@@ -14,6 +14,7 @@ import Signup from './pages/Signup';
 import AdminLayout from './pages/Admin/AdminLayout';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminProducts from './pages/Admin/AdminProducts';
+import AdminSettings from './pages/Admin/AdminSettings';
 
 function App() {
   return (
@@ -53,6 +54,7 @@ function App() {
           }>
             <Route index element={<AdminDashboard />} />
             <Route path="products" element={<AdminProducts />} />
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
         </Routes>
         <Navbar />

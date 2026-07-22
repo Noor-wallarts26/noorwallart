@@ -27,6 +27,7 @@ export const ShopProvider = ({ children }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [storeSettings, setStoreSettings] = useState({ whatsapp: '' });
 
   // Auth Listener
   useEffect(() => {
@@ -60,6 +61,18 @@ export const ShopProvider = ({ children }) => {
         console.error("Error fetching products: ", error);
         // Fallback to initial products if Firestore fails (e.g. rules issues)
         setProducts(initialProducts);
+      });
+      return () => unsubscribe();
+    });
+  }, []);
+
+  // Fetch store settings from Firestore
+  useEffect(() => {
+    import('firebase/firestore').then(({ doc, onSnapshot }) => {
+      const unsubscribe = onSnapshot(doc(db, "settings", "storeInfo"), (docSnap) => {
+        if (docSnap.exists()) {
+          setStoreSettings(docSnap.data());
+        }
       });
       return () => unsubscribe();
     });
@@ -202,6 +215,7 @@ export const ShopProvider = ({ children }) => {
       placeOrder,
       user,
       loading,
+      storeSettings,
       logout: () => signOut(auth)
     }}>
       {children}

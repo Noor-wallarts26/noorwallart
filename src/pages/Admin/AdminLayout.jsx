@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Navigate, Link, Outlet, useLocation } from 'react-router-dom';
 import { ShopContext } from '../../context/ShopContext';
-import { LayoutDashboard, Package, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, Settings, LogOut } from 'lucide-react';
 import './Admin.css';
 
 const AdminLayout = () => {
@@ -39,6 +39,13 @@ const AdminLayout = () => {
           >
             <Package size={20} />
             Products
+          </Link>
+          <Link 
+            to="/admin/settings" 
+            className={`admin-nav-item ${location.pathname === '/admin/settings' ? 'active' : ''}`}
+          >
+            <Settings size={20} />
+            Settings
           </Link>
         </nav>
         <div className="admin-sidebar-footer">
