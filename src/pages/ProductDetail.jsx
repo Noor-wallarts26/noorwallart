@@ -66,8 +66,19 @@ const ProductDetail = () => {
         </button>
       </header>
 
-      <div className="detail-image-area" style={{ background: `linear-gradient(to bottom, ${color}33, transparent)` }}>
-        <div className="detail-category-icon" style={{ color }}>{icon}</div>
+      <div 
+        className="detail-image-area" 
+        style={product.imageUrl ? { 
+          backgroundImage: `url(${product.imageUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          height: '300px'
+        } : { 
+          background: `linear-gradient(to bottom, ${color}33, transparent)`,
+          height: '250px'
+        }}
+      >
+        {!product.imageUrl && <div className="detail-category-icon" style={{ color }}>{icon}</div>}
       </div>
 
       <div className="detail-content container">

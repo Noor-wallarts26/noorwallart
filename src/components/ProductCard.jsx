@@ -19,8 +19,18 @@ const ProductCard = ({ product }) => {
 
   return (
     <div className="product-card card">
-      <Link to={`/product/${product.id}`} className="product-image-area" style={{ background: `linear-gradient(to bottom, ${color}22, transparent)` }}>
-        <div className="category-icon" style={{ color }}>{icon}</div>
+      <Link 
+        to={`/product/${product.id}`} 
+        className="product-image-area" 
+        style={product.imageUrl ? { 
+          backgroundImage: `url(${product.imageUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        } : { 
+          background: `linear-gradient(to bottom, ${color}22, transparent)` 
+        }}
+      >
+        {!product.imageUrl && <div className="category-icon" style={{ color }}>{icon}</div>}
         
         {product.stock === 0 && (
           <div className="out-of-stock-badge">OUT OF STOCK</div>

@@ -16,7 +16,8 @@ const AdminProducts = () => {
     stock: '',
     description: '',
     rating: 0,
-    reviewsCount: 0
+    reviewsCount: 0,
+    imageUrl: ''
   });
 
   const handleOpenModal = (product = null) => {
@@ -29,7 +30,8 @@ const AdminProducts = () => {
         stock: product.stock,
         description: product.description,
         rating: product.rating || 0,
-        reviewsCount: product.reviewsCount || 0
+        reviewsCount: product.reviewsCount || 0,
+        imageUrl: product.imageUrl || ''
       });
     } else {
       setEditingProduct(null);
@@ -40,7 +42,8 @@ const AdminProducts = () => {
         stock: '',
         description: '',
         rating: 4.5,
-        reviewsCount: 0
+        reviewsCount: 0,
+        imageUrl: ''
       });
     }
     setIsModalOpen(true);
@@ -161,6 +164,10 @@ const AdminProducts = () => {
                   <option>Home</option>
                   <option>Beauty</option>
                 </select>
+              </div>
+              <div className="form-group">
+                <label>Image URL (Optional)</label>
+                <input type="text" value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} placeholder="https://example.com/image.jpg" />
               </div>
               <div className="form-group">
                 <label>Description</label>
