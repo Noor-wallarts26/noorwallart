@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, Star, Flashlight, ShoppingCart } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
+import ProductCard from '../components/ProductCard';
 import './ProductDetail.css';
 
 const categoryStyles = {
@@ -47,6 +48,11 @@ const ProductDetail = () => {
   };
 
   const stockStatus = getStockStatus();
+
+  // Get related products (same category, not this exact product)
+  const relatedProducts = products
+    .filter(p => p.category === product.category && p.id !== product.id)
+    .slice(0, 4);
 
   return (
     <div className="product-detail-page animate-fade-in">
@@ -119,6 +125,21 @@ const ProductDetail = () => {
             Add to Shopping Cart
           </button>
         </div>
+
+        {relatedProducts.length > 0 && (
+          <div className="related-products-section mt-4">
+            <h3 style={{ marginBottom: '1rem' }}>You might also like</h3>
+            <div className="product-grid" style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', 
+              gap: '1rem' 
+            }}>
+              {relatedProducts.map(rp => (
+                <ProductCard key={rp.id} product={rp} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

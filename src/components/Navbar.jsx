@@ -1,6 +1,6 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, Heart, ShoppingCart, ReceiptText } from 'lucide-react';
+import { ShoppingBag, Heart, ShoppingCart, ReceiptText, Sun, Moon } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import './Navbar.css';
 
@@ -8,6 +8,27 @@ const Navbar = () => {
   const { totalItemsInCart } = useContext(ShopContext);
   const location = useLocation();
   const currentPath = location.pathname;
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      setIsDarkMode(false);
+      document.body.classList.add('light-mode');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    if (isDarkMode) {
+      document.body.classList.add('light-mode');
+      localStorage.setItem('theme', 'light');
+      setIsDarkMode(false);
+    } else {
+      document.body.classList.remove('light-mode');
+      localStorage.setItem('theme', 'dark');
+      setIsDarkMode(true);
+    }
+  };
 
   // Don't show bottom nav on checkout
   if (currentPath === '/checkout') return null;
@@ -15,6 +36,10 @@ const Navbar = () => {
   return (
     <nav className="bottom-nav">
       <div className="nav-items">
+        <button onClick={toggleTheme} className="nav-item theme-toggle-btn">
+          {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
+          <span>{isDarkMode ? 'Light' : 'Dark'}</span>
+        </button>
         <Link to="/" className={`nav-item ${currentPath === '/' || currentPath.startsWith('/product') ? 'active' : ''}`}>
           <ShoppingBag size={24} />
           <span>Shop</span>

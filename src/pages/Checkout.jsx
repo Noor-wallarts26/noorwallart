@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, CreditCard, Lock } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import './Checkout.css';
 
@@ -12,8 +12,12 @@ const Checkout = () => {
     name: 'John Doe',
     address: '1600 Amphitheatre Parkway, Mountain View, CA 94043',
     phone: '+1 (650) 253-0000',
-    paymentMethod: 'Credit Card (*4321)'
+    cardNumber: '4242 4242 4242 4242',
+    expiry: '12/24',
+    cvc: '123'
   });
+
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const [orderPlaced, setOrderPlaced] = useState(null);
 
@@ -22,10 +26,15 @@ const Checkout = () => {
   };
 
   const handleCheckout = () => {
-    const order = placeOrder();
-    if (order) {
-      setOrderPlaced(order);
-    }
+    setIsProcessing(true);
+    // Simulate Stripe API delay
+    setTimeout(() => {
+      const order = placeOrder();
+      setIsProcessing(false);
+      if (order) {
+        setOrderPlaced(order);
+      }
+    }, 2000);
   };
 
   if (orderPlaced) {
@@ -72,14 +81,30 @@ const Checkout = () => {
             <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} />
           </div>
 
-          <h3 className="mt-4">Payment Method</h3>
-          <div className="form-group">
-            <select name="paymentMethod" value={formData.paymentMethod} onChange={handleInputChange}>
-              <option value="Credit Card (*4321)">Credit Card (*4321)</option>
-              <option value="PayPal">PayPal</option>
-              <option value="Apple Pay">Apple Pay</option>
-              <option value="Google Pay">Google Pay</option>
-            </select>
+          <h3 className="mt-4" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Lock size={18} color="var(--success)" /> Secure Payment
+          </h3>
+          <div className="stripe-mock-container">
+            <div className="stripe-card-header">
+              <span>Pay with Card</span>
+              <div className="card-icons">
+                <CreditCard size={20} />
+              </div>
+            </div>
+            <div className="form-group stripe-input-group">
+              <label>Card Number</label>
+              <input type="text" name="cardNumber" value={formData.cardNumber} onChange={handleInputChange} placeholder="0000 0000 0000 0000" />
+            </div>
+            <div className="stripe-row">
+              <div className="form-group stripe-input-group">
+                <label>Expiration</label>
+                <input type="text" name="expiry" value={formData.expiry} onChange={handleInputChange} placeholder="MM/YY" />
+              </div>
+              <div className="form-group stripe-input-group">
+                <label>CVC</label>
+                <input type="text" name="cvc" value={formData.cvc} onChange={handleInputChange} placeholder="123" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -103,8 +128,8 @@ const Checkout = () => {
             <span>${finalTotal.toFixed(2)}</span>
           </div>
 
-          <button className="btn-tertiary checkout-btn" onClick={handleCheckout}>
-            Place Order
+          <button className="btn-tertiary checkout-btn" onClick={handleCheckout} disabled={isProcessing}>
+            {isProcessing ? 'Processing Payment...' : `Pay $${finalTotal.toFixed(2)}`}
           </button>
         </div>
       </div>

@@ -1,4 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth, db } from '../firebase';
 
 export const ShopContext = createContext();
 
@@ -18,28 +20,58 @@ const initialProducts = [
 ];
 
 export const ShopProvider = ({ children }) => {
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [orders, setOrders] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Load from local storage if available
+  // Auth Listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch products from Firestore
+  useEffect(() => {
+    import('firebase/firestore').then(({ collection, onSnapshot }) => {
+      const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
+        const productsData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        // Preserve wishlist state from local storage since it's user-specific
+        const savedWishlistIds = localStorage.getItem('wishlistIds');
+        const wishlistIds = savedWishlistIds ? JSON.parse(savedWishlistIds) : [];
+        
+        const finalProducts = productsData.map(p => ({
+          ...p,
+          isWishlisted: wishlistIds.includes(p.id)
+        }));
+        
+        setProducts(finalProducts);
+      }, (error) => {
+        console.error("Error fetching products: ", error);
+        // Fallback to initial products if Firestore fails (e.g. rules issues)
+        setProducts(initialProducts);
+      });
+      return () => unsubscribe();
+    });
+  }, []);
+
+  // Load cart and orders from local storage if available
   useEffect(() => {
     const savedCart = localStorage.getItem('cartItems');
     if (savedCart) setCartItems(JSON.parse(savedCart));
 
     const savedOrders = localStorage.getItem('orders');
     if (savedOrders) setOrders(JSON.parse(savedOrders));
-
-    const savedWishlistIds = localStorage.getItem('wishlistIds');
-    if (savedWishlistIds) {
-      const wishlistIds = JSON.parse(savedWishlistIds);
-      setProducts(prev => prev.map(p => ({
-        ...p,
-        isWishlisted: wishlistIds.includes(p.id)
-      })));
-    }
   }, []);
 
   // Save to local storage on change
@@ -167,7 +199,10 @@ export const ShopProvider = ({ children }) => {
       addToCart,
       updateCartQuantity,
       removeFromCart,
-      placeOrder
+      placeOrder,
+      user,
+      loading,
+      logout: () => signOut(auth)
     }}>
       {children}
     </ShopContext.Provider>
