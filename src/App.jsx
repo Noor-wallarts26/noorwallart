@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ShopProvider } from './context/ShopContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import ProductDetail from './pages/ProductDetail';
@@ -57,6 +58,7 @@ function App() {
             <Route path="settings" element={<AdminSettings />} />
           </Route>
         </Routes>
+        <Footer />
         <Navbar />
       </BrowserRouter>
     </ShopProvider>
