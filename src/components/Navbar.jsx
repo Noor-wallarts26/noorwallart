@@ -20,10 +20,10 @@ const Navbar = () => {
             <ShoppingBag size={24} />
             <span>Home</span>
           </Link>
-          <a href="/#categories" className={`nav-item ${location.hash === '#categories' ? 'active' : ''}`}>
+          <Link to="/categories" className={`nav-item ${currentPath === '/categories' ? 'active' : ''}`}>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
             <span>Categories</span>
-          </a>
+          </Link>
           <Link to="/cart" className={`nav-item ${currentPath === '/cart' ? 'active' : ''}`}>
             <div className="cart-icon-wrapper">
               <ShoppingCart size={24} />

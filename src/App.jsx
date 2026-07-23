@@ -13,6 +13,7 @@ import Orders from './pages/Orders';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Contact from './pages/Contact';
+import Categories from './pages/Categories';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/categories" element={<Categories />} />
 
         </Routes>
         <Footer />
