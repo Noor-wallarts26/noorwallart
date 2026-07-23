@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
 import { Search, X, ShoppingBag } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import ProductCard from '../components/ProductCard';
@@ -40,6 +41,27 @@ const Home = () => {
     filteredProducts 
   } = useContext(ShopContext);
 
+  const ProductMarquee = ({ products }) => {
+    if (!products || products.length === 0) return null;
+    const marqueeItems = [...products, ...products, ...products]; // Triple for smooth infinite scroll on wide screens
+    
+    return (
+      <div className="product-marquee-container">
+        <div className="product-marquee-track">
+          {marqueeItems.map((product, index) => (
+            <Link to={`/product/${product.id}`} key={`${product.id}-${index}`} className="marquee-item">
+              <img src={product.image} alt={product.name} />
+              <div className="marquee-info">
+                <span className="marquee-name">{product.name}</span>
+                <span className="marquee-price">₹{product.price}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="home-page animate-fade-in">
       <header className="home-header">
@@ -64,9 +86,11 @@ const Home = () => {
           </div>
         </div>
       </header>
+      
+      <ProductMarquee products={filteredProducts.slice(0, 8)} />
 
       <div className="container">
-        <div className="category-scroll">
+        <div id="categories" className="category-scroll" style={{ scrollMarginTop: '80px' }}>
           {categories.map(cat => (
             <button 
               key={cat} 

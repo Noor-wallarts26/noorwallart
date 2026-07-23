@@ -1,26 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 :root {
-  /* Premium Luxury Dark Palette */
-  --bg-dark: #0F1115;
-  --surface: #1E232B;
-  --surface-variant: #171A20;
-  --primary: #C9A595;
-  --primary-container: #B89382;
-  --on-primary: #111111;
-  --tertiary: #2E6B57;
-  --text-primary: #F5F5F5;
-  --text-secondary: #B0B7C3;
-  --border-color: #2A2F38;
-  --success: #22C55E;
-  --error: #EF4444;
-  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-  
-  --font-heading: 'Qano', 'Cinzel', serif;
-  --font-body: 'Poppins', sans-serif;
-}
-
-body.light-mode {
+  /* Beige & Brown Premium Palette */
   --bg-dark: #EFD5CC;
   --surface: #FFFFFF;
   --surface-variant: #F9EBE6;
@@ -31,7 +12,12 @@ body.light-mode {
   --text-primary: #331805;
   --text-secondary: #5A2D0C;
   --border-color: rgba(90, 45, 12, 0.15);
+  --success: #22C55E;
+  --error: #EF4444;
   --card-shadow: 0 8px 30px rgba(90, 45, 12, 0.08);
+  
+  --font-heading: 'Qano', 'Cinzel', serif;
+  --font-body: 'Poppins', sans-serif;
 }
 
 * {
@@ -202,20 +188,11 @@ button {
 }
 
 
-/* Make image background transparent in Light Mode */
-body.light-mode .site-logo,
-body.light-mode .footer-logo {
+/* Make image background transparent */
+.site-logo,
+.footer-logo {
   mix-blend-mode: multiply;
   filter: brightness(1.05) contrast(1.1);
-  border-radius: 0;
-  box-shadow: none;
-}
-
-/* Make image background transparent and logo white in Dark Mode */
-body:not(.light-mode) .site-logo,
-body:not(.light-mode) .footer-logo {
-  mix-blend-mode: screen;
-  filter: grayscale(1) contrast(5) invert(1);
   border-radius: 0;
   box-shadow: none;
 }
