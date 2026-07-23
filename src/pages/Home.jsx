@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Search, X, ShoppingBag } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import ProductCard from '../components/ProductCard';
+import HeroSlider from '../components/HeroSlider';
 import './Home.css';
 
 
@@ -23,8 +24,10 @@ const Home = () => {
   const { 
     searchQuery, setSearchQuery, 
     selectedCategory, setSelectedCategory, 
-    filteredProducts 
+    filteredProducts, products 
   } = useContext(ShopContext);
+
+  const sliderProducts = products.filter(p => p.showInSlider);
 
 
   return (
@@ -55,6 +58,7 @@ const Home = () => {
       <div className="container">
 
         <PromoBanner />
+        {sliderProducts.length > 0 && <HeroSlider products={sliderProducts} />}
 
         {filteredProducts.length === 0 ? (
           <div className="empty-state">

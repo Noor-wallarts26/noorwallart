@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth, db } from '../firebase';
+import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 
 export const ShopContext = createContext();
 
@@ -134,6 +135,39 @@ export const ShopProvider = ({ children }) => {
     setCartItems(prev => prev.filter(item => item.productId !== productId));
   };
 
+  const addReview = async (productId, reviewData) => {
+    try {
+      const productRef = doc(db, 'products', productId.toString());
+      await updateDoc(productRef, {
+        reviews: arrayUnion({
+          ...reviewData,
+          timestamp: Date.now(),
+          id: Math.random().toString(36).substring(7)
+        })
+      });
+      
+      // Update local state for immediate feedback
+      setProducts(prev => prev.map(p => {
+        if (p.id === productId) {
+          const newReviews = [...(p.reviews || []), { ...reviewData, timestamp: Date.now(), id: 'temp' }];
+          // Recalculate average rating
+          const newRating = newReviews.reduce((acc, r) => acc + r.rating, 0) / newReviews.length;
+          return {
+            ...p,
+            reviews: newReviews,
+            rating: parseFloat(newRating.toFixed(1)),
+            reviewsCount: newReviews.length
+          };
+        }
+        return p;
+      }));
+      return true;
+    } catch (error) {
+      console.error("Error adding review: ", error);
+      return false;
+    }
+  };
+
   const placeOrder = async (customerDetails) => {
     if (cartItems.length === 0) return null;
 
@@ -213,6 +247,7 @@ export const ShopProvider = ({ children }) => {
       updateCartQuantity,
       removeFromCart,
       placeOrder,
+      addReview,
       user,
       loading,
       storeSettings,

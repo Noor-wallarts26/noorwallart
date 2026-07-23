@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, Star, Flashlight, ShoppingCart } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
@@ -16,9 +16,24 @@ const categoryStyles = {
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { products, toggleWishlist, addToCart } = useContext(ShopContext);
+  const { products, toggleWishlist, addToCart, addReview } = useContext(ShopContext);
   
   const product = products.find(p => p.id === parseInt(id));
+
+  const [reviewForm, setReviewForm] = useState({ name: '', rating: 5, comment: '' });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!reviewForm.name.trim() || !reviewForm.comment.trim()) return;
+    
+    setIsSubmittingReview(true);
+    const success = await addReview(product.id, reviewForm);
+    if (success) {
+      setReviewForm({ name: '', rating: 5, comment: '' });
+    }
+    setIsSubmittingReview(false);
+  };
 
   // Scroll to top on load
   useEffect(() => {
@@ -135,6 +150,80 @@ const ProductDetail = () => {
             <ShoppingCart size={20} />
             Add to Shopping Cart
           </button>
+        </div>
+
+        <div className="product-reviews-section mt-4">
+          <hr className="detail-divider" />
+          <h3 style={{ marginBottom: '1.5rem' }}>Customer Reviews</h3>
+          
+          <div className="write-review-card">
+            <h4>Write a Review</h4>
+            <form onSubmit={handleReviewSubmit} className="review-form">
+              <div className="form-group">
+                <input 
+                  type="text" 
+                  placeholder="Your Name" 
+                  value={reviewForm.name}
+                  onChange={e => setReviewForm({...reviewForm, name: e.target.value})}
+                  required
+                  className="form-input"
+                />
+              </div>
+              <div className="form-group" style={{ margin: '1rem 0' }}>
+                <label>Rating: </label>
+                <select 
+                  value={reviewForm.rating} 
+                  onChange={e => setReviewForm({...reviewForm, rating: Number(e.target.value)})}
+                  style={{ padding: '0.5rem', borderRadius: '4px' }}
+                >
+                  {[5,4,3,2,1].map(num => (
+                    <option key={num} value={num}>{num} Stars</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <textarea 
+                  placeholder="Share your experience with this product..." 
+                  value={reviewForm.comment}
+                  onChange={e => setReviewForm({...reviewForm, comment: e.target.value})}
+                  required
+                  rows={3}
+                  className="form-input"
+                />
+              </div>
+              <button type="submit" className="btn-primary mt-3" disabled={isSubmittingReview}>
+                {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </form>
+          </div>
+
+          <div className="reviews-list mt-4">
+            {(!product.reviews || product.reviews.length === 0) ? (
+              <p style={{ color: 'var(--text-secondary)' }}>No reviews yet. Be the first to review this product!</p>
+            ) : (
+              product.reviews.sort((a, b) => b.timestamp - a.timestamp).map((review) => (
+                <div key={review.id} className="review-item card" style={{ padding: '1rem', marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <strong>{review.name}</strong>
+                    <div className="stars">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star 
+                          key={star} 
+                          size={12} 
+                          fill={star <= review.rating ? '#F59E0B' : 'none'} 
+                          color={star <= review.rating ? '#F59E0B' : '#94A3B8'} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>{review.comment}</p>
+                  <small style={{ color: '#94A3B8', display: 'block', marginTop: '0.5rem' }}>
+                    {new Date(review.timestamp).toLocaleDateString()}
+                  </small>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
         {relatedProducts.length > 0 && (
