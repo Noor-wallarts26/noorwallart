@@ -12,9 +12,7 @@ const Checkout = () => {
     name: 'John Doe',
     address: '1600 Amphitheatre Parkway, Mountain View, CA 94043',
     phone: '+1 (650) 253-0000',
-    cardNumber: '4242 4242 4242 4242',
-    expiry: '12/24',
-    cvc: '123'
+    upiRef: ''
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -45,7 +43,7 @@ const Checkout = () => {
             <CheckCircle2 size={64} color="var(--success)" className="success-icon" />
             <h2>Order Placed Successfully!</h2>
             <p className="order-id">Order ID: <strong>{orderPlaced.id}</strong></p>
-            <p className="order-msg">Thank you for shopping with AmazeShop. Your order is being processed and will be shipped soon.</p>
+            <p className="order-msg">Thank you for shopping with Noor Wallarts & Gifts. Your order is being processed and will be shipped soon.</p>
             <button className="btn-primary" onClick={() => navigate('/')}>Continue Shopping</button>
           </div>
         </div>
@@ -53,7 +51,7 @@ const Checkout = () => {
     );
   }
 
-  const finalTotal = cartTotal + (cartTotal > 50 ? 0 : 5.99) + (cartTotal * 0.08);
+  const finalTotal = cartTotal + 80;
 
   return (
     <div className="checkout-page animate-fade-in">
@@ -82,28 +80,31 @@ const Checkout = () => {
           </div>
 
           <h3 className="mt-4" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Lock size={18} color="var(--success)" /> Secure Payment
+            <Lock size={18} color="var(--success)" /> UPI Payment
           </h3>
-          <div className="stripe-mock-container">
-            <div className="stripe-card-header">
-              <span>Pay with Card</span>
-              <div className="card-icons">
-                <CreditCard size={20} />
-              </div>
+          <div className="stripe-mock-container" style={{ textAlign: 'center', padding: '2rem' }}>
+            <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
+              Scan the QR Code to pay <strong>₹{finalTotal.toFixed(2)}</strong> via any UPI App.
+            </p>
+            <div style={{ background: '#fff', padding: '1rem', display: 'inline-block', borderRadius: '12px', border: '1px solid var(--border)' }}>
+              <img 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=arahman32773-4@okicici&pn=Noor_Wallarts_Gifts&am=${finalTotal.toFixed(2)}&cu=INR`} 
+                alt="UPI QR Code" 
+                style={{ width: '200px', height: '200px' }} 
+              />
             </div>
-            <div className="form-group stripe-input-group">
-              <label>Card Number</label>
-              <input type="text" name="cardNumber" value={formData.cardNumber} onChange={handleInputChange} placeholder="0000 0000 0000 0000" />
-            </div>
-            <div className="stripe-row">
-              <div className="form-group stripe-input-group">
-                <label>Expiration</label>
-                <input type="text" name="expiry" value={formData.expiry} onChange={handleInputChange} placeholder="MM/YY" />
-              </div>
-              <div className="form-group stripe-input-group">
-                <label>CVC</label>
-                <input type="text" name="cvc" value={formData.cvc} onChange={handleInputChange} placeholder="123" />
-              </div>
+            <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>UPI ID: arahman32773-4@okicici</p>
+            
+            <div className="form-group stripe-input-group" style={{ marginTop: '2rem', textAlign: 'left' }}>
+              <label>UPI Transaction Reference Number</label>
+              <input 
+                type="text" 
+                name="upiRef" 
+                value={formData.upiRef} 
+                onChange={handleInputChange} 
+                placeholder="Enter 12-digit UPI reference number" 
+                required
+              />
             </div>
           </div>
         </div>
@@ -112,24 +113,20 @@ const Checkout = () => {
           <h3>Order Total</h3>
           <div className="summary-row">
             <span>Items ({totalItemsInCart})</span>
-            <span>${cartTotal.toFixed(2)}</span>
+            <span>₹{cartTotal.toFixed(2)}</span>
           </div>
           <div className="summary-row">
             <span>Shipping</span>
-            <span>{cartTotal > 50 ? 'Free' : '$5.99'}</span>
-          </div>
-          <div className="summary-row">
-            <span>Tax</span>
-            <span>${(cartTotal * 0.08).toFixed(2)}</span>
+            <span>₹80.00</span>
           </div>
           <hr className="detail-divider" />
           <div className="summary-row total">
             <span>Total Payable</span>
-            <span>${finalTotal.toFixed(2)}</span>
+            <span>₹{finalTotal.toFixed(2)}</span>
           </div>
 
-          <button className="btn-tertiary checkout-btn" onClick={handleCheckout} disabled={isProcessing}>
-            {isProcessing ? 'Processing Payment...' : `Pay $${finalTotal.toFixed(2)}`}
+          <button className="btn-primary checkout-btn" onClick={handleCheckout} disabled={isProcessing || !formData.upiRef}>
+            {isProcessing ? 'Processing Order...' : `Complete Order (₹${finalTotal.toFixed(2)})`}
           </button>
         </div>
       </div>

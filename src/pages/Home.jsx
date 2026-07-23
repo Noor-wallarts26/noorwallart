@@ -24,9 +24,9 @@ const PromoBanner = () => {
       <img src="/img_hero_banner.jpg" alt="Summer Sale" className="promo-img" />
       <div className="promo-overlay"></div>
       <div className="promo-content">
-        <span className="promo-badge">SUMMER SALE</span>
-        <h2>Up to 50% Off</h2>
-        <p>Free delivery on premium orders over $50</p>
+        <span className="promo-badge">NEW COLLECTION</span>
+        <h2>Noor Wallarts & Gifts</h2>
+        <p>Free delivery on premium orders over ₹1000</p>
       </div>
     </div>
   );
@@ -45,7 +45,7 @@ const Home = () => {
         <div className="container">
           <div className="app-logo">
             <ShoppingBag color="var(--tertiary)" size={28} />
-            <h1>AmazeShop</h1>
+            <h1>Noor Wallarts & Gifts</h1>
           </div>
           
           <div className="search-bar">

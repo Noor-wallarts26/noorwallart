@@ -50,7 +50,7 @@ const Cart = () => {
                     <div className="cart-item-details">
                       <Link to={`/product/${product.id}`}><h3 title={product.title}>{product.title}</h3></Link>
                       <span className="cart-item-category">{product.category}</span>
-                      <div className="cart-item-price">${product.price.toFixed(2)}</div>
+                      <div className="cart-item-price">₹{product.price.toFixed(2)}</div>
                     </div>
 
                     <div className="cart-item-actions">
@@ -83,24 +83,20 @@ const Cart = () => {
               <h3>Order Summary</h3>
               <div className="summary-row">
                 <span>Subtotal ({totalItemsInCart} items)</span>
-                <span>${cartTotal.toFixed(2)}</span>
+                <span>₹{cartTotal.toFixed(2)}</span>
               </div>
               <div className="summary-row">
-                <span>Shipping</span>
-                <span>{cartTotal > 50 ? 'Free' : '$5.99'}</span>
-              </div>
-              <div className="summary-row">
-                <span>Tax (Estimated)</span>
-                <span>${(cartTotal * 0.08).toFixed(2)}</span>
+                <span>Shipping <span style={{fontSize: '0.8rem', display: 'block', color: 'var(--text-secondary)'}}>(Delivery charge varies for your location)</span></span>
+                <span>₹80.00</span>
               </div>
               <hr className="detail-divider" />
               <div className="summary-row total">
                 <span>Total</span>
-                <span>${(cartTotal + (cartTotal > 50 ? 0 : 5.99) + (cartTotal * 0.08)).toFixed(2)}</span>
+                <span>₹{(cartTotal + 80).toFixed(2)}</span>
               </div>
-              
               <button 
-                className="btn-tertiary checkout-btn" 
+                className="btn-primary" 
+                style={{ width: '100%', marginTop: '1.5rem', padding: '1rem', fontSize: '1.1rem' }}
                 onClick={() => navigate('/checkout')}
               >
                 Proceed to Checkout

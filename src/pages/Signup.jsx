@@ -44,8 +44,8 @@ const Signup = () => {
       <div className="auth-container card">
         <div className="auth-header">
           <ShoppingBag color="var(--primary)" size={48} />
-          <h2>Create Account</h2>
-          <p>Join AmazeShop today</p>
+          <h2>Create an Account</h2>
+          <p>Join Noor Wallarts & Gifts today</p>
         </div>
 
         {error && <div className="auth-error">{error}</div>}

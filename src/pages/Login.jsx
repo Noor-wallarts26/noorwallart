@@ -34,7 +34,7 @@ const Login = () => {
         <div className="auth-header">
           <ShoppingBag color="var(--primary)" size={48} />
           <h2>Welcome Back</h2>
-          <p>Sign in to your AmazeShop account</p>
+          <p>Sign in to your Noor Wallarts & Gifts account</p>
         </div>
 
         {error && <div className="auth-error">{error}</div>}

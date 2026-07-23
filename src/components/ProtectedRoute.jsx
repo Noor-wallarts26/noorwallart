@@ -14,7 +14,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
   }
 
   // Simplified admin check (hardcoded email for now)
-  if (requireAdmin && user.email !== 'admin@amazeshop.com') {
+  if (requireAdmin && user.email !== 'admin@noorwallarts.com') {
     return <Navigate to="/" replace />;
   }
 
