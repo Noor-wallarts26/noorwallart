@@ -12,7 +12,7 @@ const PromoBanner = () => {
       <img src="/hero_banner.png" alt="Premium Wall Decor" className="promo-img" />
       <div className="promo-overlay"></div>
       <div className="promo-content">
-        <h2 className="brand-title">Noorwal Arts</h2>
+        <h2 className="brand-title">Noor Wall Arts</h2>
         <p style={{ color: '#ffffff' }}>Premium Wall Decor & Customized Gifts</p>
       </div>
     </div>
@@ -32,7 +32,7 @@ const Home = () => {
       <header className="home-header">
         <div className="container">
           <div className="app-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <img src="/logo.jpg" alt="Noorwal Arts Logo" className="site-logo" />
+            <img src="/logo.jpg" alt="Noor Wall Arts Logo" className="site-logo" />
             <h2 style={{ fontFamily: 'var(--font-heading)', margin: 0, fontSize: '1.4rem' }}>NOOR WALL ARTS</h2>
           </div>
           

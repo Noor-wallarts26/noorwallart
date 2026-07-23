@@ -11,7 +11,7 @@ const Contact = () => {
 
       <div className="contact-content card">
         <div className="contact-info-section">
-          <img src="/logo.jpg" alt="Noorwal Arts Logo" className="footer-logo" style={{ marginBottom: '1.5rem' }} />
+          <img src="/logo.jpg" alt="Noor Wall Arts Logo" className="footer-logo" style={{ marginBottom: '1.5rem' }} />
           <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: '1.6' }}>
             We're here to help! Whether you have a question about our premium Islamic Wall Arts, need assistance with a customized order, or just want to share feedback, we would love to hear from you.
           </p>

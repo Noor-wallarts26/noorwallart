@@ -19,7 +19,7 @@ const Footer = () => {
       <div className="container">
         <div className="footer-content">
           <div className="footer-brand">
-            <img src="/logo.jpg" alt="Noorwal Arts Logo" className="footer-logo" />
+            <img src="/logo.jpg" alt="Noor Wall Arts Logo" className="footer-logo" />
             <p style={{ marginTop: '0.75rem' }}>Premium Wall Art & Decor to bring your walls to life.</p>
           </div>
           
@@ -37,7 +37,7 @@ const Footer = () => {
         </div>
         
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} Noorwal Arts. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Noor Wall Arts. All rights reserved.</p>
         </div>
       </div>
     </footer>
