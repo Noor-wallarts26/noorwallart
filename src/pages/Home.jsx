@@ -21,12 +21,13 @@ const categories = [
 const PromoBanner = () => {
   return (
     <div className="promo-banner">
-      <img src="/img_hero_banner.jpg" alt="Summer Sale" className="promo-img" />
+      <img src="/hero_banner.png" alt="Premium Wall Decor" className="promo-img" />
       <div className="promo-overlay"></div>
       <div className="promo-content">
-        <span className="promo-badge">NEW COLLECTION</span>
+        <span className="promo-badge">LUXURY COLLECTION</span>
         <h2>Noor Wallarts & Gifts</h2>
-        <p>Free delivery on premium orders over ₹1000</p>
+        <p>Premium Wall Decor & Customized Gifts</p>
+        <button className="btn-primary" style={{ marginTop: '1.5rem' }}>Shop Now</button>
       </div>
     </div>
   );
