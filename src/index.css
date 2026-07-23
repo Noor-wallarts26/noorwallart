@@ -1,37 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 :root {
-  /* Dark Mode Palette (Rose/Brown theme) */
-  --bg-dark: #2A1B16;
-  --surface: #3B2822;
-  --surface-variant: #4F3730;
-  --primary: #EADCD8;
-  --primary-container: #D8C3BD;
-  --on-primary: #3B221B;
-  --tertiary: #C9A49B;
-  --text-primary: #F4EAE7;
-  --text-secondary: #D8C3BD;
-  --border-color: #4F3730;
+  /* Premium Luxury Palette */
+  --bg-dark: #F8F5F0;
+  --surface: #FFFFFF;
+  --surface-variant: #EFE8DD;
+  --primary: #1F3D32;
+  --primary-container: #295040;
+  --on-primary: #FFFFFF;
+  --tertiary: #C8A45D;
+  --text-primary: #1F1F1F;
+  --text-secondary: #6B6B6B;
+  --border-color: #E7DFD3;
   --success: #22C55E;
   --error: #EF4444;
-  --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   
-  --font-family: 'Inter', sans-serif;
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Poppins', sans-serif;
 }
 
 body.light-mode {
-  /* Light Mode Palette (Rose/Brown theme) */
-  --bg-dark: #EADCD8;
-  --surface: #F4EAE7;
-  --surface-variant: #D8C3BD;
-  --primary: #5E3A2F;
-  --primary-container: #785144;
+  /* Enforcing the Premium Luxury Palette in both modes */
+  --bg-dark: #F8F5F0;
+  --surface: #FFFFFF;
+  --surface-variant: #EFE8DD;
+  --primary: #1F3D32;
+  --primary-container: #295040;
   --on-primary: #FFFFFF;
-  --tertiary: #8C5A4B;
-  --text-primary: #3B221B;
-  --text-secondary: #694F45;
-  --border-color: #D8C3BD;
-  --card-shadow: 0 4px 6px -1px rgba(94, 58, 47, 0.15), 0 2px 4px -1px rgba(94, 58, 47, 0.1);
+  --tertiary: #C8A45D;
+  --text-primary: #1F1F1F;
+  --text-secondary: #6B6B6B;
+  --border-color: #E7DFD3;
+  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 * {
@@ -43,11 +44,17 @@ body.light-mode {
 body {
   background-color: var(--bg-dark);
   color: var(--text-primary);
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.5;
+  line-height: 1.6;
   min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 a {
@@ -60,7 +67,7 @@ button {
   border: none;
   background: none;
   font-family: inherit;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease;
 }
 
 /* Custom Scrollbar */
@@ -91,52 +98,50 @@ button {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: var(--card-shadow);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
 }
 
 .text-gradient {
-  background: linear-gradient(to right, #60A5FA, #3B82F6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--primary);
 }
 
 .btn-primary {
   background-color: var(--primary);
   color: var(--on-primary);
-  padding: 0.75rem 1.5rem;
-  border-radius: 9999px;
-  font-weight: 600;
+  padding: 0.85rem 1.75rem;
+  border-radius: 12px;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  letter-spacing: 0.5px;
 }
 
 .btn-primary:hover {
-  background-color: #2563EB;
-  transform: scale(1.02);
+  background-color: var(--primary-container);
 }
 
 .btn-tertiary {
   background-color: var(--tertiary);
-  color: #000;
-  padding: 0.75rem 1.5rem;
-  border-radius: 9999px;
-  font-weight: 700;
+  color: #FFFFFF;
+  padding: 0.85rem 1.75rem;
+  border-radius: 12px;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  letter-spacing: 0.5px;
 }
 
 .btn-tertiary:hover {
-  background-color: #D97706;
-  transform: scale(1.02);
+  background-color: #A98748;
 }
 
 .btn-icon {
