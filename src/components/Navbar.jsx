@@ -63,17 +63,6 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {storeSettings?.whatsapp && (
-        <a 
-          href="tel:+918525325330" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="floating-whatsapp"
-          title="Call Us"
-        >
-          <Phone size={28} color="#fff" />
-        </a>
-      )}
     </>
   );
 };
