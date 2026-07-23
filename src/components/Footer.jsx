@@ -25,9 +25,9 @@ const Footer = () => {
           
           <div className="footer-contact">
             <h3>Contact Us</h3>
-            <a href="https://api.whatsapp.com/send?phone=918525325330" target="_blank" rel="noopener noreferrer" className="btn-outline contact-btn" style={{ padding: '0.5rem 1rem', width: 'fit-content' }}>
+            <a href="tel:+918525325330" target="_blank" rel="noopener noreferrer" className="btn-outline contact-btn" style={{ padding: '0.5rem 1rem', width: 'fit-content' }}>
               <Phone size={18} />
-              Chat: +91 8525325330
+              Call: +91 8525325330
             </a>
             <a href="mailto:noorwallartsofficial@gmail.com" className="btn-outline contact-btn" style={{ padding: '0.5rem 1rem', width: 'fit-content' }}>
               <Mail size={18} />

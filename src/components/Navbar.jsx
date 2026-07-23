@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, Heart, ShoppingCart, ReceiptText, Sun, Moon, MessageCircle } from 'lucide-react';
+import { ShoppingBag, Heart, ShoppingCart, ReceiptText, Sun, Moon, Phone } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import './Navbar.css';
 
@@ -65,13 +65,13 @@ const Navbar = () => {
 
       {storeSettings?.whatsapp && (
         <a 
-          href="https://api.whatsapp.com/send?phone=918525325330" 
+          href="tel:+918525325330" 
           target="_blank" 
           rel="noopener noreferrer" 
           className="floating-whatsapp"
-          title="Chat with us on WhatsApp"
+          title="Call Us"
         >
-          <MessageCircle size={28} color="#fff" />
+          <Phone size={28} color="#fff" />
         </a>
       )}
     </>
