@@ -25,7 +25,7 @@ const Login = () => {
     if (!window.recaptchaVerifier) {
       try {
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible',
+          'size': 'normal',
           'callback': (response) => {
             // reCAPTCHA solved, allow signInWithPhoneNumber.
           },
