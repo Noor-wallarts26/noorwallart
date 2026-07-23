@@ -201,3 +201,22 @@ button {
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
+
+/* Make image background transparent in Light Mode */
+body.light-mode .site-logo,
+body.light-mode .footer-logo {
+  mix-blend-mode: multiply;
+  filter: brightness(1.05) contrast(1.1);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Make image background transparent and logo white in Dark Mode */
+body:not(.light-mode) .site-logo,
+body:not(.light-mode) .footer-logo {
+  mix-blend-mode: screen;
+  filter: grayscale(1) contrast(5) invert(1);
+  border-radius: 0;
+  box-shadow: none;
+}
+
