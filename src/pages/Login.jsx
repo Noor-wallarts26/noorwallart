@@ -70,7 +70,13 @@ const Login = () => {
       setStep('OTP');
     } catch (err) {
       console.error(err);
-      setError('Failed to send OTP. Please check the phone number and try again.');
+      if (err.code === 'auth/operation-not-allowed') {
+        setError('Phone Authentication is not enabled in Firebase. Please enable it in the Firebase Console.');
+      } else if (err.code === 'auth/invalid-phone-number') {
+        setError('Invalid phone number format.');
+      } else {
+        setError('Failed to send OTP. Please try again. (' + err.message + ')');
+      }
       if (window.recaptchaVerifier) {
         window.recaptchaVerifier.render().then(widgetId => {
           window.grecaptcha.reset(widgetId);
