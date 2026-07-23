@@ -1,23 +1,37 @@
-import React, { useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useContext, useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, CreditCard, Lock } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import './Checkout.css';
 
 const Checkout = () => {
-  const { cartTotal, totalItemsInCart, placeOrder } = useContext(ShopContext);
+  const { cartTotal, totalItemsInCart, placeOrder, user, loading } = useContext(ShopContext);
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [formData, setFormData] = useState({
-    name: 'John Doe',
-    address: '1600 Amphitheatre Parkway, Mountain View, CA 94043',
-    phone: '+1 (650) 253-0000',
+    name: '',
+    address: '',
+    phone: '',
     upiRef: ''
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
-
   const [orderPlaced, setOrderPlaced] = useState(null);
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        navigate('/login', { state: { from: location.pathname, message: 'Please login to checkout' }, replace: true });
+      } else {
+        setFormData(prev => ({ ...prev, phone: user.phoneNumber || '' }));
+      }
+    }
+  }, [user, loading, navigate, location]);
+
+  if (loading || !user) {
+    return <div className="checkout-page animate-fade-in"><div className="container" style={{padding: '2rem'}}>Loading...</div></div>;
+  }
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

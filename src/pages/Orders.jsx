@@ -4,16 +4,30 @@ import { ReceiptText, PackageCheck } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import './Orders.css';
 import Footer from '../components/Footer';
+import Login from './Login';
 
 const Orders = () => {
-  const { orders } = useContext(ShopContext);
+  const { orders, user, loading, logout } = useContext(ShopContext);
   const navigate = useNavigate();
+
+  if (loading) {
+    return <div className="orders-page animate-fade-in container" style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>;
+  }
+
+  if (!user) {
+    return <Login />;
+  }
 
   return (
     <div className="orders-page animate-fade-in container">
-      <header className="cart-header">
-        <h2>Order History</h2>
-        <span className="cart-item-count">{orders.length} Orders</span>
+      <header className="cart-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2>Order History</h2>
+          <span className="cart-item-count">{orders.length} Orders</span>
+        </div>
+        <button onClick={logout} className="btn-secondary" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem' }}>
+          Logout
+        </button>
       </header>
 
       {orders.length === 0 ? (

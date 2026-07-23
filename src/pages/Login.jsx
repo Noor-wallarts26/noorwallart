@@ -1,28 +1,103 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../firebase';
-import { ShoppingBag } from 'lucide-react';
 import './Auth.css';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
+  const [step, setStep] = useState('PHONE'); // 'PHONE' or 'OTP'
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [confirmationResult, setConfirmationResult] = useState(null);
+  
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleLogin = async (e) => {
+  // If user was redirected here from checkout, we will send them back after login
+  const from = location.state?.from?.pathname || '/';
+  const customMessage = location.state?.message || 'Login to your Noor Wall Arts account';
+
+  useEffect(() => {
+    // Initialize recaptcha when component mounts
+    if (!window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+          'callback': (response) => {
+            // reCAPTCHA solved, allow signInWithPhoneNumber.
+          },
+          'expired-callback': () => {
+            // Response expired. Ask user to solve reCAPTCHA again.
+            setError("reCAPTCHA expired, please try again.");
+          }
+        });
+      } catch(err) {
+        console.error("Recaptcha init error:", err);
+      }
+    }
+    
+    return () => {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    };
+  }, []);
+
+  const requestOTP = async (e) => {
     e.preventDefault();
     setError('');
+    
+    // Basic phone validation (assuming India +91 for now)
+    let formattedPhone = phoneNumber.trim();
+    if (!formattedPhone.startsWith('+')) {
+      formattedPhone = '+91' + formattedPhone;
+    }
+
+    if (formattedPhone.length < 10) {
+      setError('Please enter a valid phone number');
+      return;
+    }
+
     setLoading(true);
     
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate('/');
+      const appVerifier = window.recaptchaVerifier;
+      const result = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
+      setConfirmationResult(result);
+      setStep('OTP');
     } catch (err) {
-      setError('Failed to sign in. Please check your email and password.');
       console.error(err);
+      setError('Failed to send OTP. Please check the phone number and try again.');
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.render().then(widgetId => {
+          window.grecaptcha.reset(widgetId);
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOTP = async (e) => {
+    e.preventDefault();
+    setError('');
+    
+    if (otp.length < 6) {
+      setError('Please enter a valid 6-digit OTP');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await confirmationResult.confirm(otp);
+      // Login successful, redirect back to where they came from
+      navigate(from, { replace: true });
+    } catch (err) {
+      console.error(err);
+      setError('Invalid OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -32,43 +107,65 @@ const Login = () => {
     <div className="auth-page animate-fade-in">
       <div className="auth-container card">
         <div className="auth-header">
-          <img src="/logo.png" alt="Noor Wall Arts Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem' }} />
+          <img src="/logo.jpg" alt="Noor Wall Arts Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem' }} />
           <h2 className="brand-title">Noor Wall Arts</h2>
-          <p>Sign in to your Noor Wall Arts account</p>
+          <p>{customMessage}</p>
         </div>
 
         {error && <div className="auth-error">{error}</div>}
 
-        <form className="auth-form" onSubmit={handleLogin}>
-          <div className="form-group">
-            <label>Email Address</label>
-            <input 
-              type="email" 
-              required 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-            />
-          </div>
-          <div className="form-group">
-            <label>Password</label>
-            <input 
-              type="password" 
-              required 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-            />
-          </div>
-          
-          <button type="submit" className="btn-primary auth-submit-btn" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
+        <div id="recaptcha-container"></div>
 
-        <div className="auth-footer">
-          <p>Don't have an account? <Link to="/signup">Sign up</Link></p>
-        </div>
+        {step === 'PHONE' ? (
+          <form className="auth-form" onSubmit={requestOTP}>
+            <div className="form-group">
+              <label>Phone Number</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input 
+                  type="text" 
+                  value="+91" 
+                  disabled 
+                  style={{ width: '60px', textAlign: 'center', backgroundColor: 'var(--surface-variant)' }} 
+                />
+                <input 
+                  type="tel" 
+                  required 
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                  placeholder="Enter 10-digit mobile number"
+                  maxLength="10"
+                  style={{ flex: 1 }}
+                />
+              </div>
+            </div>
+            
+            <button type="submit" className="btn-primary auth-submit-btn" disabled={loading || phoneNumber.length < 10}>
+              {loading ? 'Sending OTP...' : 'Send OTP'}
+            </button>
+          </form>
+        ) : (
+          <form className="auth-form" onSubmit={verifyOTP}>
+            <div className="form-group">
+              <label>Enter OTP</label>
+              <input 
+                type="text" 
+                required 
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                placeholder="6-digit OTP"
+                maxLength="6"
+                style={{ textAlign: 'center', letterSpacing: '4px', fontSize: '1.2rem' }}
+              />
+              <small style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', display: 'block' }}>
+                OTP sent to +91 {phoneNumber} <button type="button" onClick={() => setStep('PHONE')} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline' }}>Change</button>
+              </small>
+            </div>
+            
+            <button type="submit" className="btn-primary auth-submit-btn" disabled={loading || otp.length < 6}>
+              {loading ? 'Verifying...' : 'Verify & Login'}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

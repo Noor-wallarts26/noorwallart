@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import './Cart.css';
@@ -18,8 +18,17 @@ const categoryStyles = {
 };
 
 const Cart = () => {
-  const { cartWithProducts, cartTotal, updateCartQuantity, removeFromCart, totalItemsInCart } = useContext(ShopContext);
+  const { cartWithProducts, cartTotal, updateCartQuantity, removeFromCart, totalItemsInCart, user } = useContext(ShopContext);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleCheckoutClick = () => {
+    if (!user) {
+      navigate('/login', { state: { from: location, message: 'Login with your phone number to order now' } });
+    } else {
+      navigate('/checkout');
+    }
+  };
 
   return (
     <div className="cart-page animate-fade-in">
@@ -97,7 +106,7 @@ const Cart = () => {
               <button 
                 className="btn-primary" 
                 style={{ width: '100%', marginTop: '1.5rem', padding: '1rem', fontSize: '1.1rem' }}
-                onClick={() => navigate('/checkout')}
+                onClick={handleCheckoutClick}
               >
                 Proceed to Checkout
               </button>
