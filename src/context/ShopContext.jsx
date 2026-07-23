@@ -134,7 +134,7 @@ export const ShopProvider = ({ children }) => {
     setCartItems(prev => prev.filter(item => item.productId !== productId));
   };
 
-  const placeOrder = () => {
+  const placeOrder = async (customerDetails) => {
     if (cartItems.length === 0) return null;
 
     const cartWithProducts = cartItems.map(item => {
@@ -149,9 +149,11 @@ export const ShopProvider = ({ children }) => {
     const order = {
       id: orderId,
       timestamp: Date.now(),
-      totalPrice: total,
+      totalPrice: total + 80, // adding fixed shipping cost
       itemsSummary: summary,
-      status: "Processing"
+      status: "Processing",
+      customer: customerDetails,
+      items: cartItems
     };
 
     // Deduct stock
@@ -162,6 +164,13 @@ export const ShopProvider = ({ children }) => {
       }
       return p;
     }));
+
+    try {
+      const { doc, setDoc } = await import('firebase/firestore');
+      await setDoc(doc(db, "orders", orderId), order);
+    } catch(err) {
+      console.error("Error saving order: ", err);
+    }
 
     setOrders(prev => [order, ...prev]);
     setCartItems([]);

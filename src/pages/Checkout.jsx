@@ -23,16 +23,13 @@ const Checkout = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     setIsProcessing(true);
-    // Simulate Stripe API delay
-    setTimeout(() => {
-      const order = placeOrder();
-      setIsProcessing(false);
-      if (order) {
-        setOrderPlaced(order);
-      }
-    }, 2000);
+    const order = await placeOrder(formData);
+    setIsProcessing(false);
+    if (order) {
+      setOrderPlaced(order);
+    }
   };
 
   if (orderPlaced) {
