@@ -72,11 +72,17 @@ const Login = () => {
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/operation-not-allowed') {
-        setError('Phone Authentication is not enabled in Firebase. Please enable it in the Firebase Console.');
+        const msg = 'Phone Authentication is not enabled in Firebase. Please enable it in the Firebase Console.';
+        setError(msg);
+        alert(msg);
       } else if (err.code === 'auth/invalid-phone-number') {
-        setError('Invalid phone number format.');
+        const msg = 'Invalid phone number format.';
+        setError(msg);
+        alert(msg);
       } else {
-        setError('Failed to send OTP. Please try again. (' + err.message + ')');
+        const msg = 'Failed to send OTP. Please try again. (' + err.message + ')';
+        setError(msg);
+        alert(msg);
       }
       if (window.recaptchaVerifier) {
         window.recaptchaVerifier.render().then(widgetId => {
