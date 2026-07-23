@@ -17,7 +17,7 @@ const Contact = () => {
           </p>
 
           <div className="contact-methods">
-            <a href="https://wa.me/918525325330" target="_blank" rel="noopener noreferrer" className="contact-method-card">
+            <a href="https://api.whatsapp.com/send?phone=918525325330" target="_blank" rel="noopener noreferrer" className="contact-method-card">
               <div className="contact-icon-circle">
                 <Phone size={24} />
               </div>

@@ -65,7 +65,7 @@ const Navbar = () => {
 
       {storeSettings?.whatsapp && (
         <a 
-          href="https://wa.me/918525325330" 
+          href="https://api.whatsapp.com/send?phone=918525325330" 
           target="_blank" 
           rel="noopener noreferrer" 
           className="floating-whatsapp"
