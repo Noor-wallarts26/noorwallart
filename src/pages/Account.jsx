@@ -45,8 +45,8 @@ const Account = () => {
               <div className="profile-header">
                 <img src="/logo.jpg" alt="Noor Wall Arts" className="profile-avatar" />
                 <div className="profile-info">
-                  <h3 className="brand-title" style={{ fontSize: '1.2rem', marginBottom: '0.2rem' }}>NOOR WALL ARTS</h3>
-                  <p className="profile-phone">{user.phoneNumber}</p>
+                  <h3 className="brand-title" style={{ fontSize: '1.2rem', marginBottom: '0.2rem' }}>{user.displayName || 'NOOR WALL ARTS'}</h3>
+                  <p className="profile-phone">{user.email || user.phoneNumber}</p>
                 </div>
               </div>
               <button onClick={logout} className="btn-outline logout-btn-full">
