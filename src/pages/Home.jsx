@@ -27,7 +27,9 @@ const Home = () => {
     filteredProducts, products 
   } = useContext(ShopContext);
 
-  const sliderProducts = products.filter(p => p.showInSlider);
+  const sliderProducts = products.filter(p => p.showInSlider).length > 0 
+    ? products.filter(p => p.showInSlider)
+    : products.slice(0, 3); // Fallback to first 3 products if none are explicitly set
 
 
   return (
