@@ -45,8 +45,7 @@ const Home = () => {
       <header className="home-header">
         <div className="container">
           <div className="app-logo">
-            <img src="/logo.png" alt="Noorwal Arts Logo" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
-            <h1 className="brand-title">Noorwal Arts</h1>
+            <img src="/logo.jpg" alt="Noorwal Arts Logo" className="site-logo" />
           </div>
           
           <div className="search-bar">

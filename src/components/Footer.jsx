@@ -19,8 +19,8 @@ const Footer = () => {
       <div className="container">
         <div className="footer-content">
           <div className="footer-brand">
-            <h2 className="brand-title">Noorwal Arts</h2>
-            <p>Premium Wall Art & Decor to bring your walls to life.</p>
+            <img src="/logo.jpg" alt="Noorwal Arts Logo" className="footer-logo" />
+            <p style={{ marginTop: '0.75rem' }}>Premium Wall Art & Decor to bring your walls to life.</p>
           </div>
           
           <div className="footer-contact">

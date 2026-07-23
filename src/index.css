@@ -185,3 +185,7 @@ button {
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out forwards;
 }
+
+.site-logo { max-height: 80px; width: auto; object-fit: contain; }
+.footer-logo { max-height: 60px; width: auto; object-fit: contain; }
+
