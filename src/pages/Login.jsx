@@ -32,7 +32,7 @@ const Login = () => {
     <div className="auth-page animate-fade-in">
       <div className="auth-container card">
         <div className="auth-header">
-          <ShoppingBag color="var(--primary)" size={48} />
+          <img src="/logo.png" alt="Noor Wallarts Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem' }} />
           <h2>Welcome Back</h2>
           <p>Sign in to your Noor Wallarts & Gifts account</p>
         </div>

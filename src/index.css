@@ -1,37 +1,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-  /* Dark Mode Palette (Default) */
-  --bg-dark: #0F172A;
-  --surface: #1E293B;
-  --surface-variant: #334155;
-  --primary: #3B82F6;
-  --primary-container: #1E3A8A;
-  --on-primary: #FFFFFF;
-  --tertiary: #F59E0B;
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --border-color: #334155;
+  /* Dark Mode Palette (Rose/Brown theme) */
+  --bg-dark: #2A1B16;
+  --surface: #3B2822;
+  --surface-variant: #4F3730;
+  --primary: #EADCD8;
+  --primary-container: #D8C3BD;
+  --on-primary: #3B221B;
+  --tertiary: #C9A49B;
+  --text-primary: #F4EAE7;
+  --text-secondary: #D8C3BD;
+  --border-color: #4F3730;
   --success: #22C55E;
   --error: #EF4444;
-  --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
   
   --font-family: 'Inter', sans-serif;
 }
 
 body.light-mode {
-  /* Light Mode Palette */
-  --bg-dark: #F1F5F9;
-  --surface: #FFFFFF;
-  --surface-variant: #E2E8F0;
-  --primary: #2563EB;
-  --primary-container: #DBEAFE;
+  /* Light Mode Palette (Rose/Brown theme) */
+  --bg-dark: #EADCD8;
+  --surface: #F4EAE7;
+  --surface-variant: #D8C3BD;
+  --primary: #5E3A2F;
+  --primary-container: #785144;
   --on-primary: #FFFFFF;
-  --tertiary: #D97706;
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --border-color: #CBD5E1;
-  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --tertiary: #8C5A4B;
+  --text-primary: #3B221B;
+  --text-secondary: #694F45;
+  --border-color: #D8C3BD;
+  --card-shadow: 0 4px 6px -1px rgba(94, 58, 47, 0.15), 0 2px 4px -1px rgba(94, 58, 47, 0.1);
 }
 
 * {

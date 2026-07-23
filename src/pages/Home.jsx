@@ -44,7 +44,7 @@ const Home = () => {
       <header className="home-header">
         <div className="container">
           <div className="app-logo">
-            <ShoppingBag color="var(--tertiary)" size={28} />
+            <img src="/logo.png" alt="Noor Wallarts Logo" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
             <h1>Noor Wallarts & Gifts</h1>
           </div>
           
