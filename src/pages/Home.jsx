@@ -4,7 +4,19 @@ import { ShopContext } from '../context/ShopContext';
 import ProductCard from '../components/ProductCard';
 import './Home.css';
 
-const categories = ["All", "Electronics", "Fashion", "Books", "Home", "Beauty"];
+const categories = [
+  "All", 
+  "Islamic wall arts", 
+  "Customized Frames", 
+  "Wedding and nikkah collections", 
+  "Customized Gifts", 
+  "Acrylic & Glass works", 
+  "Home decor", 
+  "Wall stickers & Decals", 
+  "Custom printing", 
+  "Corporate and event products", 
+  "Personalized products"
+];
 
 const PromoBanner = () => {
   return (

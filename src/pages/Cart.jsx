@@ -5,11 +5,16 @@ import { ShopContext } from '../context/ShopContext';
 import './Cart.css';
 
 const categoryStyles = {
-  Electronics: { color: '#3B82F6', icon: '💻' },
-  Fashion: { color: '#EC4899', icon: '👕' },
-  Books: { color: '#F59E0B', icon: '📚' },
-  Home: { color: '#10B981', icon: '🏠' },
-  Beauty: { color: '#8B5CF6', icon: '✨' },
+  "Islamic wall arts": { color: '#10B981', icon: '☪️' },
+  "Customized Frames": { color: '#3B82F6', icon: '🖼️' },
+  "Wedding and nikkah collections": { color: '#EC4899', icon: '💍' },
+  "Customized Gifts": { color: '#F59E0B', icon: '🎁' },
+  "Acrylic & Glass works": { color: '#8B5CF6', icon: '✨' },
+  "Home decor": { color: '#14B8A6', icon: '🏠' },
+  "Wall stickers & Decals": { color: '#F43F5E', icon: '🎨' },
+  "Custom printing": { color: '#6366F1', icon: '🖨️' },
+  "Corporate and event products": { color: '#0F766E', icon: '🏢' },
+  "Personalized products": { color: '#D946EF', icon: '💝' },
 };
 
 const Cart = () => {

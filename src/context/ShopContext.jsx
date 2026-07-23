@@ -5,18 +5,9 @@ import { auth, db } from '../firebase';
 export const ShopContext = createContext();
 
 const initialProducts = [
-  { id: 1, title: "Apex Wireless Headphones", description: "Over-ear active noise cancelling headphones with rich, immersive spatial audio and up to 40 hours of battery life.", price: 129.99, category: "Electronics", rating: 4.8, reviewsCount: 1240, stock: 15, isWishlisted: false },
-  { id: 2, title: "Quantum Smartwatch Pro", description: "Water-resistant health and fitness smartwatch with AMOLED screen, advanced sleep score, stress level index, and 14-day battery.", price: 199.99, category: "Electronics", rating: 4.5, reviewsCount: 850, stock: 10, isWishlisted: false },
-  { id: 3, title: "Vivid View 4K Projector", description: "Ultra-bright portable smart projector featuring built-in streaming apps, keystone auto-correction, and dual stereo speakers.", price: 349.50, category: "Electronics", rating: 4.6, reviewsCount: 430, stock: 5, isWishlisted: false },
-  { id: 4, title: "Urban Nomad Denim Jacket", description: "Classic premium cotton denim jacket with modern relaxed silhouette, reinforced stitching, and multi-pocket design.", price: 59.99, category: "Fashion", rating: 4.4, reviewsCount: 340, stock: 20, isWishlisted: false },
-  { id: 5, title: "ActiveFit Breathable Sneakers", description: "Ultra lightweight running shoes designed with premium shock-absorption soles and breathable knit upper material.", price: 74.95, category: "Fashion", rating: 4.7, reviewsCount: 1120, stock: 12, isWishlisted: false },
-  { id: 6, title: "Nomad Canvas Backpack", description: "Rugged, water-resistant canvas travel daypack featuring dedicated 15-inch laptop sleeve and anti-theft zipper compartments.", price: 45.00, category: "Fashion", rating: 4.3, reviewsCount: 190, stock: 25, isWishlisted: false },
-  { id: 7, title: "The Infinite Code", description: "A gripping sci-fi technothriller about an underground network of programmers uncovering a quantum AI conspiracy. A national bestseller.", price: 14.99, category: "Books", rating: 4.9, reviewsCount: 520, stock: 30, isWishlisted: false },
-  { id: 8, title: "Atomic Habits & Mindsets", description: "Practical framework to design high-performance routines, break bad behaviors, and build remarkable lifelong positive systems.", price: 18.90, category: "Books", rating: 4.8, reviewsCount: 2340, stock: 40, isWishlisted: false },
-  { id: 9, title: "Barista Express Espresso Maker", description: "Commercial grade espresso extraction machine with built-in adjustable grinder, precise milk steam wand, and temperature control.", price: 299.99, category: "Home", rating: 4.7, reviewsCount: 670, stock: 4, isWishlisted: false },
-  { id: 10, title: "Smart Ambient LED Lamp", description: "Sleek magnetic bedside lamp featuring app control, custom schedule routines, millions of ambient light colors, and phone wireless charging.", price: 39.99, category: "Home", rating: 4.5, reviewsCount: 1150, stock: 18, isWishlisted: false },
-  { id: 11, title: "Organic Glow Skin Serum", description: "Nourishing, dermatologically tested skin defense serum infused with organic Vitamin C, hyaluronic acid, and cold-pressed botanical extracts.", price: 24.99, category: "Beauty", rating: 4.6, reviewsCount: 1420, stock: 22, isWishlisted: false },
-  { id: 12, title: "Essential Oil Diffuser Set", description: "Quiet ultrasonic wooden-styled humidifier paired with 6 essential oils including Lavender, Peppermint, Tea Tree, and Eucalyptus.", price: 32.50, category: "Beauty", rating: 4.4, reviewsCount: 890, stock: 15, isWishlisted: false }
+  { id: 1, title: "Ayatul Kursi Wall Art", description: "Beautifully crafted wooden Ayatul Kursi Islamic wall art with gold finish.", price: 129.99, category: "Islamic wall arts", rating: 4.8, reviewsCount: 124, stock: 15, isWishlisted: false },
+  { id: 2, title: "Customized Photo Frame", description: "Personalized wooden photo frame for couples and family.", price: 49.99, category: "Customized Frames", rating: 4.5, reviewsCount: 85, stock: 10, isWishlisted: false },
+  { id: 3, title: "Nikkah Welcome Sign", description: "Elegant acrylic welcome sign for Nikkah and Wedding events.", price: 89.50, category: "Wedding and nikkah collections", rating: 4.6, reviewsCount: 43, stock: 5, isWishlisted: false }
 ];
 
 export const ShopProvider = ({ children }) => {
