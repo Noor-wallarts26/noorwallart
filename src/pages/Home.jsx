@@ -29,16 +29,21 @@ const Home = () => {
 
   const sliderProducts = products.filter(p => p.showInSlider).length > 0 
     ? products.filter(p => p.showInSlider)
-    : products.slice(0, 3); // Fallback to first 3 products if none are explicitly set
+    : products.slice(0, 10); // Fallback to first 10 products if none are explicitly set
 
 
   return (
     <div className="home-page animate-fade-in">
       <header className="home-header">
         <div className="container">
-          <div className="app-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <img src="/logo.jpg" alt="Noor Wall Arts Logo" className="site-logo" />
-            <h2 style={{ fontFamily: 'var(--font-heading)', margin: 0, fontSize: '1.4rem' }}>NOOR WALL ARTS</h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <div className="app-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: 0 }}>
+              <img src="/logo.jpg" alt="Noor Wall Arts Logo" className="site-logo" />
+              <h2 style={{ fontFamily: 'var(--font-heading)', margin: 0, fontSize: '1.4rem' }}>NOOR WALL ARTS</h2>
+            </div>
+            <Link to="/cart" className="top-cart-link" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: 'var(--primary)' }}>
+              <ShoppingBag size={24} />
+            </Link>
           </div>
           
           <div className="search-bar">

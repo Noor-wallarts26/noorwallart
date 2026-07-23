@@ -1,7 +1,7 @@
 .hero-slider-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 3;
   height: auto;
   overflow: hidden;
   border-radius: 12px;
@@ -61,13 +61,14 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 0.25rem;
+  color: #ffffff;
   text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .hero-slide-price {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--tertiary);
+  color: #ffffff;
   text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
@@ -98,8 +99,8 @@
 
 @media (min-width: 768px) {
   .hero-slider-container {
-    height: 450px;
-    aspect-ratio: auto;
+    aspect-ratio: 16 / 9;
+    max-height: 500px;
   }
   .hero-slide-content h3 {
     font-size: 2rem;
