@@ -1,38 +1,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 :root {
-  /* Premium Luxury Dark Palette */
-  --bg-dark: #0F1115;
-  --surface: #1E232B;
-  --surface-variant: #171A20;
-  --primary: #C9A595;
-  --primary-container: #B89382;
-  --on-primary: #111111;
-  --tertiary: #2E6B57;
-  --text-primary: #F5F5F5;
-  --text-secondary: #B0B7C3;
-  --border-color: #2A2F38;
+  /* Beige & Brown Premium Palette */
+  --bg-dark: #EFD5CC;
+  --surface: #FFFFFF;
+  --surface-variant: #F9EBE6;
+  --primary: #5A2D0C;
+  --primary-container: #7A3E16;
+  --on-primary: #FFFFFF;
+  --tertiary: #7A3E16;
+  --text-primary: #331805;
+  --text-secondary: #5A2D0C;
+  --border-color: rgba(90, 45, 12, 0.15);
   --success: #22C55E;
   --error: #EF4444;
-  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  --card-shadow: 0 8px 30px rgba(90, 45, 12, 0.08);
   
-  --font-heading: 'Playfair Display', serif;
+  --font-heading: 'Qano', 'Cinzel', serif;
   --font-body: 'Poppins', sans-serif;
 }
 
 body.light-mode {
-  /* Enforcing the Premium Luxury Dark Palette in both modes */
-  --bg-dark: #0F1115;
-  --surface: #1E232B;
-  --surface-variant: #171A20;
-  --primary: #C9A595;
-  --primary-container: #B89382;
-  --on-primary: #111111;
-  --tertiary: #2E6B57;
-  --text-primary: #F5F5F5;
-  --text-secondary: #B0B7C3;
-  --border-color: #2A2F38;
-  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  --bg-dark: #EFD5CC;
+  --surface: #FFFFFF;
+  --surface-variant: #F9EBE6;
+  --primary: #5A2D0C;
+  --primary-container: #7A3E16;
+  --on-primary: #FFFFFF;
+  --tertiary: #7A3E16;
+  --text-primary: #331805;
+  --text-secondary: #5A2D0C;
+  --border-color: rgba(90, 45, 12, 0.15);
+  --card-shadow: 0 8px 30px rgba(90, 45, 12, 0.08);
 }
 
 * {
@@ -53,8 +52,8 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  color: var(--text-primary);
-  font-weight: 600;
+  color: var(--primary);
+  font-weight: 700;
 }
 
 a {
@@ -63,8 +62,8 @@ a {
 }
 
 .brand-title {
-  font-family: 'Cinzel', serif;
-  color: #D4AF37;
+  font-family: var(--font-heading);
+  color: var(--primary);
   letter-spacing: 2px;
   text-transform: uppercase;
   font-weight: 700;

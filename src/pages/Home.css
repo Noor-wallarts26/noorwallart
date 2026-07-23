@@ -1,7 +1,8 @@
 .home-header {
-  background-color: var(--primary);
+  background-color: var(--surface);
   padding: 1.5rem 0 1rem;
   margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .app-logo {
@@ -13,9 +14,9 @@
 
 .app-logo h1 {
   font-size: 1.75rem;
-  font-family: 'Cinzel', serif;
+  font-family: var(--font-heading);
   font-weight: 700;
-  color: #D4AF37;
+  color: var(--primary);
   letter-spacing: 2px;
   text-transform: uppercase;
 }
@@ -23,31 +24,32 @@
 .search-bar {
   display: flex;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: var(--surface-variant);
   border-radius: 9999px;
   padding: 0 1rem;
   height: 48px;
-  border: 1px solid transparent;
+  border: 1px solid var(--border-color);
   transition: border-color 0.2s;
 }
 
 .search-bar:focus-within {
-  border-color: var(--tertiary);
-  background-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--primary);
+  background-color: var(--surface);
 }
 
 .search-bar input {
   flex: 1;
   background: transparent;
   border: none;
-  color: white;
+  color: var(--text-primary);
   padding: 0 0.75rem;
   font-size: 1rem;
   outline: none;
 }
 
 .search-bar input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
+  opacity: 0.7;
 }
 
 .category-scroll {
@@ -131,7 +133,7 @@
 
 .promo-content p {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-secondary);
 }
 
 .products-grid {

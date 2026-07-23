@@ -22,15 +22,15 @@
   align-items: center;
   gap: 1.5rem;
   padding: 1.5rem;
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   transition: all 0.3s ease;
 }
 
 .contact-method-card:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-color: #D4AF37;
+  background-color: var(--surface-variant);
+  border-color: var(--primary);
   transform: translateY(-2px);
 }
 
@@ -38,13 +38,13 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), transparent);
-  color: #D4AF37;
+  background: linear-gradient(135deg, var(--surface-variant), transparent);
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid var(--border-color);
 }
 
 .contact-method-text h4 {
@@ -66,7 +66,7 @@
 }
 
 .contact-form-section {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: var(--surface);
   padding: 2rem;
   border-radius: 12px;
   border: 1px solid var(--border-color);
@@ -105,7 +105,7 @@
 .contact-form .form-group input:focus,
 .contact-form .form-group textarea:focus {
   outline: none;
-  border-color: #D4AF37;
+  border-color: var(--primary);
 }
 
 @media (max-width: 768px) {

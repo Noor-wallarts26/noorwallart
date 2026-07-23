@@ -30,7 +30,7 @@
 }
 
 .top-bar-link:hover {
-  color: #D4AF37;
+  color: var(--primary);
 }
 
 .top-bar-links a {
@@ -43,7 +43,7 @@
 }
 
 .top-bar-links a:hover {
-  color: #D4AF37;
+  color: var(--primary);
 }
 
 @media (max-width: 600px) {
