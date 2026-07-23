@@ -88,7 +88,7 @@ const Checkout = () => {
             </p>
             <div style={{ background: '#fff', padding: '1rem', display: 'inline-block', borderRadius: '12px', border: '1px solid var(--border)' }}>
               <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=arahman32773-4@okicici&pn=Noor_Wallarts_Gifts&am=${finalTotal.toFixed(2)}&cu=INR`} 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=arahman32773-4@okicici&pn=Noor_Wallarts_Gifts&am=${finalTotal.toFixed(2)}&cu=INR`)}`} 
                 alt="UPI QR Code" 
                 style={{ width: '200px', height: '200px' }} 
               />
