@@ -5,6 +5,7 @@ import { auth } from '../firebase';
 import './Auth.css';
 
 const Login = () => {
+  const [countryCode, setCountryCode] = useState('+91');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState('PHONE'); // 'PHONE' or 'OTP'
@@ -50,13 +51,13 @@ const Login = () => {
     e.preventDefault();
     setError('');
     
-    // Basic phone validation (assuming India +91 for now)
+    // Basic phone validation
     let formattedPhone = phoneNumber.trim();
     if (!formattedPhone.startsWith('+')) {
-      formattedPhone = '+91' + formattedPhone;
+      formattedPhone = countryCode + formattedPhone;
     }
 
-    if (formattedPhone.length < 10) {
+    if (formattedPhone.length < 8) {
       setError('Please enter a valid phone number');
       return;
     }
@@ -127,25 +128,37 @@ const Login = () => {
             <div className="form-group">
               <label>Phone Number</label>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input 
-                  type="text" 
-                  value="+91" 
-                  disabled 
-                  style={{ width: '60px', textAlign: 'center', backgroundColor: 'var(--surface-variant)' }} 
-                />
+                <select 
+                  value={countryCode} 
+                  onChange={(e) => setCountryCode(e.target.value)}
+                  style={{ width: '80px', textAlign: 'center', backgroundColor: 'var(--surface-variant)', border: '1px solid var(--border-color)', borderRadius: '8px' }} 
+                >
+                  <option value="+91">🇮🇳 +91</option>
+                  <option value="+971">🇦🇪 +971</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+65">🇸🇬 +65</option>
+                  <option value="+60">🇲🇾 +60</option>
+                  <option value="+966">🇸🇦 +966</option>
+                  <option value="+974">🇶🇦 +974</option>
+                  <option value="+965">🇰🇼 +965</option>
+                  <option value="+968">🇴🇲 +968</option>
+                  <option value="+973">🇧🇭 +973</option>
+                  <option value="+94">🇱🇰 +94</option>
+                </select>
                 <input 
                   type="tel" 
                   required 
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                  placeholder="Enter 10-digit mobile number"
-                  maxLength="10"
+                  placeholder="Mobile number"
+                  maxLength="15"
                   style={{ flex: 1 }}
                 />
               </div>
             </div>
             
-            <button type="submit" className="btn-primary auth-submit-btn" disabled={loading || phoneNumber.length < 10}>
+            <button type="submit" className="btn-primary auth-submit-btn" disabled={loading || phoneNumber.length < 5}>
               {loading ? 'Sending OTP...' : 'Send OTP'}
             </button>
           </form>
@@ -163,7 +176,7 @@ const Login = () => {
                 style={{ textAlign: 'center', letterSpacing: '4px', fontSize: '1.2rem' }}
               />
               <small style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', display: 'block' }}>
-                OTP sent to +91 {phoneNumber} <button type="button" onClick={() => setStep('PHONE')} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline' }}>Change</button>
+                OTP sent to {countryCode} {phoneNumber} <button type="button" onClick={() => setStep('PHONE')} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline' }}>Change</button>
               </small>
             </div>
             
