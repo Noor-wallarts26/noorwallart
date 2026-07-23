@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ReceiptText, PackageCheck } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import './Orders.css';
+import Footer from '../components/Footer';
 
 const Orders = () => {
   const { orders } = useContext(ShopContext);
@@ -45,6 +46,7 @@ const Orders = () => {
           })}
         </div>
       )}
+      <Footer />
     </div>
   );
 };

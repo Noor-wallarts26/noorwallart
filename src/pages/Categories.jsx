@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 import './Categories.css';
+import Footer from '../components/Footer';
 
 const categoriesList = [
   "All", 
@@ -47,6 +48,7 @@ const Categories = () => {
           ))}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

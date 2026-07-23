@@ -33,7 +33,6 @@ function App() {
           <Route path="/categories" element={<Categories />} />
 
         </Routes>
-        <Footer />
         <Navbar />
       </BrowserRouter>
     </ShopProvider>
