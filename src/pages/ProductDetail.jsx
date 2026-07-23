@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Star, Flashlight, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, Heart, Star, Zap, ShoppingCart } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import ProductCard from '../components/ProductCard';
 import './ProductDetail.css';
@@ -131,7 +131,7 @@ const ProductDetail = () => {
             disabled={product.stock === 0}
             style={{ opacity: product.stock === 0 ? 0.5 : 1 }}
           >
-            <Flashlight size={20} />
+            <Zap size={20} fill="currentColor" />
             Buy Now
           </button>
 
