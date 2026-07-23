@@ -18,7 +18,7 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { products, toggleWishlist, addToCart, addReview } = useContext(ShopContext);
   
-  const product = products.find(p => p.id === parseInt(id));
+  const product = products.find(p => String(p.id) === String(id));
 
   const [reviewForm, setReviewForm] = useState({ name: '', rating: 5, comment: '' });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -81,19 +81,16 @@ const ProductDetail = () => {
         </button>
       </header>
 
-      <div 
-        className="detail-image-area" 
-        style={product.imageUrl ? { 
-          backgroundImage: `url(${product.imageUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          height: '300px'
-        } : { 
-          background: `linear-gradient(to bottom, ${color}33, transparent)`,
-          height: '250px'
-        }}
-      >
-        {!product.imageUrl && <div className="detail-category-icon" style={{ color }}>{icon}</div>}
+      <div className="detail-image-area" style={{ height: '350px', backgroundColor: 'var(--surface-variant)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        {product.imageUrl ? (
+          <img 
+            src={product.imageUrl} 
+            alt={product.title} 
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+          />
+        ) : (
+          <div className="detail-category-icon" style={{ color, fontSize: '4rem' }}>{icon}</div>
+        )}
       </div>
 
       <div className="detail-content container">
