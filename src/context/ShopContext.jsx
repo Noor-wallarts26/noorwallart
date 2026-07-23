@@ -20,6 +20,7 @@ export const ShopProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [storeSettings, setStoreSettings] = useState({ whatsapp: '' });
+  const [deliveryAddress, setDeliveryAddress] = useState('');
 
   // Auth Listener
   useEffect(() => {
@@ -77,6 +78,9 @@ export const ShopProvider = ({ children }) => {
 
     const savedOrders = localStorage.getItem('orders');
     if (savedOrders) setOrders(JSON.parse(savedOrders));
+
+    const savedAddress = localStorage.getItem('deliveryAddress');
+    if (savedAddress) setDeliveryAddress(savedAddress);
   }, []);
 
   // Save to local storage on change
@@ -87,6 +91,10 @@ export const ShopProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('orders', JSON.stringify(orders));
   }, [orders]);
+
+  useEffect(() => {
+    localStorage.setItem('deliveryAddress', deliveryAddress);
+  }, [deliveryAddress]);
 
   useEffect(() => {
     const wishlistIds = products.filter(p => p.isWishlisted).map(p => p.id);
@@ -237,6 +245,8 @@ export const ShopProvider = ({ children }) => {
       setSearchQuery,
       selectedCategory,
       setSelectedCategory,
+      deliveryAddress,
+      setDeliveryAddress,
       filteredProducts,
       wishlistedProducts: products.filter(p => p.isWishlisted),
       cartWithProducts,
