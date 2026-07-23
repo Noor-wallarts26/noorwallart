@@ -33,7 +33,7 @@ const Orders = () => {
                     <p className="order-date">{date}</p>
                   </div>
                   <div className="order-total">
-                    ${order.totalPrice.toFixed(2)}
+                    ₹{order.totalPrice.toFixed(2)}
                   </div>
                 </div>
                 <div className="order-body">

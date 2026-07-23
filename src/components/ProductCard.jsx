@@ -77,7 +77,9 @@ const ProductCard = ({ product }) => {
         </div>
 
         <div className="product-bottom">
-          <span className="product-price">${product.price.toFixed(2)}</span>
+          <Link to={`/product/${product.id}`}>
+            <span className="product-price">₹{product.price.toFixed(2)}</span>
+          </Link>
           <button 
             className="add-to-cart-btn"
             disabled={product.stock === 0}

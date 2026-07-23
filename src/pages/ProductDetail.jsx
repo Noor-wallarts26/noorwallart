@@ -104,7 +104,7 @@ const ProductDetail = () => {
 
         <hr className="detail-divider" />
 
-        <div className="detail-price">${product.price.toFixed(2)}</div>
+        <div className="detail-price">₹{product.price.toFixed(2)}</div>
         <div className="detail-stock" style={{ color: stockStatus.color }}>{stockStatus.text}</div>
 
         <div className="detail-description-box">
