@@ -17,12 +17,12 @@ const Contact = () => {
           </p>
 
           <div className="contact-methods">
-            <a href="tel:+918525325330" className="contact-method-card">
+            <a href="https://wa.me/918525325330" target="_blank" rel="noopener noreferrer" className="contact-method-card">
               <div className="contact-icon-circle">
                 <Phone size={24} />
               </div>
               <div className="contact-method-text">
-                <h4>Call Us</h4>
+                <h4>Chat on WhatsApp</h4>
                 <p>+91 8525325330</p>
                 <span>Mon-Sat, 9AM to 6PM</span>
               </div>

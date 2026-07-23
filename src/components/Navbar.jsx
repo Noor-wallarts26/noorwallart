@@ -65,7 +65,7 @@ const Navbar = () => {
 
       {storeSettings?.whatsapp && (
         <a 
-          href={`https://wa.me/${storeSettings.whatsapp}`} 
+          href="https://wa.me/918525325330" 
           target="_blank" 
           rel="noopener noreferrer" 
           className="floating-whatsapp"
