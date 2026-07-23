@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Instagram, Mail, Phone } from 'lucide-react';
+import { Camera, Mail, Phone } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import './Footer.css';
 
@@ -34,7 +34,7 @@ const Footer = () => {
               {email}
             </a>
             <a href={`https://instagram.com/${instaHandle}`} target="_blank" rel="noopener noreferrer" className="contact-link">
-              <Instagram size={18} />
+              <Camera size={18} />
               {instagram}
             </a>
           </div>
