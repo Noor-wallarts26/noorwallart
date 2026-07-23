@@ -4,7 +4,7 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../firebase';
 import './Auth.css';
 
-const Login = () => {
+const Login = ({ embedded = false }) => {
   const [countryCode, setCountryCode] = useState('+91');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
@@ -116,9 +116,8 @@ const Login = () => {
     }
   };
 
-  return (
-    <div className="auth-page animate-fade-in">
-      <div className="auth-container card">
+  const content = (
+      <div className="auth-container card" style={embedded ? { margin: 0, width: '100%', boxShadow: '0 4px 20px rgba(90, 45, 12, 0.08)' } : {}}>
         <div className="auth-header">
           <img src="/logo.jpg" alt="Noor Wall Arts Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem' }} />
           <h2 className="brand-title">Noor Wall Arts</h2>
@@ -192,6 +191,15 @@ const Login = () => {
           </form>
         )}
       </div>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
+  return (
+    <div className="auth-page animate-fade-in">
+      {content}
     </div>
   );
 };
