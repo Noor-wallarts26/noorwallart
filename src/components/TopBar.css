@@ -1,0 +1,62 @@
+.top-bar {
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.5rem 0;
+  font-size: 0.85rem;
+  z-index: 100;
+  position: relative;
+}
+
+.top-bar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.top-contact-info {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.top-bar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+  font-weight: 500;
+}
+
+.top-bar-link:hover {
+  color: #D4AF37;
+}
+
+.top-bar-links a {
+  color: var(--text-secondary);
+  font-weight: 600;
+  transition: color 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+}
+
+.top-bar-links a:hover {
+  color: #D4AF37;
+}
+
+@media (max-width: 600px) {
+  .top-bar-content {
+    justify-content: center;
+  }
+  .top-contact-info {
+    flex-direction: row;
+    gap: 1rem;
+    align-items: center;
+    font-size: 0.75rem;
+  }
+  .top-bar-links {
+    display: none; /* Hide Contact link on mobile to save space, or keep it */
+  }
+}

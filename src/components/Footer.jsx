@@ -25,17 +25,13 @@ const Footer = () => {
           
           <div className="footer-contact">
             <h3>Contact Us</h3>
-            <a href={`https://wa.me/91${whatsapp}`} target="_blank" rel="noopener noreferrer" className="contact-link">
+            <a href="tel:+918525325330" className="btn-outline contact-btn" style={{ padding: '0.5rem 1rem', width: 'fit-content' }}>
               <Phone size={18} />
-              +91 {whatsapp}
+              Call: +91 8525325330
             </a>
-            <a href={`mailto:${email}`} className="contact-link">
+            <a href="mailto:noorwallartsofficial@gmail.com" className="btn-outline contact-btn" style={{ padding: '0.5rem 1rem', width: 'fit-content' }}>
               <Mail size={18} />
-              {email}
-            </a>
-            <a href={`https://instagram.com/${instaHandle}`} target="_blank" rel="noopener noreferrer" className="contact-link">
-              <Camera size={18} />
-              {instagram}
+              Email Us
             </a>
           </div>
         </div>
