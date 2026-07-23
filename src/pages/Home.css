@@ -12,9 +12,12 @@
 }
 
 .app-logo h1 {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: white;
+  font-size: 1.75rem;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  color: #D4AF37;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
 .search-bar {

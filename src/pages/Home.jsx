@@ -25,7 +25,7 @@ const PromoBanner = () => {
       <div className="promo-overlay"></div>
       <div className="promo-content">
         <span className="promo-badge">LUXURY COLLECTION</span>
-        <h2>Noor Wallarts & Gifts</h2>
+        <h2 className="brand-title">Noorwal Arts</h2>
         <p>Premium Wall Decor & Customized Gifts</p>
         <button className="btn-primary" style={{ marginTop: '1.5rem' }}>Shop Now</button>
       </div>
@@ -45,8 +45,8 @@ const Home = () => {
       <header className="home-header">
         <div className="container">
           <div className="app-logo">
-            <img src="/logo.png" alt="Noor Wallarts Logo" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
-            <h1>Noor Wallarts & Gifts</h1>
+            <img src="/logo.png" alt="Noorwal Arts Logo" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+            <h1 className="brand-title">Noorwal Arts</h1>
           </div>
           
           <div className="search-bar">

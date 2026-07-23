@@ -43,9 +43,9 @@ const Signup = () => {
     <div className="auth-page animate-fade-in">
       <div className="auth-container card">
         <div className="auth-header">
-          <img src="/logo.png" alt="Noor Wallarts Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem' }} />
-          <h2>Create an Account</h2>
-          <p>Join Noor Wallarts & Gifts today</p>
+          <img src="/logo.png" alt="Noorwal Arts Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem' }} />
+          <h2 className="brand-title">Noorwal Arts</h2>
+          <p>Join Noorwal Arts today</p>
         </div>
 
         {error && <div className="auth-error">{error}</div>}

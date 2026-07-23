@@ -43,7 +43,7 @@ const Checkout = () => {
             <CheckCircle2 size={64} color="var(--success)" className="success-icon" />
             <h2>Order Placed Successfully!</h2>
             <p className="order-id">Order ID: <strong>{orderPlaced.id}</strong></p>
-            <p className="order-msg">Thank you for shopping with Noor Wallarts & Gifts. Your order is being processed and will be shipped soon.</p>
+            <p className="order-msg">Thank you for shopping with Noorwal Arts. Your order is being processed and will be shipped soon.</p>
             <button className="btn-primary" onClick={() => navigate('/')}>Continue Shopping</button>
           </div>
         </div>
