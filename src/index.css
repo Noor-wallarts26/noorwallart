@@ -1,38 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 :root {
-  /* Premium Luxury Palette */
-  --bg-dark: #F8F5F0;
-  --surface: #FFFFFF;
-  --surface-variant: #EFE8DD;
-  --primary: #1F3D32;
-  --primary-container: #295040;
-  --on-primary: #FFFFFF;
-  --tertiary: #C8A45D;
-  --text-primary: #1F1F1F;
-  --text-secondary: #6B6B6B;
-  --border-color: #E7DFD3;
+  /* Premium Luxury Dark Palette */
+  --bg-dark: #0F1115;
+  --surface: #1E232B;
+  --surface-variant: #171A20;
+  --primary: #C8A45D;
+  --primary-container: #D8B66A;
+  --on-primary: #111111;
+  --tertiary: #2E6B57;
+  --text-primary: #F5F5F5;
+  --text-secondary: #B0B7C3;
+  --border-color: #2A2F38;
   --success: #22C55E;
   --error: #EF4444;
-  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
   
   --font-heading: 'Playfair Display', serif;
   --font-body: 'Poppins', sans-serif;
 }
 
 body.light-mode {
-  /* Enforcing the Premium Luxury Palette in both modes */
-  --bg-dark: #F8F5F0;
-  --surface: #FFFFFF;
-  --surface-variant: #EFE8DD;
-  --primary: #1F3D32;
-  --primary-container: #295040;
-  --on-primary: #FFFFFF;
-  --tertiary: #C8A45D;
-  --text-primary: #1F1F1F;
-  --text-secondary: #6B6B6B;
-  --border-color: #E7DFD3;
-  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  /* Enforcing the Premium Luxury Dark Palette in both modes */
+  --bg-dark: #0F1115;
+  --surface: #1E232B;
+  --surface-variant: #171A20;
+  --primary: #C8A45D;
+  --primary-container: #D8B66A;
+  --on-primary: #111111;
+  --tertiary: #2E6B57;
+  --text-primary: #F5F5F5;
+  --text-secondary: #B0B7C3;
+  --border-color: #2A2F38;
+  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
 * {
