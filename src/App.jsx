@@ -35,6 +35,7 @@ function App() {
 
         </Routes>
         <Navbar />
+        <WhatsAppButton />
       </BrowserRouter>
     </ShopProvider>
   );
