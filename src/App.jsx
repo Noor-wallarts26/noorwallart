@@ -4,6 +4,7 @@ import { ShopProvider } from './context/ShopContext';
 import Navbar from './components/Navbar';
 import TopBar from './components/TopBar';
 import Footer from './components/Footer';
+import WhatsAppButton from './components/WhatsAppButton';
 import Home from './pages/Home';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
