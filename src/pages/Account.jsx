@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Package, MapPin, ChevronRight, ChevronDown, Phone, Mail, LogOut } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
-import { ShopContext } from '../context/ShopContext';
 import MapPicker from '../components/MapPicker';
 import './Account.css';
 import Footer from '../components/Footer';
