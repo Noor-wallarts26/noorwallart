@@ -41,11 +41,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
+  margin: 14px;
+  border-radius: 16px;
   background-color: #FFFFFF;
   border-bottom: none;
   overflow: hidden; /* Guarantee image doesn't bleed out */
@@ -58,8 +55,8 @@
 
 .out-of-stock-badge {
   position: absolute;
-  top: 16px;
-  left: 16px;
+  top: 24px;
+  left: 24px;
   background-color: rgba(239, 68, 68, 0.95);
   color: white;
   font-size: 0.6rem;
@@ -70,8 +67,8 @@
 
 .wishlist-btn {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 24px;
+  right: 24px;
   background: #FFFFFF;
   border-radius: 50%;
   width: 36px;
