@@ -12,12 +12,35 @@ const Checkout = () => {
   
   const [formData, setFormData] = useState({
     name: '',
-    address: '',
     phone: '',
+    houseNo: '',
+    building: '',
+    street: '',
+    area: '',
+    landmark: '',
+    district: '',
+    state: '',
+    pincode: '',
+    addressType: 'Home',
+    instructions: '',
     upiRef: '',
     lat: null,
     lng: null
   });
+
+  const isFormValid = () => {
+    return (
+      formData.name.trim() !== '' &&
+      formData.phone.trim() !== '' &&
+      formData.houseNo.trim() !== '' &&
+      formData.street.trim() !== '' &&
+      formData.area.trim() !== '' &&
+      formData.district.trim() !== '' &&
+      formData.state.trim() !== '' &&
+      formData.pincode.trim() !== '' &&
+      formData.upiRef.trim() !== ''
+    );
+  };
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(null);
@@ -91,18 +114,69 @@ const Checkout = () => {
                 ...prev,
                 lat: loc.lat,
                 lng: loc.lng,
-                address: loc.address || prev.address 
+                // Optional: auto-fill some fields if reverse geocoding provides them
               }));
             }} 
           />
 
-          <div className="form-group">
-            <label>Delivery Address</label>
-            <textarea name="address" value={formData.address} onChange={handleInputChange} rows="3" placeholder="Add specific details like Flat No, Landmark..."></textarea>
+          <div className="address-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label>Phone Number *</label>
+              <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="Enter your phone number" required />
+            </div>
+            
+            <div className="form-group">
+              <label>House / Flat / Door No. *</label>
+              <input type="text" name="houseNo" value={formData.houseNo} onChange={handleInputChange} placeholder="e.g. Flat 4B" required />
+            </div>
+            
+            <div className="form-group">
+              <label>Building / Apartment Name (Optional)</label>
+              <input type="text" name="building" value={formData.building} onChange={handleInputChange} placeholder="e.g. Sea View Apts" />
+            </div>
+
+            <div className="form-group">
+              <label>Street / Road Name *</label>
+              <input type="text" name="street" value={formData.street} onChange={handleInputChange} placeholder="e.g. MG Road" required />
+            </div>
+
+            <div className="form-group">
+              <label>Area / Locality *</label>
+              <input type="text" name="area" value={formData.area} onChange={handleInputChange} placeholder="e.g. Anna Nagar" required />
+            </div>
+
+            <div className="form-group">
+              <label>Landmark (Optional)</label>
+              <input type="text" name="landmark" value={formData.landmark} onChange={handleInputChange} placeholder="e.g. Opposite Post Office" />
+            </div>
+
+            <div className="form-group">
+              <label>District *</label>
+              <input type="text" name="district" value={formData.district} onChange={handleInputChange} placeholder="e.g. Chennai" required />
+            </div>
+
+            <div className="form-group">
+              <label>State *</label>
+              <input type="text" name="state" value={formData.state} onChange={handleInputChange} placeholder="e.g. Tamil Nadu" required />
+            </div>
+
+            <div className="form-group">
+              <label>Pincode *</label>
+              <input type="text" name="pincode" value={formData.pincode} onChange={handleInputChange} placeholder="e.g. 600001" required />
+            </div>
+            
+            <div className="form-group">
+              <label>Address Type *</label>
+              <select name="addressType" value={formData.addressType} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--surface-variant)' }}>
+                <option value="Home">Home (All day delivery)</option>
+                <option value="Office">Office (Delivery between 10 AM - 5 PM)</option>
+              </select>
+            </div>
           </div>
-          <div className="form-group">
-            <label>Phone Number</label>
-            <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} />
+
+          <div className="form-group" style={{ marginTop: '1rem' }}>
+            <label>Delivery Instructions (Optional)</label>
+            <textarea name="instructions" value={formData.instructions} onChange={handleInputChange} rows="2" placeholder="Describe your delivery instructions (e.g. Leave at security)"></textarea>
           </div>
 
           <h3 className="mt-4" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -151,9 +225,18 @@ const Checkout = () => {
             <span>₹{finalTotal.toFixed(2)}</span>
           </div>
 
-          <button className="btn-primary checkout-btn" onClick={handleCheckout} disabled={isProcessing || !formData.upiRef}>
+          <button 
+            className="btn-primary checkout-btn" 
+            onClick={handleCheckout} 
+            disabled={isProcessing || !isFormValid()}
+          >
             {isProcessing ? 'Processing Order...' : `Complete Order (₹${finalTotal.toFixed(2)})`}
           </button>
+          {!isFormValid() && (
+            <p style={{ color: 'var(--error)', fontSize: '0.8rem', textAlign: 'center', marginTop: '0.75rem' }}>
+              Please fill all mandatory (*) fields to complete your order.
+            </p>
+          )}
         </div>
       </div>
     </div>
