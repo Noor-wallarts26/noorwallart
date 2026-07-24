@@ -34,18 +34,16 @@ const Home = () => {
 
   return (
     <div className="home-page animate-fade-in">
+      <div className="top-brand-header container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 0 0.5rem 0' }}>
+        <div className="app-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: 0 }}>
+          <img src="/logo.jpg" alt="Noor Wall Arts Logo" className="site-logo" />
+          <h2 style={{ fontFamily: 'var(--font-heading)', margin: 0, fontSize: '1.4rem' }}>NOOR WALL ARTS</h2>
+        </div>
+        {/* Removed top cart link as per user request */}
+      </div>
+
       <header className="home-header">
         <div className="container">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <div className="app-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: 0 }}>
-              <img src="/logo.jpg" alt="Noor Wall Arts Logo" className="site-logo" />
-              <h2 style={{ fontFamily: 'var(--font-heading)', margin: 0, fontSize: '1.4rem' }}>NOOR WALL ARTS</h2>
-            </div>
-            <Link to="/cart" className="top-cart-link" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: 'var(--primary)' }}>
-              <ShoppingBag size={24} />
-            </Link>
-          </div>
-          
           <div className="search-bar">
             <Search size={20} className="search-icon" color="var(--text-secondary)" />
             <input 
