@@ -10,7 +10,7 @@ import './Home.css';
 const PromoBanner = () => {
   return (
     <div className="promo-banner">
-      <img src="/hero_banner.png" alt="Premium Wall Decor" className="promo-img" />
+      <img src="/modern_wall_decor.png" alt="Premium Wall Decor" className="promo-img" />
       <div className="promo-overlay"></div>
       <div className="promo-content">
         <h2 className="brand-title" style={{ color: '#ffffff' }}>Noor Wall Arts</h2>
@@ -35,7 +35,7 @@ const Home = () => {
   return (
     <div className="home-page animate-fade-in">
       <div className="top-brand-header container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 0 0.5rem 0' }}>
-        <div className="app-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: 0 }}>
+        <div className="app-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: 0, marginLeft: '15px' }}>
           <img src="/logo.jpg" alt="Noor Wall Arts Logo" className="site-logo" />
           <h2 style={{ fontFamily: 'var(--font-heading)', margin: 0, fontSize: '1.4rem' }}>NOOR WALL ARTS</h2>
         </div>
