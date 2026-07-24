@@ -57,9 +57,9 @@ const ProductDetail = () => {
   };
 
   const getStockStatus = () => {
-    if (product.stock === 0) return { text: "Currently Out of Stock", color: "var(--error)" };
-    if (product.stock <= 5) return { text: `Only ${product.stock} left in stock - order soon`, color: "#F59E0B" };
-    return { text: `In Stock (${product.stock} items available)`, color: "var(--success)" };
+    if (product.stock === 0) return { text: "Currently Out of Stock", color: "#DC2626" }; // Red
+    if (product.stock <= 5) return { text: `Only ${product.stock} left in stock - order soon`, color: "#F59E0B" }; // Yellow/Orange
+    return { text: `In Stock (${product.stock} items available)`, color: "#16A34A" }; // Green
   };
 
   const stockStatus = getStockStatus();
@@ -118,6 +118,10 @@ const ProductDetail = () => {
 
         <div className="detail-price">₹{product.price.toFixed(2)}</div>
         <div className="detail-stock" style={{ color: stockStatus.color }}>{stockStatus.text}</div>
+        
+        <div style={{ marginBottom: '1.5rem', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+          <strong>Category:</strong> {product.category}
+        </div>
 
         <div className="detail-description-box">
           <h3>Product Description</h3>
