@@ -3,6 +3,17 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(90, 45, 12, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid var(--border-color);
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow);
 }
 
 .product-image-area {
@@ -13,6 +24,7 @@
   align-items: center;
   justify-content: center;
   border-bottom: 1px solid var(--border-color);
+  background: var(--surface-variant);
 }
 
 .category-icon {
