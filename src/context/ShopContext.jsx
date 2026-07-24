@@ -193,7 +193,7 @@ export const ShopProvider = ({ children }) => {
       timestamp: Date.now(),
       totalPrice: total + 80, // adding fixed shipping cost
       itemsSummary: summary,
-      status: "Processing",
+      status: "Pending",
       customer: customerDetails,
       items: cartItems
     };

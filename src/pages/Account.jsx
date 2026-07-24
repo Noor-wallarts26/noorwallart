@@ -87,7 +87,9 @@ const Account = () => {
                           <span className="order-id-mini">#{order.id}</span>
                           <span className="order-total-mini">₹{order.totalPrice.toFixed(2)}</span>
                         </div>
-                        <p className="order-status-mini">{order.status}</p>
+                        <p className="order-status-mini" style={{ color: order.status === 'Pending' ? 'var(--warning, #f59e0b)' : (order.status === 'Accepted' ? 'var(--success, #10b981)' : 'var(--text-secondary)') }}>
+                          {order.status === 'Pending' ? '⏳ Pending' : (order.status === 'Accepted' ? '✅ Accepted' : order.status)}
+                        </p>
                       </div>
                     ))}
                   </div>
