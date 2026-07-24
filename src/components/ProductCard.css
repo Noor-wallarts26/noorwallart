@@ -23,8 +23,31 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--surface-variant);
+  margin: 1rem;
+  border-radius: 16px;
+  background-color: var(--surface-variant);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+  z-index: 1;
+}
+
+.product-image-area::before {
+  content: '';
+  position: absolute;
+  top: -3px; left: -3px; right: -3px; bottom: -3px;
+  background: var(--primary-gradient);
+  border-radius: 19px;
+  z-index: -1;
+}
+
+.product-image-area::after {
+  content: '';
+  position: absolute;
+  top: 5px; left: 5px; right: 5px; bottom: -5px;
+  background: var(--primary-gradient);
+  filter: blur(15px);
+  z-index: -2;
+  opacity: 0.5;
+  border-radius: 16px;
 }
 
 .category-icon {
@@ -34,8 +57,8 @@
 
 .out-of-stock-badge {
   position: absolute;
-  top: 8px;
-  left: 8px;
+  top: 12px;
+  left: 12px;
   background-color: rgba(239, 68, 68, 0.9);
   color: white;
   font-size: 0.55rem;
@@ -46,8 +69,8 @@
 
 .wishlist-btn {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 24px;
+  right: 24px;
   background: rgba(255, 255, 255, 0.6);
   border-radius: 50%;
   padding: 8px;
