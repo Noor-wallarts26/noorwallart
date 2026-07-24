@@ -68,7 +68,8 @@ const MapPicker = ({ onLocationSelect, defaultAddress }) => {
         onLocationSelect({
           lat,
           lng,
-          address: data.display_name
+          address: data.display_name,
+          addressObj: data.address
         });
       }
     } catch (error) {
@@ -114,7 +115,7 @@ const MapPicker = ({ onLocationSelect, defaultAddress }) => {
           title="Use my current GPS location"
         >
           <Navigation size={16} /> 
-          Use Current Location
+          Allow your live location
         </button>
       </div>
 

@@ -110,16 +110,27 @@ const Checkout = () => {
 
           <MapPicker 
             onLocationSelect={(loc) => {
+              const addr = loc.addressObj;
               setFormData(prev => ({
                 ...prev,
                 lat: loc.lat,
                 lng: loc.lng,
-                // Optional: auto-fill some fields if reverse geocoding provides them
+                houseNo: addr?.house_number || prev.houseNo,
+                street: addr?.road || prev.street,
+                area: addr?.suburb || addr?.neighbourhood || prev.area,
+                district: addr?.city_district || addr?.county || addr?.city || prev.district,
+                state: addr?.state || prev.state,
+                pincode: addr?.postcode || prev.pincode
               }));
             }} 
           />
 
           <div className="address-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label>Full Name *</label>
+              <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Enter your full name" required />
+            </div>
+
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label>Phone Number *</label>
               <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="Enter your phone number" required />
@@ -127,42 +138,42 @@ const Checkout = () => {
             
             <div className="form-group">
               <label>House / Flat / Door No. *</label>
-              <input type="text" name="houseNo" value={formData.houseNo} onChange={handleInputChange} placeholder="e.g. Flat 4B" required />
+              <input type="text" name="houseNo" value={formData.houseNo} onChange={handleInputChange} placeholder="Enter your house number" required />
             </div>
             
             <div className="form-group">
               <label>Building / Apartment Name (Optional)</label>
-              <input type="text" name="building" value={formData.building} onChange={handleInputChange} placeholder="e.g. Sea View Apts" />
+              <input type="text" name="building" value={formData.building} onChange={handleInputChange} placeholder="Enter building name" />
             </div>
 
             <div className="form-group">
               <label>Street / Road Name *</label>
-              <input type="text" name="street" value={formData.street} onChange={handleInputChange} placeholder="e.g. MG Road" required />
+              <input type="text" name="street" value={formData.street} onChange={handleInputChange} placeholder="Enter street or road name" required />
             </div>
 
             <div className="form-group">
               <label>Area / Locality *</label>
-              <input type="text" name="area" value={formData.area} onChange={handleInputChange} placeholder="e.g. Anna Nagar" required />
+              <input type="text" name="area" value={formData.area} onChange={handleInputChange} placeholder="Enter your area" required />
             </div>
 
             <div className="form-group">
               <label>Landmark (Optional)</label>
-              <input type="text" name="landmark" value={formData.landmark} onChange={handleInputChange} placeholder="e.g. Opposite Post Office" />
+              <input type="text" name="landmark" value={formData.landmark} onChange={handleInputChange} placeholder="Enter a landmark" />
             </div>
 
             <div className="form-group">
               <label>District *</label>
-              <input type="text" name="district" value={formData.district} onChange={handleInputChange} placeholder="e.g. Chennai" required />
+              <input type="text" name="district" value={formData.district} onChange={handleInputChange} placeholder="Enter your district" required />
             </div>
 
             <div className="form-group">
               <label>State *</label>
-              <input type="text" name="state" value={formData.state} onChange={handleInputChange} placeholder="e.g. Tamil Nadu" required />
+              <input type="text" name="state" value={formData.state} onChange={handleInputChange} placeholder="Enter your state" required />
             </div>
 
             <div className="form-group">
               <label>Pincode *</label>
-              <input type="text" name="pincode" value={formData.pincode} onChange={handleInputChange} placeholder="e.g. 600001" required />
+              <input type="text" name="pincode" value={formData.pincode} onChange={handleInputChange} placeholder="Enter 6-digit pincode" required />
             </div>
             
             <div className="form-group">
