@@ -23,19 +23,25 @@ const HeroSlider = ({ products }) => {
         {products.map((product, index) => (
           <div key={product.id} className={`hero-slide ${index === currentIndex ? 'active' : ''}`}>
             <Link to={`/product/${product.id}`} className="hero-slide-link">
-              <div 
-                className="hero-slide-image"
-                style={{ 
-                  backgroundImage: `url(${product.imageUrl})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
-              >
-                {!product.imageUrl && <div className="placeholder-slide">{product.title}</div>}
-              </div>
               <div className="hero-slide-content">
+                <span className="hero-slide-category">{product.category}</span>
                 <h3>{product.title}</h3>
                 <span className="hero-slide-price">₹{product.price.toFixed(2)}</span>
+                <div className="hero-buy-btn">
+                  <span>Buy Now</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+              </div>
+              
+              <div className="hero-slide-image-wrapper">
+                <div 
+                  className="hero-slide-image"
+                  style={{ 
+                    backgroundImage: `url(${product.imageUrl})`
+                  }}
+                >
+                  {!product.imageUrl && <div className="placeholder-slide">{product.title}</div>}
+                </div>
               </div>
             </Link>
           </div>
