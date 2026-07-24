@@ -132,8 +132,8 @@ const Checkout = () => {
             </div>
 
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label>Phone Number *</label>
-              <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="Enter your phone number" required />
+              <label>Mobile Number *</label>
+              <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="Enter your 10-digit mobile number" maxLength="10" pattern="[0-9]{10}" required />
             </div>
             
             <div className="form-group">

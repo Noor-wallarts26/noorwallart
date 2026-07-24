@@ -171,8 +171,8 @@ const Account = () => {
                   </div>
 
                   <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Phone Number *</label>
-                    <input type="text" name="phone" value={addressInput.phone || ''} onChange={handleAddressChange} placeholder="Enter your phone number" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Mobile Number *</label>
+                    <input type="tel" name="phone" value={addressInput.phone || ''} onChange={handleAddressChange} placeholder="Enter your 10-digit mobile number" maxLength="10" pattern="[0-9]{10}" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
                   </div>
                   
                   <div className="form-group">
