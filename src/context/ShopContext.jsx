@@ -176,6 +176,24 @@ export const ShopProvider = ({ children }) => {
     }
   };
 
+  const updateProductSliderStatus = async (productId, showInSlider) => {
+    try {
+      const productRef = doc(db, 'products', productId.toString());
+      await updateDoc(productRef, {
+        showInSlider: showInSlider
+      });
+      
+      // Update local state for immediate feedback
+      setProducts(prev => prev.map(p => 
+        p.id === productId ? { ...p, showInSlider: showInSlider } : p
+      ));
+      return true;
+    } catch (error) {
+      console.error("Error updating slider status: ", error);
+      return false;
+    }
+  };
+
   const placeOrder = async (customerDetails) => {
     if (cartItems.length === 0) return null;
 
@@ -261,6 +279,7 @@ export const ShopProvider = ({ children }) => {
       removeFromCart,
       placeOrder,
       addReview,
+      updateProductSliderStatus,
       user,
       loading,
       storeSettings,

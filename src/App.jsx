@@ -15,6 +15,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Contact from './pages/Contact';
 import Categories from './pages/Categories';
+import Admin from './pages/Admin';
 
 function App() {
   return (
@@ -32,7 +33,7 @@ function App() {
           <Route path="/account" element={<Account />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/categories" element={<Categories />} />
-
+          <Route path="/admin" element={<Admin />} />
         </Routes>
         <Navbar />
         <WhatsAppButton />

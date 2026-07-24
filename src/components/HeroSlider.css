@@ -87,6 +87,7 @@
   font-size: 0.85rem;
   font-weight: 700;
   align-self: flex-start;
+  margin-bottom: 1.5rem;
   transition: all 0.3s ease;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
