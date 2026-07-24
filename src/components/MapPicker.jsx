@@ -15,12 +15,7 @@ L.Icon.Default.mergeOptions({
 
 // Component to handle clicks on the map and update marker
 const MapEvents = ({ position, setPosition, fetchAddress }) => {
-  const map = useMapEvents({
-    click(e) {
-      setPosition(e.latlng);
-      fetchAddress(e.latlng.lat, e.latlng.lng);
-    }
-  });
+  const map = useMapEvents({});
 
   // Re-center map when position changes programmatically (like GPS)
   useEffect(() => {
@@ -32,15 +27,7 @@ const MapEvents = ({ position, setPosition, fetchAddress }) => {
   return position ? (
     <Marker 
       position={position} 
-      draggable={true}
-      eventHandlers={{
-        dragend: (e) => {
-          const marker = e.target;
-          const newPos = marker.getLatLng();
-          setPosition(newPos);
-          fetchAddress(newPos.lat, newPos.lng);
-        },
-      }}
+      draggable={false}
     />
   ) : null;
 };
@@ -141,7 +128,7 @@ const MapPicker = ({ onLocationSelect, defaultAddress }) => {
       {loadingAddress && <p className="map-loading-text">Getting address...</p>}
       {errorMsg && <p className="map-error-text">{errorMsg}</p>}
       {!position && !loadingAddress && (
-        <p className="map-hint-text">Click on the map or use the GPS button to set your delivery location.</p>
+        <p className="map-hint-text">Click the GPS button above to auto-detect and pin your live delivery location.</p>
       )}
     </div>
   );
