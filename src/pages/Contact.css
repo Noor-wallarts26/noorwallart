@@ -90,23 +90,7 @@
   color: var(--text-secondary);
 }
 
-.contact-form .form-group input,
-.contact-form .form-group textarea {
-  width: 100%;
-  padding: 0.8rem 1rem;
-  background-color: var(--background);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  color: var(--text-primary);
-  font-family: inherit;
-  transition: border-color 0.2s;
-}
-
-.contact-form .form-group input:focus,
-.contact-form .form-group textarea:focus {
-  outline: none;
-  border-color: var(--primary);
-}
+/* Inputs use global styles from index.css */
 
 @media (max-width: 768px) {
   .contact-content {

@@ -1,11 +1,14 @@
 .home-header {
-  background-color: var(--surface);
-  padding: 1rem 0;
-  margin-bottom: 1rem;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 1.5rem 0;
+  margin-bottom: 2rem;
   border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.03);
 }
 
 .app-logo {
@@ -18,10 +21,11 @@
 .app-logo h1 {
   font-size: 1.75rem;
   font-family: var(--font-heading);
-  font-weight: 700;
-  color: var(--primary);
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .search-bar {
@@ -71,18 +75,27 @@
 .category-chip {
   background-color: var(--surface);
   border: 1px solid var(--border-color);
-  color: var(--text-primary);
-  padding: 0.5rem 1rem;
+  color: var(--text-secondary);
+  padding: 0.75rem 1.5rem;
   border-radius: 9999px;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 600;
   white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.category-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  color: var(--primary);
 }
 
 .category-chip.active {
-  background-color: var(--primary-container);
-  color: var(--on-primary);
-  border-color: var(--primary);
+  background: var(--primary-gradient);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
 }
 
 .promo-banner {
@@ -143,8 +156,8 @@
 .products-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
-  padding-bottom: 1.5rem;
+  gap: 2rem;
+  padding-bottom: 4rem;
 }
 
 @media (min-width: 768px) {
@@ -205,13 +218,15 @@
   border-radius: 50px;
   text-decoration: none;
   color: var(--text-primary);
-  box-shadow: 0 2px 8px rgba(90, 45, 12, 0.05);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.04);
   border: 1px solid var(--border-color);
-  transition: transform 0.2s;
+  transition: all 0.3s ease;
 }
 
 .marquee-item:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(59,130,246,0.1);
+  border-color: var(--primary);
 }
 
 .marquee-item img {

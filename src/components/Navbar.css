@@ -3,10 +3,13 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: var(--surface);
-  border-top: 1px solid var(--border-color);
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(231, 234, 240, 0.6);
   padding: 0.5rem 0;
   z-index: 50;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.04);
 }
 
 .nav-items {
@@ -23,15 +26,25 @@
   align-items: center;
   color: var(--text-secondary);
   font-size: 0.75rem;
-  font-weight: 500;
-  gap: 0.25rem;
-  padding: 0.5rem;
-  border-radius: 8px;
+  font-weight: 600;
+  gap: 0.35rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.nav-item:hover {
+  transform: translateY(-4px);
+  color: var(--primary);
 }
 
 .nav-item.active {
   color: var(--primary);
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: transparent;
+}
+
+.nav-item.active svg {
+  filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.3));
 }
 
 .cart-icon-wrapper {
@@ -42,7 +55,7 @@
   position: absolute;
   top: -8px;
   right: -8px;
-  background-color: var(--error);
+  background: var(--primary-gradient);
   color: white;
   font-size: 0.65rem;
   min-width: 18px;
@@ -52,9 +65,10 @@
   justify-content: center;
   border-radius: 9px;
   font-weight: bold;
+  box-shadow: 0 4px 8px rgba(236, 72, 153, 0.3);
 }
 
 /* Add padding to body to prevent content from hiding behind nav */
 body {
-  padding-bottom: 70px;
+  padding-bottom: 80px;
 }
