@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, CreditCard, Lock } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
+import MapPicker from '../components/MapPicker';
 import './Checkout.css';
 
 const Checkout = () => {
@@ -13,7 +14,9 @@ const Checkout = () => {
     name: '',
     address: '',
     phone: '',
-    upiRef: ''
+    upiRef: '',
+    lat: null,
+    lng: null
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -81,9 +84,21 @@ const Checkout = () => {
             <label>Full Name</label>
             <input type="text" name="name" value={formData.name} onChange={handleInputChange} />
           </div>
+
+          <MapPicker 
+            onLocationSelect={(loc) => {
+              setFormData(prev => ({
+                ...prev,
+                lat: loc.lat,
+                lng: loc.lng,
+                address: loc.address || prev.address 
+              }));
+            }} 
+          />
+
           <div className="form-group">
             <label>Delivery Address</label>
-            <textarea name="address" value={formData.address} onChange={handleInputChange} rows="3"></textarea>
+            <textarea name="address" value={formData.address} onChange={handleInputChange} rows="3" placeholder="Add specific details like Flat No, Landmark..."></textarea>
           </div>
           <div className="form-group">
             <label>Phone Number</label>
