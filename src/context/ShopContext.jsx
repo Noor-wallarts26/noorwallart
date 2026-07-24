@@ -191,9 +191,12 @@ export const ShopProvider = ({ children }) => {
     const order = {
       id: orderId,
       timestamp: Date.now(),
-      totalPrice: total + 80, // adding fixed shipping cost
+      totalPrice: total + 80,
       itemsSummary: summary,
       status: "Pending",
+      paymentMethod: "UPI",
+      transactionId: customerDetails.upiRef || "N/A",
+      paymentStatus: "Pending Verification",
       customer: customerDetails,
       items: cartItems
     };
