@@ -1,6 +1,8 @@
 import React, { useContext, useState } from 'react';
 import { Package, MapPin, ChevronRight, ChevronDown, Phone, Mail, LogOut } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
+import { ShopContext } from '../context/ShopContext';
+import MapPicker from '../components/MapPicker';
 import './Account.css';
 import Footer from '../components/Footer';
 import Login from './Login';
@@ -11,8 +13,32 @@ const Account = () => {
   const navigate = useNavigate();
   
   const [expandedSection, setExpandedSection] = useState(null); // 'orders' | 'address' | null
-  const [addressInput, setAddressInput] = useState(deliveryAddress || '');
+  
+  const defaultAddressState = {
+    name: '', phone: '', houseNo: '', building: '', street: '', 
+    area: '', landmark: '', district: '', state: '', pincode: '', 
+    addressType: 'Home', instructions: '', lat: null, lng: null
+  };
+  
+  const [addressInput, setAddressInput] = useState(deliveryAddress || defaultAddressState);
   const [isSaved, setIsSaved] = useState(false);
+
+  const handleAddressChange = (e) => {
+    setAddressInput({ ...addressInput, [e.target.name]: e.target.value });
+  };
+
+  const isAddressValid = () => {
+    return (
+      addressInput.name?.trim() !== '' &&
+      addressInput.phone?.trim() !== '' &&
+      addressInput.houseNo?.trim() !== '' &&
+      addressInput.street?.trim() !== '' &&
+      addressInput.area?.trim() !== '' &&
+      addressInput.district?.trim() !== '' &&
+      addressInput.state?.trim() !== '' &&
+      addressInput.pincode?.trim() !== ''
+    );
+  };
 
   const toggleSection = (section) => {
     if (!user && section !== null) {
@@ -121,18 +147,99 @@ const Account = () => {
             {/* Expanded Address Section */}
             {expandedSection === 'address' && (
               <div className="menu-expanded-content">
-                <textarea 
-                  value={addressInput}
-                  onChange={(e) => setAddressInput(e.target.value)}
-                  placeholder="Enter your full delivery address..."
-                  rows="3"
-                  className="address-textarea"
+                <MapPicker 
+                  onLocationSelect={(loc) => {
+                    const addr = loc.addressObj;
+                    setAddressInput(prev => ({
+                      ...prev,
+                      lat: loc.lat,
+                      lng: loc.lng,
+                      houseNo: addr?.house_number || prev.houseNo,
+                      street: addr?.road || prev.street,
+                      area: addr?.suburb || addr?.neighbourhood || prev.area,
+                      district: addr?.city_district || addr?.county || addr?.city || prev.district,
+                      state: addr?.state || prev.state,
+                      pincode: addr?.postcode || prev.pincode
+                    }));
+                  }} 
                 />
-                <div className="address-actions mt-2" style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '0.5rem' }}>
-                  <button onClick={handleSaveAddress} className="btn-primary" style={{ padding: '0.5rem 1rem' }}>
-                    Save
+
+                <div className="address-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Full Name *</label>
+                    <input type="text" name="name" value={addressInput.name || ''} onChange={handleAddressChange} placeholder="Enter your full name" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                  </div>
+
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Phone Number *</label>
+                    <input type="text" name="phone" value={addressInput.phone || ''} onChange={handleAddressChange} placeholder="Enter your phone number" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>House / Door No. *</label>
+                    <input type="text" name="houseNo" value={addressInput.houseNo || ''} onChange={handleAddressChange} placeholder="Enter house number" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Building (Optional)</label>
+                    <input type="text" name="building" value={addressInput.building || ''} onChange={handleAddressChange} placeholder="Enter building" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Street / Road *</label>
+                    <input type="text" name="street" value={addressInput.street || ''} onChange={handleAddressChange} placeholder="Enter street" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Area / Locality *</label>
+                    <input type="text" name="area" value={addressInput.area || ''} onChange={handleAddressChange} placeholder="Enter area" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Landmark (Optional)</label>
+                    <input type="text" name="landmark" value={addressInput.landmark || ''} onChange={handleAddressChange} placeholder="Enter landmark" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>District *</label>
+                    <input type="text" name="district" value={addressInput.district || ''} onChange={handleAddressChange} placeholder="Enter district" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>State *</label>
+                    <input type="text" name="state" value={addressInput.state || ''} onChange={handleAddressChange} placeholder="Enter state" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Pincode *</label>
+                    <input type="text" name="pincode" value={addressInput.pincode || ''} onChange={handleAddressChange} placeholder="Enter pincode" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                  </div>
+                  
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Address Type *</label>
+                    <select name="addressType" value={addressInput.addressType || 'Home'} onChange={handleAddressChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--surface-variant)' }}>
+                      <option value="Home">Home (All day delivery)</option>
+                      <option value="Office">Office (Delivery between 10 AM - 5 PM)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginTop: '1rem' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Delivery Instructions (Optional)</label>
+                  <textarea name="instructions" value={addressInput.instructions || ''} onChange={handleAddressChange} rows="2" placeholder="Describe your delivery instructions" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}></textarea>
+                </div>
+
+                {!isAddressValid() && (
+                  <p style={{ color: 'var(--error)', fontSize: '0.8rem', marginTop: '0.75rem' }}>
+                    Please fill all mandatory (*) fields to save your address.
+                  </p>
+                )}
+
+                <div className="address-actions mt-2" style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '1rem' }}>
+                  <button onClick={handleSaveAddress} className="btn-primary" style={{ padding: '0.75rem 1.5rem', width: '100%' }} disabled={!isAddressValid()}>
+                    Save Address
                   </button>
-                  {isSaved && <span className="save-success">Saved!</span>}
+                  {isSaved && <span className="save-success" style={{ color: 'var(--success)', fontWeight: 'bold' }}>Saved!</span>}
                 </div>
               </div>
             )}

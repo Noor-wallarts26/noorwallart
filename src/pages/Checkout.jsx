@@ -6,26 +6,26 @@ import MapPicker from '../components/MapPicker';
 import './Checkout.css';
 
 const Checkout = () => {
-  const { cartTotal, totalItemsInCart, placeOrder, user, loading } = useContext(ShopContext);
+  const { cartTotal, totalItemsInCart, placeOrder, user, loading, deliveryAddress } = useContext(ShopContext);
   const navigate = useNavigate();
   const location = useLocation();
   
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    houseNo: '',
-    building: '',
-    street: '',
-    area: '',
-    landmark: '',
-    district: '',
-    state: '',
-    pincode: '',
-    addressType: 'Home',
-    instructions: '',
+    name: deliveryAddress?.name || '',
+    phone: deliveryAddress?.phone || '',
+    houseNo: deliveryAddress?.houseNo || '',
+    building: deliveryAddress?.building || '',
+    street: deliveryAddress?.street || '',
+    area: deliveryAddress?.area || '',
+    landmark: deliveryAddress?.landmark || '',
+    district: deliveryAddress?.district || '',
+    state: deliveryAddress?.state || '',
+    pincode: deliveryAddress?.pincode || '',
+    addressType: deliveryAddress?.addressType || 'Home',
+    instructions: deliveryAddress?.instructions || '',
     upiRef: '',
-    lat: null,
-    lng: null
+    lat: deliveryAddress?.lat || null,
+    lng: deliveryAddress?.lng || null
   });
 
   const isFormValid = () => {

@@ -20,7 +20,7 @@ export const ShopProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [storeSettings, setStoreSettings] = useState({ whatsapp: '' });
-  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState(null);
 
   // Auth Listener
   useEffect(() => {
@@ -80,7 +80,14 @@ export const ShopProvider = ({ children }) => {
     if (savedOrders) setOrders(JSON.parse(savedOrders));
 
     const savedAddress = localStorage.getItem('deliveryAddress');
-    if (savedAddress) setDeliveryAddress(savedAddress);
+    if (savedAddress) {
+      try {
+        setDeliveryAddress(JSON.parse(savedAddress));
+      } catch (e) {
+        // Fallback for old string addresses
+        setDeliveryAddress(null);
+      }
+    }
   }, []);
 
   // Save to local storage on change
@@ -93,7 +100,9 @@ export const ShopProvider = ({ children }) => {
   }, [orders]);
 
   useEffect(() => {
-    localStorage.setItem('deliveryAddress', deliveryAddress);
+    if (deliveryAddress) {
+      localStorage.setItem('deliveryAddress', JSON.stringify(deliveryAddress));
+    }
   }, [deliveryAddress]);
 
   useEffect(() => {
