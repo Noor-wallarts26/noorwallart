@@ -3,22 +3,22 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--surface);
+  background: #FFFFFF;
   border-radius: 20px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05); /* Soft shadow below */
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border: none; /* DO NOT use a solid border */
-  isolation: isolate;
+  z-index: 1; /* Creates stacking context so z-index -1 stays behind card */
 }
 
 .product-card::before {
   content: '';
   position: absolute;
-  top: -2px; left: -2px; right: -2px; bottom: -2px;
-  border-radius: 22px;
-  /* Pink, Purple, Blue, Orange gradient */
+  /* Keep a small gap by starting the glow slightly inside */
+  top: 4px; left: 4px; right: 4px; bottom: 4px;
+  border-radius: 20px;
   background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 33%, #3B82F6 66%, #F59E0B 100%);
-  filter: blur(20px); /* Blurred, subtle, fade outward */
+  filter: blur(15px); /* Soft subtle glow outward */
   z-index: -1;
   opacity: 0.6;
   transition: opacity 0.3s ease;
@@ -46,8 +46,9 @@
   border-top-right-radius: 20px;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  background-color: var(--surface-variant);
+  background-color: #FFFFFF;
   border-bottom: none;
+  overflow: hidden; /* Guarantee image doesn't bleed out */
 }
 
 .category-icon {

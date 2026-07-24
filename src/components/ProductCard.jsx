@@ -32,7 +32,7 @@ const ProductCard = ({ product }) => {
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         } : { 
-          background: `linear-gradient(to bottom, ${color}22, transparent)` 
+          background: 'var(--surface-variant)'
         }}
       >
         {!product.imageUrl && <div className="category-icon" style={{ color }}>{icon}</div>}
