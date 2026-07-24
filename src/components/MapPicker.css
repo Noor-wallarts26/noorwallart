@@ -34,11 +34,11 @@
 }
 
 .btn-location:hover {
-  background: var(--primary-gradient);
+  background: var(--text-primary);
   color: white;
   border-color: transparent;
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(59,130,246,0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .map-wrapper {

@@ -23,9 +23,7 @@
   font-family: var(--font-heading);
   font-weight: 800;
   letter-spacing: -0.5px;
-  background: var(--primary-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
 }
 
 .search-bar {
@@ -92,10 +90,10 @@
 }
 
 .category-chip.active {
-  background: var(--primary-gradient);
+  background: var(--text-primary);
   color: white;
   border-color: transparent;
-  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 .promo-banner {

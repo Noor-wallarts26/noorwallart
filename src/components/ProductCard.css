@@ -162,9 +162,9 @@
 }
 
 .add-to-cart-btn:not(:disabled):hover {
-  background: var(--primary-gradient);
+  background: var(--text-primary);
   color: white;
   border-color: transparent;
   transform: scale(1.15);
-  box-shadow: 0 8px 15px rgba(236,72,153,0.3);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
 }
