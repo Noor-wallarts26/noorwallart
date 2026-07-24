@@ -14,7 +14,7 @@ const PromoBanner = () => {
       <div className="promo-overlay"></div>
       <div className="promo-content">
         <h2 className="brand-title" style={{ color: '#ffffff' }}>Noor Wall Arts</h2>
-        <p style={{ color: '#ffffff' }}>Premium Wall Decor & Customized Gifts</p>
+        <p style={{ color: '#ffffff' }}>Premium Wall Decor <br />& Customized Gifts</p>
       </div>
     </div>
   );

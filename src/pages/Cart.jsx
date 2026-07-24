@@ -52,8 +52,8 @@ const Cart = () => {
                 
                 return (
                   <div key={product.id} className="cart-item card">
-                    <div className="cart-item-image" style={{ backgroundColor: `${color}11` }}>
-                      <span style={{ fontSize: '2rem', color }}>{icon}</span>
+                    <div className="cart-item-image" style={{ backgroundColor: `${color}11`, backgroundImage: product.imageUrl ? `url(${product.imageUrl})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                      {!product.imageUrl && <span style={{ fontSize: '2rem', color }}>{icon}</span>}
                     </div>
                     
                     <div className="cart-item-details">

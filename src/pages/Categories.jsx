@@ -33,11 +33,13 @@ const Categories = () => {
 
   return (
     <div className="categories-page animate-fade-in">
+      <div className="container">
+        <h2 style={{ fontFamily: 'var(--font-heading)', color: 'var(--primary)', marginBottom: '1rem', marginTop: '1.5rem' }}>
+          Categories
+        </h2>
+      </div>
       <header className="categories-header">
         <div className="container">
-          <h2 style={{ fontFamily: 'var(--font-heading)', color: 'var(--primary)', marginBottom: '1rem', marginTop: '0.5rem' }}>
-            Categories
-          </h2>
           
           <div className="search-bar">
             <Search size={20} className="search-icon" color="var(--text-secondary)" />
