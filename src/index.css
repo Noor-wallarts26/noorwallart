@@ -6,19 +6,19 @@
   --surface: #FFFFFF; /* Card Background */
   --surface-variant: #F8FAFC; /* Secondary Background */
   
-  --primary: #3B82F6;
-  --tertiary: #6366F1;
+  --primary: #111827; /* Dark black */
+  --tertiary: #4B5563; /* Gray */
   --on-primary: #FFFFFF;
   
   --text-primary: #111827;
   --text-secondary: #6B7280;
   --border-color: #E7EAF0;
   
-  --success: #22C55E;
-  --error: #EC4899; /* Pink Accent for errors/badges */
+  --success: #16A34A;
+  --error: #DC2626; /* Pure Red for errors */
   
   --card-shadow: 0 20px 60px rgba(0,0,0,0.08);
-  --card-shadow-hover: 0 30px 80px rgba(59,130,246,0.18);
+  --card-shadow-hover: 0 30px 80px rgba(17, 24, 39, 0.12);
   
   --primary-gradient: linear-gradient(90deg, #3B82F6 0%, #6366F1 50%, #EC4899 100%);
   
@@ -35,8 +35,8 @@
 body {
   background-color: var(--surface-variant);
   background-image: 
-    radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 0% 50%, rgba(236, 72, 153, 0.03) 0%, transparent 50%);
+    radial-gradient(circle at 50% 0%, rgba(0, 0, 0, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 0% 50%, rgba(0, 0, 0, 0.02) 0%, transparent 50%);
   background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-body);
@@ -63,9 +63,7 @@ a {
 
 .brand-title {
   font-family: var(--font-heading);
-  background: var(--primary-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
   letter-spacing: 1px;
   text-transform: uppercase;
   font-weight: 800;
@@ -116,13 +114,11 @@ button {
 }
 
 .text-gradient {
-  background: var(--primary-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
 }
 
 .btn-primary {
-  background: var(--primary-gradient);
+  background: var(--text-primary);
   color: var(--on-primary);
   padding: 1rem 2rem;
   border-radius: 18px;
@@ -131,13 +127,13 @@ button {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .btn-primary:hover {
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 15px 30px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
 }
 
 .btn-secondary {
@@ -191,20 +187,20 @@ button {
 }
 
 .btn-icon:hover {
-  background: var(--primary-gradient);
+  background: var(--text-primary);
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 .badge {
-  background: var(--primary-gradient);
+  background: var(--text-primary);
   color: white;
   font-size: 0.75rem;
   font-weight: 700;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(236, 72, 153, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Animations */

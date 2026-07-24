@@ -19,9 +19,9 @@ const HeroSlider = ({ products }) => {
 
   return (
     <div className="hero-slider-container">
-      <div className="hero-slider-wrapper" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
+      <div className="hero-slider-wrapper">
         {products.map((product, index) => (
-          <div key={product.id} className="hero-slide">
+          <div key={product.id} className={`hero-slide ${index === currentIndex ? 'active' : ''}`}>
             <Link to={`/product/${product.id}`} className="hero-slide-link">
               <div 
                 className="hero-slide-image"

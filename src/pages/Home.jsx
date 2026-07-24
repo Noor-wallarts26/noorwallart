@@ -13,7 +13,7 @@ const PromoBanner = () => {
       <img src="/hero_banner.png" alt="Premium Wall Decor" className="promo-img" />
       <div className="promo-overlay"></div>
       <div className="promo-content">
-        <h2 className="brand-title">Noor Wall Arts</h2>
+        <h2 className="brand-title" style={{ color: '#ffffff' }}>Noor Wall Arts</h2>
         <p style={{ color: '#ffffff' }}>Premium Wall Decor & Customized Gifts</p>
       </div>
     </div>
