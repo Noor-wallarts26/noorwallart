@@ -81,7 +81,13 @@ export const ShopProvider = ({ children }) => {
     import('firebase/firestore').then(({ doc, onSnapshot }) => {
       const unsubscribe = onSnapshot(doc(db, "settings", "storeInfo"), (docSnap) => {
         if (docSnap.exists()) {
-          setStoreSettings(docSnap.data());
+          const data = docSnap.data();
+          if (data && (data.whatsapp === '8525325330' || !data.whatsapp)) {
+            data.whatsapp = '8925325330';
+          }
+          setStoreSettings(data);
+        } else {
+          setStoreSettings({ whatsapp: '8925325330' });
         }
       });
       return () => unsubscribe();
