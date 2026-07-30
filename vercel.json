@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/(account|admin|cart|checkout|categories|login|contact|store-info)",
+      "destination": "/#/$1",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

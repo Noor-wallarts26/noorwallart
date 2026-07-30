@@ -1,0 +1,250 @@
+.account-page {
+  min-height: 100vh;
+  background-color: var(--bg-dark);
+}
+
+.account-top-card {
+  margin-bottom: 1rem;
+}
+
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.5rem;
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(90, 45, 12, 0.08);
+}
+
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.profile-phone {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.logout-btn-full {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 8px;
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+/* Menu Cards */
+.account-menu-card {
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+  box-shadow: 0 4px 20px rgba(90, 45, 12, 0.08);
+}
+
+.menu-item-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.menu-item:hover {
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.menu-icon-bg {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.menu-text {
+  flex: 1;
+}
+
+.menu-text h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.1rem;
+}
+
+.menu-text p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.menu-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0 1.25rem;
+}
+
+.menu-expanded-content {
+  padding: 0.5rem 1.25rem 1.5rem 1.25rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.address-textarea {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.address-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.save-success {
+  color: var(--success);
+  font-weight: 600;
+  font-size: 0.9rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.empty-state-mini {
+  text-align: center;
+  padding: 1rem 0;
+  color: var(--text-secondary);
+}
+
+.orders-list-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.order-item-mini {
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+
+.order-header-mini {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.order-id-mini {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.order-total-mini {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 0.9rem;
+}
+
+.order-status-mini {
+  font-size: 0.8rem;
+  color: var(--success);
+  font-weight: 600;
+}
+
+/* Contact Card */
+.account-contact-card {
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: 12px;
+  padding: 1.25rem 0 0.5rem 0;
+  box-shadow: 0 4px 20px rgba(90, 45, 12, 0.08);
+}
+
+.contact-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  padding: 0 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.contact-list-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  text-decoration: none;
+  transition: background-color 0.2s;
+  gap: 1rem;
+}
+
+.contact-list-item:hover {
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.contact-icon-mini {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.contact-icon-mini.whatsapp {
+  color: #25D366;
+}
+
+.contact-icon-mini.email {
+  color: #EA4335;
+}
+
+.contact-icon-mini.instagram {
+  color: #E1306C;
+}
+
+.contact-list-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.contact-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0 1.25rem;
+}
+

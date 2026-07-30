@@ -1,0 +1,105 @@
+.categories-header {
+  background: transparent;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding-bottom: 0.5rem;
+}
+
+.category-scroll-container {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.category-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 0.75rem;
+  padding-bottom: 0.5rem;
+  scrollbar-width: none; 
+}
+
+.category-scroll::-webkit-scrollbar {
+  display: none; 
+}
+
+.category-chip {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  color: var(--text-primary);
+  padding: 0.6rem 1.25rem;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  box-shadow: var(--glass-shadow);
+}
+
+.category-chip:hover {
+  background: var(--glass-bg-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.5);
+}
+
+.category-chip.active {
+  background: rgba(17, 24, 39, 0.85); /* Black Glass */
+  color: var(--on-primary);
+  border-color: rgba(255,255,255,0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.1);
+}
+
+/* Reusing grid and search bar from globals/Home */
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 9999px;
+  padding: 0 1rem;
+  height: 48px;
+  transition: all 0.2s;
+}
+
+.search-bar:focus-within {
+  background: var(--glass-bg-hover);
+  border-color: rgba(255,255,255,1);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5), inset 0 2px 5px rgba(0,0,0,0.01);
+}
+
+.search-bar input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  padding: 0 0.75rem;
+  font-size: 1rem;
+  outline: none;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  padding-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .products-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+

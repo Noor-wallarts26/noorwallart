@@ -1,0 +1,179 @@
+.product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  
+  /* Glassmorphism - Apple iPhone Style */
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  
+  border-radius: 20px;
+  /* Stronger, more pronounced drop shadow for the background */
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(255,255,255,0.2);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+  z-index: 1; 
+}
+
+.product-card::before {
+  content: '';
+  position: absolute;
+  /* Expand the pseudo element slightly outside the card to create a shadow/glow */
+  top: 5px; left: -5px; right: -5px; bottom: -5px;
+  border-radius: 24px;
+  background: rgba(0, 0, 0, 0.08); /* Darker shadow base */
+  filter: blur(20px); 
+  z-index: -1;
+  opacity: 1; 
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.product-card:hover::before {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.12); /* Deepen shadow on hover */
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(255,255,255,0.5);
+}
+
+.product-image-area {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 14px;
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-bottom: none;
+  overflow: hidden; 
+}
+
+.category-icon {
+  font-size: 3rem;
+  opacity: 0.6;
+}
+
+.out-of-stock-badge {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  background-color: rgba(239, 68, 68, 0.95);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+
+.wishlist-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  color: #6B7280;
+}
+
+.wishlist-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.product-info {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.product-title {
+  font-size: 1rem;
+  font-weight: 800; /* Bolder for clarity */
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary);
+}
+
+.product-category {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.4rem;
+}
+
+.product-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+}
+
+.reviews-count {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+}
+
+.product-bottom {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.product-price {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.add-to-cart-btn {
+  background: #FFFFFF;
+  color: #111827;
+  border: 1px solid #E5E7EB;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.add-to-cart-btn:disabled {
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  color: var(--text-secondary);
+  border-color: transparent;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.add-to-cart-btn:not(:disabled):hover {
+  background: var(--text-primary);
+  color: white;
+  border-color: transparent;
+  transform: scale(1.15);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
