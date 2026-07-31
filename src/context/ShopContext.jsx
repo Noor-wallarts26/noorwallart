@@ -30,6 +30,7 @@ export const ShopProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [storeSettings, setStoreSettings] = useState({ whatsapp: '' });
+  const [paymentSettings, setPaymentSettings] = useState({ upiId: '', qrCodeUrl: '' });
   const [deliveryAddress, setDeliveryAddress] = useState(null);
 
   // Auth Listener
@@ -89,6 +90,18 @@ export const ShopProvider = ({ children }) => {
           setStoreSettings(data);
         } else {
           setStoreSettings({ whatsapp: '8925325330' });
+        }
+      });
+      return () => unsubscribe();
+    });
+  }, []);
+
+  // Fetch payment settings (UPI ID + QR Code) from Firestore
+  useEffect(() => {
+    import('firebase/firestore').then(({ doc, onSnapshot }) => {
+      const unsubscribe = onSnapshot(doc(db, "settings", "payment"), (docSnap) => {
+        if (docSnap.exists()) {
+          setPaymentSettings(docSnap.data());
         }
       });
       return () => unsubscribe();
@@ -496,6 +509,7 @@ export const ShopProvider = ({ children }) => {
       loading,
       isProductsLoading,
       storeSettings,
+      paymentSettings,
       logout: () => signOut(auth)
     }}>
       {children}

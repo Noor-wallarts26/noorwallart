@@ -7,7 +7,7 @@ import indiaData from '../utils/indiaStatesDistricts.json';
 import './Checkout.css';
 
 const Checkout = () => {
-  const { cartTotal, deliveryFee, totalItemsInCart, placeOrder, user, loading, deliveryAddress, appliedCoupon, couponDiscount, finalTotal: contextFinalTotal } = useContext(ShopContext);
+  const { cartTotal, deliveryFee, totalItemsInCart, placeOrder, user, loading, deliveryAddress, appliedCoupon, couponDiscount, finalTotal: contextFinalTotal, paymentSettings } = useContext(ShopContext);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -376,16 +376,51 @@ const Checkout = () => {
           {paymentMethod === 'UPI' && (
             <div className="stripe-mock-container animate-fade-in" style={{ textAlign: 'center', padding: '2rem', marginTop: '1.5rem', background: 'var(--surface-variant)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
               <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
-                Scan the QR Code to pay <strong>₹{finalTotal.toFixed(2)}</strong> via any UPI App.
+                Scan the QR Code to pay <strong>&#8377;{finalTotal.toFixed(2)}</strong> via any UPI App.
               </p>
-              <div style={{ background: '#fff', padding: '1rem', display: 'inline-block', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=arahman32773-4@okicici&pn=Noor_Wallarts_Gifts&am=${finalTotal.toFixed(2)}&cu=INR`)}`} 
-                  alt="UPI QR Code" 
-                  style={{ width: '200px', height: '200px' }} 
-                />
+
+              {/* QR Code with Noor Wallarts logo overlay in center */}
+              <div style={{ display: 'inline-block', position: 'relative', background: '#fff', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                {paymentSettings?.qrCodeUrl ? (
+                  <>
+                    <img
+                      src={paymentSettings.qrCodeUrl}
+                      alt="Payment QR Code"
+                      style={{ width: '200px', height: '200px', display: 'block', borderRadius: '4px' }}
+                    />
+                    {/* Noor Wallarts Logo – center overlay */}
+                    <div style={{
+                      position: 'absolute',
+                      top: '50%', left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      width: '44px', height: '44px',
+                      borderRadius: '50%',
+                      overflow: 'hidden',
+                      border: '3px solid #fff',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+                      backgroundColor: '#fff',
+                      pointerEvents: 'none'
+                    }}>
+                      <img
+                        src="/logo.jpg"
+                        alt="Noor Wallarts"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ width: '200px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94A3B8', fontSize: '0.85rem', flexDirection: 'column', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '2rem' }}>&#x1F4F7;</span>
+                    <span>QR Code not set.<br/>Please contact support.</span>
+                  </div>
+                )}
               </div>
-              <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>UPI ID: arahman32773-4@okicici</p>
+
+              {paymentSettings?.upiId && (
+                <p style={{ marginTop: '1rem', fontWeight: 'bold', fontSize: '0.95rem' }}>
+                  UPI ID: <span style={{ color: 'var(--primary)', letterSpacing: '0.03em' }}>{paymentSettings.upiId}</span>
+                </p>
+              )}
               
               <div className="form-group stripe-input-group" style={{ marginTop: '2rem', textAlign: 'left' }}>
                 <label>UPI Transaction Reference Number *</label>
@@ -398,7 +433,7 @@ const Checkout = () => {
                   required
                 />
                 <p style={{ fontSize: '0.85rem', color: '#B45309', backgroundColor: '#FEF3C7', padding: '0.75rem', borderRadius: '8px', marginTop: '0.75rem', border: '1px solid #FCD34D', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <span>⚠️</span>
+                  <span>&#x26A0;&#xFE0F;</span>
                   <span><strong>Important:</strong> Please enter the correct 12-digit Transaction ID. Incorrect IDs will result in order cancellation.</span>
                 </p>
               </div>
