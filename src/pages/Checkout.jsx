@@ -7,7 +7,7 @@ import indiaData from '../utils/indiaStatesDistricts.json';
 import './Checkout.css';
 
 const Checkout = () => {
-  const { cartTotal, deliveryFee, totalItemsInCart, placeOrder, user, loading, deliveryAddress } = useContext(ShopContext);
+  const { cartTotal, deliveryFee, totalItemsInCart, placeOrder, user, loading, deliveryAddress, appliedCoupon, couponDiscount, finalTotal: contextFinalTotal } = useContext(ShopContext);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -241,7 +241,7 @@ const Checkout = () => {
     );
   }
 
-  const finalTotal = cartTotal + deliveryFee;
+  const finalTotal = contextFinalTotal ?? (cartTotal + deliveryFee);
 
   return (
     <div className="checkout-page animate-fade-in">
@@ -416,6 +416,12 @@ const Checkout = () => {
             <span>Shipping</span>
             <span>{deliveryFee === 0 ? 'Free' : `₹${deliveryFee.toFixed(2)}`}</span>
           </div>
+          {couponDiscount > 0 && (
+            <div className="summary-row" style={{ color: '#16A34A', fontWeight: 600 }}>
+              <span>Coupon ({appliedCoupon?.code})</span>
+              <span>-₹{couponDiscount.toFixed(2)}</span>
+            </div>
+          )}
           <hr className="detail-divider" />
           <div className="summary-row total">
             <span>Total Payable</span>

@@ -1,8 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Star, Zap, ShoppingCart, Share2 } from 'lucide-react';
+import { ArrowLeft, Heart, Star, Zap, ShoppingCart, Share2, Tag } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
+import { db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import ProductCard from '../components/ProductCard';
 import './ProductDetail.css';
 
@@ -24,6 +26,26 @@ const ProductDetail = () => {
   const [reviewForm, setReviewForm] = useState({ name: '', rating: 5, comment: '' });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [productCoupon, setProductCoupon] = useState(null);
+
+  // Fetch coupon linked to product
+  useEffect(() => {
+    if (!product?.couponId) { setProductCoupon(null); return; }
+    const fetchCoupon = async () => {
+      try {
+        const snap = await getDoc(doc(db, 'coupons', product.couponId));
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.isActive && (!data.expiryDate || new Date(data.expiryDate) >= new Date())) {
+            setProductCoupon({ id: snap.id, ...data });
+          } else {
+            setProductCoupon(null);
+          }
+        }
+      } catch { setProductCoupon(null); }
+    };
+    fetchCoupon();
+  }, [product?.couponId]);
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
@@ -168,7 +190,7 @@ const ProductDetail = () => {
           <span className="detail-reviews" style={{ fontSize: '0.9rem', color: '#3B82F6', fontWeight: '500' }}>{product.reviewsCount} ratings</span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem', marginBottom: '1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem', marginBottom: '0.75rem' }}>
           <div className="detail-price" style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: 0, color: 'var(--text-primary)', lineHeight: 1 }}>₹{product.price.toFixed(2)}</div>
           <div style={{ 
             color: product.stock === 0 ? '#DC2626' : '#16A34A', 
@@ -179,6 +201,27 @@ const ProductDetail = () => {
             {product.stock === 0 ? 'Out of Stock' : `In Stock (${product.stock} Items Available)`}
           </div>
         </div>
+
+        {/* Coupon badge */}
+        {productCoupon && (
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+            padding: '0.4rem 0.85rem', borderRadius: '20px',
+            backgroundColor: '#DCFCE7', border: '1.5px dashed #16A34A',
+            marginBottom: '1rem', cursor: 'default'
+          }}>
+            <Tag size={14} color="#16A34A" />
+            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#15803D', letterSpacing: '0.03em' }}>
+              {productCoupon.code}
+            </span>
+            <span style={{ fontSize: '0.78rem', color: '#166534' }}>
+              &mdash; {productCoupon.discountType === 'percentage'
+                ? `${productCoupon.discountValue}% OFF`
+                : `₹${productCoupon.discountValue} OFF`}
+              {productCoupon.minOrderAmount ? ` on orders above ₹${productCoupon.minOrderAmount}` : ''}
+            </span>
+          </div>
+        )}
         
         <div style={{ 
           display: 'flex', 

@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { doc, updateDoc, arrayUnion, collection, query, where, getDocs, setDoc } from 'firebase/firestore';
+import { cleanInput, isRateLimited, isValidCouponCode } from '../utils/security';
 
 export const ShopContext = createContext();
 
@@ -356,6 +357,85 @@ export const ShopProvider = ({ children }) => {
     }
   };
 
+  // Coupon state
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+
+  const applyCoupon = async (codeStr) => {
+    if (!codeStr || !codeStr.trim()) {
+      return { success: false, error: "Please enter a coupon code." };
+    }
+    const cleanCode = cleanInput(codeStr.trim().toUpperCase());
+
+    // Rate limit: max 10 coupon attempts per minute
+    if (isRateLimited('coupon_apply', 10, 60000)) {
+      return { success: false, error: "Too many attempts. Please wait a moment and try again." };
+    }
+
+    if (!isValidCouponCode(cleanCode)) {
+      return { success: false, error: "Invalid coupon code format." };
+    }
+
+    try {
+      const q = query(collection(db, "coupons"), where("code", "==", cleanCode));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        return { success: false, error: "Invalid coupon code." };
+      }
+
+      let couponData = null;
+      querySnapshot.forEach(docSnap => {
+        couponData = { id: docSnap.id, ...docSnap.data() };
+      });
+
+      if (!couponData.isActive) {
+        return { success: false, error: "This coupon is currently inactive." };
+      }
+
+      // Check Expiry Date
+      if (couponData.expiryDate) {
+        const expiry = new Date(couponData.expiryDate).getTime();
+        const today = new Date().setHours(0,0,0,0);
+        if (expiry < today) {
+          return { success: false, error: "This coupon code has expired." };
+        }
+      }
+
+      // Check Usage Limit
+      if (couponData.maxUses && couponData.maxUses > 0) {
+        const usedCount = Number(couponData.usedCount) || 0;
+        if (usedCount >= couponData.maxUses) {
+          return { success: false, error: "This coupon has reached its usage limit." };
+        }
+      }
+
+      // Check Min Order Amount
+      const minAmount = Number(couponData.minOrderAmount) || 0;
+      if (cartTotal < minAmount) {
+        return { success: false, error: `Minimum order amount of ₹${minAmount} required to use this coupon.` };
+      }
+
+      // Calculate Discount Value
+      let discountAmt = 0;
+      if (couponData.discountType === 'percentage') {
+        discountAmt = Math.round((cartTotal * Number(couponData.discountValue)) / 100);
+      } else {
+        discountAmt = Number(couponData.discountValue) || 0;
+      }
+      discountAmt = Math.min(discountAmt, cartTotal);
+
+      setAppliedCoupon({ ...couponData, discountAmount: discountAmt });
+      return { success: true, discount: discountAmt, message: `Coupon '${cleanCode}' applied! You save ₹${discountAmt}.` };
+    } catch (err) {
+      console.error("Error applying coupon:", err);
+      return { success: false, error: "Failed to validate coupon code. Please try again." };
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+  };
+
   // Derived state
   const cartWithProducts = cartItems.map(item => {
     const product = products.find(p => p.id === item.productId);
@@ -367,6 +447,9 @@ export const ShopProvider = ({ children }) => {
     const charge = item.product.deliveryCharge !== undefined ? Number(item.product.deliveryCharge) : 80;
     return sum + (charge * item.quantity);
   }, 0);
+
+  const couponDiscount = appliedCoupon ? Math.min(appliedCoupon.discountAmount || 0, cartTotal) : 0;
+  const finalTotal = Math.max(0, cartTotal + deliveryFee - couponDiscount);
   const totalItemsInCart = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const filteredProducts = products.filter(p => {
@@ -392,6 +475,11 @@ export const ShopProvider = ({ children }) => {
       cartWithProducts,
       cartTotal,
       deliveryFee,
+      appliedCoupon,
+      couponDiscount,
+      finalTotal,
+      applyCoupon,
+      removeCoupon,
       totalItemsInCart,
       toggleWishlist,
       addToCart,
@@ -414,3 +502,4 @@ export const ShopProvider = ({ children }) => {
     </ShopContext.Provider>
   );
 };
+
