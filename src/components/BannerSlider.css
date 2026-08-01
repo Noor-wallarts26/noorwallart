@@ -1,0 +1,99 @@
+.banner-slider {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height: 300px;
+  overflow: hidden;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  background-color: var(--bg-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.banner-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  pointer-events: none;
+}
+
+.banner-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.banner-overlay-text {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 2rem 1.5rem 1.5rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+  color: white;
+}
+
+.banner-overlay-text h2 {
+  font-family: var(--font-heading);
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.banner-overlay-text p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  color: white;
+}
+
+.banner-dots {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.banner-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.banner-dot.active {
+  background-color: white;
+  transform: scale(1.2);
+}
+
+@media (max-width: 768px) {
+  .banner-slider {
+    height: 200px;
+    border-radius: 8px;
+  }
+  
+  .banner-overlay-text {
+    padding: 1.5rem 1rem 1rem;
+  }
+  
+  .banner-overlay-text h2 {
+    font-size: 1.2rem;
+  }
+  
+  .banner-overlay-text p {
+    font-size: 0.8rem;
+  }
+}

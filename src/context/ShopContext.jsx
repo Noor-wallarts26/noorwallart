@@ -42,6 +42,8 @@ export const ShopProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
+  const [banners, setBanners] = useState([]);
+
   // Fetch products from Firestore
   useEffect(() => {
     import('firebase/firestore').then(({ collection, onSnapshot }) => {
@@ -73,6 +75,41 @@ export const ShopProvider = ({ children }) => {
         // Fallback to initial products if Firestore fails (e.g. rules issues)
         setProducts(initialProducts);
         setIsProductsLoading(false);
+      });
+      return () => unsubscribe();
+    });
+  }, []);
+
+  // Fetch banners from Firestore
+  useEffect(() => {
+    import('firebase/firestore').then(({ collection, onSnapshot }) => {
+      const unsubscribe = onSnapshot(collection(db, "banners"), (snapshot) => {
+        const bannersData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setBanners(bannersData);
+      }, (error) => {
+        console.error("Error fetching banners: ", error);
+      });
+      return () => unsubscribe();
+    });
+  }, []);
+
+  const [categories, setCategories] = useState([]);
+
+  // Fetch categories from Firestore
+  useEffect(() => {
+    import('firebase/firestore').then(({ collection, onSnapshot }) => {
+      const unsubscribe = onSnapshot(collection(db, "categories"), (snapshot) => {
+        const cats = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        cats.sort((a, b) => (a.order || 0) - (b.order || 0));
+        setCategories(cats);
+      }, (error) => {
+        console.error("Error fetching categories: ", error);
       });
       return () => unsubscribe();
     });
@@ -474,6 +511,8 @@ export const ShopProvider = ({ children }) => {
 
   return (
     <ShopContext.Provider value={{
+      categories,
+      banners,
       products,
       cartItems,
       orders,

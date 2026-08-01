@@ -4,33 +4,24 @@ import { Search, X, ShoppingBag } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import ProductCard from '../components/ProductCard';
 import HeroSlider from '../components/HeroSlider';
+import BannerSlider from '../components/BannerSlider';
 import './Home.css';
-
-
-const PromoBanner = () => {
-  return (
-    <div className="promo-banner">
-      <img src="/modern_wall_decor.png" alt="Premium Wall Decor" className="promo-img" />
-      <div className="promo-overlay"></div>
-      <div className="promo-content">
-        <h2 className="brand-title" style={{ color: '#ffffff' }}>Noor Wall Arts & Gifts</h2>
-        <p style={{ color: '#ffffff' }}>Premium Wall Decor <br />& Customized Gifts</p>
-      </div>
-    </div>
-  );
-};
 
 const Home = () => {
   const { 
     searchQuery, setSearchQuery, 
     selectedCategory, setSelectedCategory, 
-    filteredProducts, products, isProductsLoading 
+    filteredProducts, products, isProductsLoading,
+    banners
   } = useContext(ShopContext);
 
   const sliderProducts = products.filter(p => p.showInSlider).length > 0 
     ? products.filter(p => p.showInSlider)
     : products.slice(0, 10); // Fallback to first 10 products if none are explicitly set
 
+  const activeHomeBanners = banners
+    .filter(b => b.isActive !== false && b.showOnHomepage !== false)
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
 
   return (
     <div className="home-page animate-fade-in">
@@ -66,7 +57,7 @@ const Home = () => {
       </header>
       <div className="container">
 
-        <PromoBanner />
+        {activeHomeBanners.length > 0 && <BannerSlider banners={activeHomeBanners} />}
         {sliderProducts.length > 0 && <HeroSlider products={sliderProducts} />}
 
         {isProductsLoading ? (

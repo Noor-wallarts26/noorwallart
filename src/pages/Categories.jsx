@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import ProductCard from '../components/ProductCard';
+import BannerSlider from '../components/BannerSlider';
 import Footer from '../components/Footer';
 import './Categories.css';
 
@@ -29,7 +30,8 @@ const Categories = () => {
   const { 
     searchQuery, setSearchQuery, 
     selectedCategory, setSelectedCategory, 
-    filteredProducts, isProductsLoading 
+    filteredProducts, isProductsLoading,
+    banners, categories
   } = useContext(ShopContext);
 
   // Scroll to top on load
@@ -37,12 +39,25 @@ const Categories = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Find the ID of the selected category from the DB categories
+  const dbCategory = categories.find(c => c.name.toLowerCase() === selectedCategory.toLowerCase());
+  const categoryId = dbCategory ? dbCategory.id : null;
+
+  const categoryBanners = banners
+    .filter(b => b.isActive !== false && b.category === categoryId)
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+
   return (
     <div className="categories-page animate-fade-in">
       <div className="container">
         <h2 style={{ fontFamily: 'var(--font-heading)', color: 'var(--primary)', marginBottom: '1rem', marginTop: '1.5rem' }}>
           Categories
         </h2>
+        {categoryBanners.length > 0 && (
+          <div style={{ marginTop: '1rem' }}>
+            <BannerSlider banners={categoryBanners} />
+          </div>
+        )}
       </div>
       <header className="categories-header">
         <div className="container">

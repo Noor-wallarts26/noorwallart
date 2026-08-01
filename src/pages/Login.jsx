@@ -6,7 +6,8 @@ import {
   signInWithPopup, 
   GoogleAuthProvider 
 } from 'firebase/auth';
-import { auth } from '../firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 import './Auth.css';
 
 const Login = ({ embedded = false }) => {
@@ -24,17 +25,38 @@ const Login = ({ embedded = false }) => {
   const from = location.state?.from?.pathname || '/';
   const customMessage = location.state?.message || 'Login to your Noor Wall Arts & Gifts account';
 
+  const saveUserToDb = async (user) => {
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName || '',
+          photoURL: user.photoURL || '',
+          phone: user.phoneNumber || '',
+          createdAt: Date.now(),
+        });
+      }
+    } catch (err) {
+      console.error('Error saving user to DB:', err);
+    }
+  };
+
   const handleEmailAuth = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
+      let userCredential;
       if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        userCredential = await createUserWithEmailAndPassword(auth, email, password);
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        userCredential = await signInWithEmailAndPassword(auth, email, password);
       }
+      await saveUserToDb(userCredential.user);
       navigate(from, { replace: true });
     } catch (err) {
       console.error(err);
@@ -57,7 +79,8 @@ const Login = ({ embedded = false }) => {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(auth, provider);
+      await saveUserToDb(userCredential.user);
       navigate(from, { replace: true });
     } catch (err) {
       console.error(err);
