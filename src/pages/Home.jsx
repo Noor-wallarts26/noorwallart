@@ -56,11 +56,7 @@ const Home = () => {
       </header>
       <div className="container">
         
-        {activeBanners.length > 0 && (
-          <BannerSlider banners={activeBanners} />
-        )}
-
-        {storeSettings?.homepageVideoUrl && (
+        {storeSettings?.homepageVideoUrl ? (
           <div style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', marginBottom: '2rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
             <video 
               src={storeSettings.homepageVideoUrl} 
@@ -71,7 +67,9 @@ const Home = () => {
               style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '85vh', objectFit: 'cover' }} 
             />
           </div>
-        )}
+        ) : activeBanners.length > 0 ? (
+          <BannerSlider banners={activeBanners} />
+        ) : null}
         {sliderProducts.length > 0 && <HeroSlider products={sliderProducts} />}
 
         {isProductsLoading ? (
