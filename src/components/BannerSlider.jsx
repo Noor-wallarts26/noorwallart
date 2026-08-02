@@ -114,6 +114,7 @@ const BannerSlider = ({ banners = [] }) => {
     const mediaProps = isVideo ? {
       src: banner.imageURL,
       className: "banner-video",
+      autoPlay: true,
       muted: true,
       playsInline: true,
       loop: isSingle, // Only loop if it's the only banner

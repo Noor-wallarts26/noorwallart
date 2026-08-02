@@ -12,12 +12,15 @@ const Home = () => {
     searchQuery, setSearchQuery, 
     selectedCategory, setSelectedCategory, 
     filteredProducts, products, isProductsLoading,
-    storeSettings
+    storeSettings,
+    banners
   } = useContext(ShopContext);
 
   const sliderProducts = products.filter(p => p.showInSlider).length > 0 
     ? products.filter(p => p.showInSlider)
     : products.slice(0, 10); // Fallback to first 10 products if none are explicitly set
+
+  const activeBanners = banners ? banners.filter(b => b.isActive && b.showOnHomepage) : [];
 
   return (
     <div className="home-page animate-fade-in">
@@ -52,6 +55,10 @@ const Home = () => {
         </div>
       </header>
       <div className="container">
+        
+        {activeBanners.length > 0 && (
+          <BannerSlider banners={activeBanners} />
+        )}
 
         {storeSettings?.homepageVideoUrl && (
           <div style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', marginBottom: '2rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
