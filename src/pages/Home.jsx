@@ -12,16 +12,12 @@ const Home = () => {
     searchQuery, setSearchQuery, 
     selectedCategory, setSelectedCategory, 
     filteredProducts, products, isProductsLoading,
-    banners
+    storeSettings
   } = useContext(ShopContext);
 
   const sliderProducts = products.filter(p => p.showInSlider).length > 0 
     ? products.filter(p => p.showInSlider)
     : products.slice(0, 10); // Fallback to first 10 products if none are explicitly set
-
-  const activeHomeBanners = banners
-    .filter(b => b.isActive !== false && b.showOnHomepage !== false)
-    .sort((a, b) => (a.order || 0) - (b.order || 0));
 
   return (
     <div className="home-page animate-fade-in">
@@ -57,7 +53,18 @@ const Home = () => {
       </header>
       <div className="container">
 
-        {activeHomeBanners.length > 0 && <BannerSlider banners={activeHomeBanners} />}
+        {storeSettings?.homepageVideoUrl && (
+          <div style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', marginBottom: '2rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+            <video 
+              src={storeSettings.homepageVideoUrl} 
+              autoPlay 
+              loop 
+              muted 
+              playsInline 
+              style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '600px', objectFit: 'cover' }} 
+            />
+          </div>
+        )}
         {sliderProducts.length > 0 && <HeroSlider products={sliderProducts} />}
 
         {isProductsLoading ? (
