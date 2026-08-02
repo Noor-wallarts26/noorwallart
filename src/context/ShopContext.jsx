@@ -88,6 +88,13 @@ export const ShopProvider = ({ children }) => {
           id: doc.id,
           ...doc.data()
         }));
+        // Sort banners by order, fallback to createdAt descending (newest first)
+        bannersData.sort((a, b) => {
+          if (a.order !== undefined && b.order !== undefined) {
+            return a.order - b.order;
+          }
+          return (b.createdAt || 0) - (a.createdAt || 0);
+        });
         setBanners(bannersData);
       }, (error) => {
         console.error("Error fetching banners: ", error);
