@@ -5,6 +5,8 @@ const BannerSlider = ({ banners = [] }) => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const touchStartX = useRef(null);
+  const timerRef = useRef(null);
+  const videoRefs = useRef({});
 
   // Extended array for infinite loop: [last, 0, 1, 2, ..., last, 0]
   const extendedBanners = banners && banners.length > 0 ? [
@@ -12,19 +14,6 @@ const BannerSlider = ({ banners = [] }) => {
     ...banners,
     banners[0]
   ] : [];
-
-  useEffect(() => {
-    if (!banners || banners.length <= 1) return;
-    
-    const shouldAutoSlide = banners.some(b => b.enableAutoSlider !== false);
-    if (!shouldAutoSlide) return;
-
-    const interval = setInterval(() => {
-      handleNext();
-    }, 2000); // 2 seconds
-
-    return () => clearInterval(interval);
-  }, [banners]);
 
   const handleNext = () => {
     setIsTransitioning(true);
@@ -35,6 +24,44 @@ const BannerSlider = ({ banners = [] }) => {
     setIsTransitioning(true);
     setCurrentIndex((prev) => prev - 1);
   };
+
+  // Auto Slider Logic
+  useEffect(() => {
+    if (!banners || banners.length <= 1) return;
+    
+    const shouldAutoSlide = banners.some(b => b.enableAutoSlider !== false);
+    if (!shouldAutoSlide) return;
+
+    const currentBanner = extendedBanners[currentIndex];
+    if (!currentBanner) return;
+
+    // If it's a video, the onEnded event will handle the slide
+    if (currentBanner.mediaType === 'video') {
+      return;
+    }
+
+    // For images, set a timeout
+    timerRef.current = setTimeout(() => {
+      handleNext();
+    }, 3500); // 3.5 seconds
+
+    return () => clearTimeout(timerRef.current);
+  }, [currentIndex, banners]);
+
+  // Video Playback Control
+  useEffect(() => {
+    Object.keys(videoRefs.current).forEach(key => {
+      const video = videoRefs.current[key];
+      if (video) {
+        if (Number(key) === currentIndex) {
+          video.play().catch(e => console.log("Video autoplay prevented:", e));
+        } else {
+          video.pause();
+          video.currentTime = 0;
+        }
+      }
+    });
+  }, [currentIndex]);
 
   const handleTransitionEnd = () => {
     // Jump instantly to real slides when reaching the cloned edges
@@ -82,6 +109,43 @@ const BannerSlider = ({ banners = [] }) => {
     currentIndex === extendedBanners.length - 1 ? 0 : 
     currentIndex - 1;
 
+  const renderMedia = (banner, index, isSingle = false) => {
+    const isVideo = banner.mediaType === 'video';
+    const mediaProps = isVideo ? {
+      src: banner.imageURL,
+      className: "banner-video",
+      muted: true,
+      playsInline: true,
+      loop: isSingle, // Only loop if it's the only banner
+      ref: el => videoRefs.current[index] = el,
+      onEnded: () => {
+        if (!isSingle && banner.enableAutoSlider !== false) {
+          handleNext();
+        }
+      },
+      onError: () => {
+        if (!isSingle && banner.enableAutoSlider !== false) {
+          handleNext();
+        }
+      }
+    } : {
+      src: banner.imageURL,
+      alt: banner.title || 'Banner',
+      className: "banner-img"
+    };
+
+    const mediaElement = isVideo ? <video {...mediaProps} /> : <img {...mediaProps} />;
+
+    if (banner.link) {
+      return (
+        <a href={banner.link} target={banner.link.startsWith('http') ? "_blank" : "_self"} rel="noopener noreferrer" style={{ display: 'block', width: '100%', height: '100%' }}>
+          {mediaElement}
+        </a>
+      );
+    }
+    return mediaElement;
+  };
+
   // If only 1 banner, don't use the sliding logic
   if (banners.length === 1) {
     const banner = banners[0];
@@ -89,13 +153,7 @@ const BannerSlider = ({ banners = [] }) => {
       <div className="banner-slider-container">
         <div className="banner-slider-wrapper single">
           <div className="banner-slide active">
-            {banner.link ? (
-              <a href={banner.link} target={banner.link.startsWith('http') ? "_blank" : "_self"} rel="noopener noreferrer">
-                <img src={banner.imageURL} alt={banner.title || 'Banner'} className="banner-img" />
-              </a>
-            ) : (
-              <img src={banner.imageURL} alt={banner.title || 'Banner'} className="banner-img" />
-            )}
+            {renderMedia(banner, 1, true)}
             {(banner.title || banner.description) && (
               <div className="banner-overlay-text">
                 {banner.title && <h2>{banner.title}</h2>}
@@ -124,13 +182,8 @@ const BannerSlider = ({ banners = [] }) => {
       >
         {extendedBanners.map((banner, index) => (
           <div key={`${banner.id || index}-${index}`} className="banner-slide active">
-            {banner.link ? (
-              <a href={banner.link} target={banner.link.startsWith('http') ? "_blank" : "_self"} rel="noopener noreferrer">
-                <img src={banner.imageURL} alt={banner.title || 'Banner'} className="banner-img" />
-              </a>
-            ) : (
-              <img src={banner.imageURL} alt={banner.title || 'Banner'} className="banner-img" />
-            )}
+            
+            {renderMedia(banner, index)}
             
             {(banner.title || banner.description) && (
               <div className="banner-overlay-text">
