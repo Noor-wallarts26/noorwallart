@@ -105,14 +105,17 @@ const HeroSlider = ({ products }) => {
                 </div>
               </div>
               
-              <div className="hero-slide-image-wrapper">
-                <div 
-                  className="hero-slide-image"
-                  style={{ backgroundImage: `url(${product.imageUrl})` }}
-                >
-                  {!product.imageUrl && <div className="placeholder-slide">{product.title}</div>}
+                <div className="hero-slide-image-container">
+                  {product.imageUrl ? (
+                    <img 
+                      src={product.imageUrl} 
+                      alt={product.title} 
+                      className="hero-slide-image" 
+                    />
+                  ) : (
+                    <div className="placeholder-slide">{product.title}</div>
+                  )}
                 </div>
-              </div>
             </Link>
           </div>
         ))}
