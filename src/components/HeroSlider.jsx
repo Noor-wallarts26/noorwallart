@@ -79,43 +79,45 @@ const HeroSlider = ({ products }) => {
     currentIndex - 1;
 
   return (
-    <div 
-      className="hero-slider-container"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
+    <div className="hero-slider-section">
       <div 
-        className="hero-slider-wrapper"
-        style={{ 
-          transform: `translateX(-${currentIndex * 100}%)`,
-          transition: isTransitioning ? 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
-        }}
-        onTransitionEnd={handleTransitionEnd}
+        className="hero-slider-container"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
-        {extendedProducts.map((product, index) => (
-          <div key={`${product.id}-${index}`} className={`hero-slide ${index === currentIndex ? 'active' : ''}`}>
-            <Link to={`/product/${product.id}`} className="hero-slide-link">
-              <div className="hero-slide-content">
-                <span className="hero-slide-category">{product.category}</span>
-                <h3>{product.title}</h3>
-                <span className="hero-slide-price">₹{product.price.toFixed(2)}</span>
-                <div className="hero-buy-btn">
-                  <span>Buy Now</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <div 
+          className="hero-slider-wrapper"
+          style={{ 
+            transform: `translateX(-${currentIndex * 100}%)`,
+            transition: isTransitioning ? 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
+          }}
+          onTransitionEnd={handleTransitionEnd}
+        >
+          {extendedProducts.map((product, index) => (
+            <div key={`${product.id}-${index}`} className={`hero-slide ${index === currentIndex ? 'active' : ''}`}>
+              <Link to={`/product/${product.id}`} className="hero-slide-link">
+                <div className="hero-slide-content">
+                  <span className="hero-slide-category">{product.category}</span>
+                  <h3>{product.title}</h3>
+                  <span className="hero-slide-price">₹{product.price.toFixed(2)}</span>
+                  <div className="hero-buy-btn">
+                    <span>Buy Now</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="hero-slide-image-wrapper">
-                <div 
-                  className="hero-slide-image"
-                  style={{ backgroundImage: `url(${product.imageUrl})` }}
-                >
-                  {!product.imageUrl && <div className="placeholder-slide">{product.title}</div>}
+                
+                <div className="hero-slide-image-wrapper">
+                  <div 
+                    className="hero-slide-image"
+                    style={{ backgroundImage: `url(${product.imageUrl})` }}
+                  >
+                    {!product.imageUrl && <div className="placeholder-slide">{product.title}</div>}
+                  </div>
                 </div>
-              </div>
-            </Link>
-          </div>
-        ))}
+              </Link>
+            </div>
+          ))}
+        </div>
       </div>
       
       <div className="hero-slider-dots">
