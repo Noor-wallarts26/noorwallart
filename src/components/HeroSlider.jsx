@@ -95,29 +95,23 @@ const HeroSlider = ({ products }) => {
         {extendedProducts.map((product, index) => (
           <div key={`${product.id}-${index}`} className={`hero-slide ${index === currentIndex ? 'active' : ''}`}>
             <Link to={`/product/${product.id}`} className="hero-slide-link">
-              <div className="hero-slide-info">
+              <div className="hero-slide-content">
                 <span className="hero-slide-category">{product.category}</span>
-                <h3 className="hero-slide-title">{product.title}</h3>
-                {product.description && (
-                  <p className="hero-slide-desc">{product.description}</p>
-                )}
+                <h3>{product.title}</h3>
+                <span className="hero-slide-price">₹{product.price.toFixed(2)}</span>
                 <div className="hero-buy-btn">
                   <span>Buy Now</span>
-                  <span className="hero-buy-arrow">→</span>
-                  <span>₹{product.price.toFixed(2)}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
               </div>
               
-              <div className="hero-slide-image-col">
-                {product.imageUrl ? (
-                  <img 
-                    src={product.imageUrl} 
-                    alt={product.title} 
-                    className="hero-slide-image" 
-                  />
-                ) : (
-                  <div className="placeholder-slide">{product.title}</div>
-                )}
+              <div className="hero-slide-image-wrapper">
+                <div 
+                  className="hero-slide-image"
+                  style={{ backgroundImage: `url(${product.imageUrl})` }}
+                >
+                  {!product.imageUrl && <div className="placeholder-slide">{product.title}</div>}
+                </div>
               </div>
             </Link>
           </div>
