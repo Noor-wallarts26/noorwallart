@@ -1,4 +1,4 @@
-.banner-slider {
+.banner-slider-container {
   position: relative;
   width: 100%;
   max-width: 100%;
@@ -8,28 +8,28 @@
   margin-bottom: 2rem;
   background-color: var(--bg-color);
   box-shadow: var(--shadow-sm);
+  touch-action: pan-y;
+}
+
+.banner-slider-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
 }
 
 .banner-slide {
-  position: absolute;
-  top: 0;
-  left: 0;
+  flex: 0 0 100%;
   width: 100%;
   height: 100%;
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-  pointer-events: none;
-}
-
-.banner-slide.active {
-  opacity: 1;
-  pointer-events: auto;
+  position: relative;
 }
 
 .banner-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .banner-overlay-text {
@@ -37,7 +37,7 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  padding: 2rem 1.5rem 1.5rem;
+  padding: 2.5rem 1.5rem 1.5rem;
   background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
   color: white;
 }
@@ -56,37 +56,40 @@
   color: white;
 }
 
-.banner-dots {
+.banner-slider-dots {
   position: absolute;
   bottom: 15px;
-  right: 15px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   gap: 8px;
   z-index: 10;
 }
 
-.banner-dot {
+.banner-slider-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.4);
+  border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  padding: 0;
+  transition: all 0.3s ease;
 }
 
-.banner-dot.active {
+.banner-slider-dot.active {
   background-color: white;
-  transform: scale(1.2);
+  transform: scale(1.3);
 }
 
 @media (max-width: 768px) {
-  .banner-slider {
+  .banner-slider-container {
     height: 200px;
     border-radius: 8px;
   }
   
   .banner-overlay-text {
-    padding: 1.5rem 1rem 1rem;
+    padding: 2rem 1rem 1rem;
   }
   
   .banner-overlay-text h2 {
