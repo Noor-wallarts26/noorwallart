@@ -88,11 +88,8 @@ export const ShopProvider = ({ children }) => {
           id: doc.id,
           ...doc.data()
         }));
-        // Sort banners by order, fallback to createdAt descending (newest first)
+        // Force newest banners to show first unconditionally
         bannersData.sort((a, b) => {
-          if (a.order !== undefined && b.order !== undefined) {
-            return a.order - b.order;
-          }
           return (b.createdAt || 0) - (a.createdAt || 0);
         });
         setBanners(bannersData);
