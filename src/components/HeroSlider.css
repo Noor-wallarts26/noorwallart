@@ -41,7 +41,7 @@
     flex-direction: row; /* Desktop: left and right columns */
     align-items: center;
     padding: 3rem 4rem;
-    min-height: 500px;
+    min-height: 600px;
   }
 }
 
@@ -131,6 +131,11 @@
   opacity: 0.9;
 }
 
+.hero-buy-arrow {
+  margin: 0 8px;
+  font-weight: normal;
+}
+
 /* RIGHT SIDE: Image */
 .hero-slide-image-col {
   width: 100%;
@@ -160,7 +165,7 @@
 @media (min-width: 768px) {
   .hero-slide-image {
     max-width: 100%; /* Take full column width */
-    height: 450px;
+    height: 550px;
   }
 }
 
@@ -194,8 +199,6 @@
 
 @media (min-width: 768px) {
   .hero-slider-dots {
-    left: 4rem;
-    transform: none;
     bottom: 2rem;
   }
 }

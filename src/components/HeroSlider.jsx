@@ -103,7 +103,7 @@ const HeroSlider = ({ products }) => {
                 )}
                 <div className="hero-buy-btn">
                   <span>Buy Now</span>
-                  <span style={{ fontWeight: 'normal', margin: '0 4px' }}>|</span>
+                  <span className="hero-buy-arrow">→</span>
                   <span>₹{product.price.toFixed(2)}</span>
                 </div>
               </div>
