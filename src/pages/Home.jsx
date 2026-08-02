@@ -61,7 +61,7 @@ const Home = () => {
               loop 
               muted 
               playsInline 
-              style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '600px', objectFit: 'cover' }} 
+              style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '85vh', objectFit: 'cover' }} 
             />
           </div>
         )}
