@@ -6,8 +6,8 @@ import {
   signInWithPopup, 
   GoogleAuthProvider 
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
 import './Auth.css';
 
 const Login = ({ embedded = false }) => {
@@ -25,38 +25,30 @@ const Login = ({ embedded = false }) => {
   const from = location.state?.from?.pathname || '/';
   const customMessage = location.state?.message || 'Login to your Noor Wall Arts & Gifts account';
 
-  const saveUserToDb = async (user) => {
-    try {
-      const userRef = doc(db, 'users', user.uid);
-      const userSnap = await getDoc(userRef);
-      if (!userSnap.exists()) {
-        await setDoc(userRef, {
-          uid: user.uid,
-          email: user.email,
-          name: user.displayName || '',
-          photoURL: user.photoURL || '',
-          phone: user.phoneNumber || '',
-          createdAt: Date.now(),
-        });
-      }
-    } catch (err) {
-      console.error('Error saving user to DB:', err);
-    }
-  };
-
   const handleEmailAuth = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      let userCredential;
+      let userCred;
       if (isSignUp) {
-        userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        userCred = await createUserWithEmailAndPassword(auth, email, password);
       } else {
-        userCredential = await signInWithEmailAndPassword(auth, email, password);
+        userCred = await signInWithEmailAndPassword(auth, email, password);
       }
-      await saveUserToDb(userCredential.user);
+      
+      // Save user to Firestore to show in Admin Customers Panel
+      if (userCred && userCred.user) {
+        await setDoc(doc(db, "users", userCred.user.uid), {
+          uid: userCred.user.uid,
+          email: userCred.user.email,
+          name: userCred.user.displayName || email.split('@')[0],
+          createdAt: userCred.user.metadata.creationTime ? new Date(userCred.user.metadata.creationTime).getTime() : Date.now(),
+          lastLogin: Date.now()
+        }, { merge: true });
+      }
+
       navigate(from, { replace: true });
     } catch (err) {
       console.error(err);
@@ -79,8 +71,19 @@ const Login = ({ embedded = false }) => {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-      await saveUserToDb(userCredential.user);
+      const userCred = await signInWithPopup(auth, provider);
+      
+      if (userCred && userCred.user) {
+        await setDoc(doc(db, "users", userCred.user.uid), {
+          uid: userCred.user.uid,
+          email: userCred.user.email,
+          name: userCred.user.displayName || userCred.user.email.split('@')[0],
+          photoURL: userCred.user.photoURL || null,
+          createdAt: userCred.user.metadata.creationTime ? new Date(userCred.user.metadata.creationTime).getTime() : Date.now(),
+          lastLogin: Date.now()
+        }, { merge: true });
+      }
+
       navigate(from, { replace: true });
     } catch (err) {
       console.error(err);

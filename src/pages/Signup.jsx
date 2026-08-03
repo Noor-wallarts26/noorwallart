@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
 import { ShoppingBag } from 'lucide-react';
 import './Auth.css';
 
@@ -13,25 +13,6 @@ const Signup = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  const saveUserToDb = async (user) => {
-    try {
-      const userRef = doc(db, 'users', user.uid);
-      const userSnap = await getDoc(userRef);
-      if (!userSnap.exists()) {
-        await setDoc(userRef, {
-          uid: user.uid,
-          email: user.email,
-          name: user.displayName || '',
-          photoURL: user.photoURL || '',
-          phone: user.phoneNumber || '',
-          createdAt: Date.now(),
-        });
-      }
-    } catch (err) {
-      console.error('Error saving user to DB:', err);
-    }
-  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -48,8 +29,19 @@ const Signup = () => {
     setLoading(true);
     
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await saveUserToDb(userCredential.user);
+      const userCred = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Save user to Firestore to show in Admin Customers Panel
+      if (userCred && userCred.user) {
+        await setDoc(doc(db, "users", userCred.user.uid), {
+          uid: userCred.user.uid,
+          email: userCred.user.email,
+          name: userCred.user.displayName || email.split('@')[0],
+          createdAt: userCred.user.metadata.creationTime ? new Date(userCred.user.metadata.creationTime).getTime() : Date.now(),
+          lastLogin: Date.now()
+        }, { merge: true });
+      }
+
       // Wait a moment for auth state observer to trigger
       setTimeout(() => navigate('/'), 500);
     } catch (err) {
