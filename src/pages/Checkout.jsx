@@ -183,37 +183,68 @@ const Checkout = () => {
     }
   };
 
-  const handleWhatsAppOrder = () => {
-    if (!orderPlaced) return;
+  const sendInstantWhatsAppNotification = (order) => {
+    if (!order) return;
     
     const addressDetails = [
-      orderPlaced.customer.houseNo,
-      orderPlaced.customer.building,
-      orderPlaced.customer.street,
-      orderPlaced.customer.area,
-      orderPlaced.customer.landmark,
-      orderPlaced.customer.district,
-      orderPlaced.customer.state,
-      orderPlaced.customer.pincode
+      order.customer?.houseNo,
+      order.customer?.building,
+      order.customer?.street,
+      order.customer?.area,
+      order.customer?.landmark,
+      order.customer?.district,
+      order.customer?.state,
+      order.customer?.pincode
     ].filter(Boolean).join(', ');
 
-    const mapLink = orderPlaced.customer.lat && orderPlaced.customer.lng 
-      ? `https://www.google.com/maps/search/?api=1&query=${orderPlaced.customer.lat},${orderPlaced.customer.lng}` 
-      : 'Not provided';
+    const mapLink = order.customer?.lat && order.customer?.lng 
+      ? `https://www.google.com/maps/search/?api=1&query=${order.customer.lat},${order.customer.lng}` 
+      : null;
 
-    const message = `Hello Noor Wall Arts! I just placed a new order.
+    const dateStr = order.timestamp 
+      ? new Date(order.timestamp).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+      : new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
 
-*Order ID:* ${orderPlaced.id}
-*Name:* ${orderPlaced.customer.name}
-*Mobile:* ${orderPlaced.customer.phone}
+    const message = `🚨 *NEW ORDER ALERT* 🚨
 
-*Address:* ${addressDetails}
-*Live Location:* ${mapLink}
+*Order ID:* ${order.id}
+*Order Date & Time:* ${dateStr}
 
-*Total Amount:* ₹${orderPlaced.totalPrice.toFixed(2)}`;
+*Customer Details:*
+• *Customer Name:* ${order.customer?.name || 'N/A'}
+• *Customer Phone Number:* ${order.customer?.phone || 'N/A'}
 
-    const whatsappNumber = '918925325330'; // Your business WhatsApp number
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+*Product(s):*
+${order.itemsSummary || 'N/A'}
+
+*Order Details:*
+• *Total Amount:* ₹${order.totalPrice ? order.totalPrice.toFixed(2) : '0.00'}
+• *Payment Method:* ${order.paymentMethod || 'COD'}
+
+*Delivery Address:*
+${addressDetails || 'N/A'}${mapLink ? `\n*Location Map:* ${mapLink}` : ''}`;
+
+    const bizPhone = (storeSettings?.whatsapp || '8925325330').replace(/\D/g, '');
+    const whatsappNumber = bizPhone.startsWith('91') || bizPhone.length > 10 ? bizPhone : `91${bizPhone}`;
+    const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+
+    try {
+      window.open(waUrl, '_blank');
+    } catch (e) {
+      console.error("Error launching WhatsApp:", e);
+    }
+  };
+
+  useEffect(() => {
+    if (orderPlaced) {
+      sendInstantWhatsAppNotification(orderPlaced);
+    }
+  }, [orderPlaced]);
+
+  const handleWhatsAppOrder = () => {
+    if (orderPlaced) {
+      sendInstantWhatsAppNotification(orderPlaced);
+    }
   };
 
   if (orderPlaced) {
