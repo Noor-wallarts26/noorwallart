@@ -283,7 +283,7 @@ export const ShopProvider = ({ children }) => {
     }
   };
 
-  const placeOrder = async (customerDetails, paymentMethod = 'COD', paymentDetails = null) => {
+  const placeOrder = async (customerDetails, paymentMethod = 'Razorpay', paymentDetails = null) => {
     if (cartItems.length === 0) return null;
 
     const cartWithProducts = cartItems.map(item => {
@@ -327,7 +327,7 @@ export const ShopProvider = ({ children }) => {
       transactionId: paymentDetails?.transactionId || "N/A",
       razorpayOrderId: paymentDetails?.razorpayOrderId || "N/A",
       razorpaySignature: paymentDetails?.razorpaySignature || "N/A",
-      paymentStatus: paymentMethod === 'COD' ? 'Pending (COD)' : (paymentDetails?.paymentStatus || 'Paid'),
+      paymentStatus: paymentDetails?.paymentStatus || 'Paid',
       customer: customerDetails,
       items: cartWithProducts
     };

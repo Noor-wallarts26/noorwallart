@@ -391,7 +391,7 @@ Thank you for shopping with Noor Wall Arts!`;
           </div>
 
           {paymentError && (
-            <div style={{ marginTop: '1.5rem', padding: '1.25rem', backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '12px', color '#991B1B' }}>
+            <div style={{ marginTop: '1.5rem', padding: '1.25rem', backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '12px', color: '#991B1B' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, fontSize: '1rem', marginBottom: '0.5rem' }}>
                 <AlertCircle size={20} color="#DC2626" />
                 Payment Unsuccessful
