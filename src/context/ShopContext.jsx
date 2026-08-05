@@ -179,21 +179,28 @@ export const ShopProvider = ({ children }) => {
     ));
   };
 
-  const addToCart = (productId, quantity = 1) => {
+  const addToCart = (productId, quantity = 1, options = {}, couponInfo = null) => {
     const product = products.find(p => p.id === productId);
     if (!product || product.stock === 0) return;
 
     setCartItems(prev => {
-      const existing = prev.find(item => item.productId === productId);
-      if (existing) {
+      const existingIndex = prev.findIndex(item => item.productId === productId);
+      if (existingIndex > -1) {
+        const existing = prev[existingIndex];
         const newQuantity = existing.quantity + quantity;
         if (newQuantity <= product.stock) {
-          return prev.map(item => item.productId === productId ? { ...item, quantity: newQuantity } : item);
+          const updated = [...prev];
+          updated[existingIndex] = {
+            ...existing,
+            quantity: newQuantity,
+            appliedCoupon: couponInfo || existing.appliedCoupon || null
+          };
+          return updated;
         }
         return prev;
       } else {
         if (quantity <= product.stock) {
-          return [...prev, { productId, quantity }];
+          return [...prev, { productId, quantity, appliedCoupon: couponInfo || null }];
         }
         return prev;
       }
@@ -226,11 +233,9 @@ export const ShopProvider = ({ children }) => {
         })
       });
       
-      // Update local state for immediate feedback
       setProducts(prev => prev.map(p => {
         if (p.id === productId) {
           const newReviews = [...(p.reviews || []), { ...reviewData, timestamp: Date.now(), id: 'temp' }];
-          // Recalculate average rating
           const newRating = newReviews.reduce((acc, r) => acc + r.rating, 0) / newReviews.length;
           return {
             ...p,
@@ -251,14 +256,8 @@ export const ShopProvider = ({ children }) => {
   const updateProductSliderStatus = async (productId, showInSlider) => {
     try {
       const productRef = doc(db, 'products', productId.toString());
-      await updateDoc(productRef, {
-        showInSlider: showInSlider
-      });
-      
-      // Update local state for immediate feedback
-      setProducts(prev => prev.map(p => 
-        p.id === productId ? { ...p, showInSlider: showInSlider } : p
-      ));
+      await updateDoc(productRef, { showInSlider });
+      setProducts(prev => prev.map(p => p.id === productId ? { ...p, showInSlider } : p));
       return true;
     } catch (error) {
       console.error("Error updating slider status: ", error);
@@ -269,13 +268,8 @@ export const ShopProvider = ({ children }) => {
   const updateProductDeliveryCharge = async (productId, charge) => {
     try {
       const productRef = doc(db, 'products', productId.toString());
-      await updateDoc(productRef, {
-        deliveryCharge: Number(charge)
-      });
-      
-      setProducts(prev => prev.map(p => 
-        p.id === productId ? { ...p, deliveryCharge: Number(charge) } : p
-      ));
+      await updateDoc(productRef, { deliveryCharge: Number(charge) });
+      setProducts(prev => prev.map(p => p.id === productId ? { ...p, deliveryCharge: Number(charge) } : p));
       return true;
     } catch (error) {
       console.error("Error updating delivery charge: ", error);
@@ -288,28 +282,53 @@ export const ShopProvider = ({ children }) => {
 
     const cartWithProducts = cartItems.map(item => {
       const product = products.find(p => p.id === item.productId);
-      return { 
-        title: product?.title || 'Product',
-        imageUrl: product?.imageUrl || product?.logoUrl || '/logo.jpg',
-        price: product?.price || 0,
+      if (!product) return null;
+
+      const coupon = item.appliedCoupon;
+      let discountAmount = 0;
+      let discountedUnitPrice = product.price;
+
+      if (coupon) {
+        if (coupon.discountType === 'percentage') {
+          discountAmount = Math.round((product.price * Number(coupon.discountValue)) / 100);
+        } else if (coupon.discountType === 'flat') {
+          discountAmount = Number(coupon.discountValue) || 0;
+        } else {
+          discountAmount = Number(coupon.discountAmount) || 0;
+        }
+        discountAmount = Math.min(discountAmount, product.price);
+        discountedUnitPrice = Math.max(0, product.price - discountAmount);
+      }
+
+      return {
+        productId: product.id,
+        title: product.title || 'Product',
+        imageUrl: product.imageUrl || product.logoUrl || '/logo.jpg',
+        price: discountedUnitPrice,
+        originalPrice: product.price,
+        discountAmount: discountAmount,
         quantity: item.quantity,
+        appliedCoupon: coupon ? {
+          code: coupon.code,
+          discountType: coupon.discountType,
+          discountValue: coupon.discountValue,
+          discountAmount: discountAmount
+        } : null,
         variant: item.variant || 'N/A',
         size: item.size || 'N/A',
         color: item.color || 'N/A',
         frameType: item.frameType || 'N/A',
         product: product 
       };
-    }).filter(i => i.product);
+    }).filter(Boolean);
 
     const subtotal = cartWithProducts.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const deliveryFee = cartWithProducts.reduce((sum, item) => {
       const charge = item.product.deliveryCharge !== undefined ? Number(item.product.deliveryCharge) : 80;
       return sum + (charge * item.quantity);
     }, 0);
-    const discount = appliedCoupon ? Math.min(appliedCoupon.discountAmount || 0, subtotal) : 0;
     const summary = cartWithProducts.map(item => `${item.title} (x${item.quantity})`).join(", ");
 
-    // Generate unique Order ID starting with NWA + 6 digits (e.g. NWA123456)
     const orderId = await generateUniqueOrderId(db);
 
     const rawOrderPayload = {
@@ -318,8 +337,8 @@ export const ShopProvider = ({ children }) => {
       timestamp: Date.now(),
       subtotal: subtotal,
       deliveryFee: deliveryFee,
-      discount: discount,
-      totalPrice: Math.max(0, subtotal + deliveryFee - discount),
+      discount: 0,
+      totalPrice: subtotal + deliveryFee,
       itemsSummary: summary,
       status: "Pending",
       adminMessage: "",
@@ -334,7 +353,6 @@ export const ShopProvider = ({ children }) => {
 
     const sanitized = sanitizeOrder(rawOrderPayload);
 
-    // Deduct stock
     setProducts(prev => prev.map(p => {
       const cartItem = cartItems.find(c => c.productId === p.id);
       if (cartItem) {
@@ -352,7 +370,6 @@ export const ShopProvider = ({ children }) => {
     setOrders(prev => [sanitized, ...prev]);
     setCartItems([]);
 
-    // Automatically send WhatsApp order notification to business WhatsApp
     try {
       const businessWhatsapp = storeSettings?.whatsapp || '8925325330';
       sendWhatsAppOrderNotification(sanitized, businessWhatsapp);
@@ -368,10 +385,7 @@ export const ShopProvider = ({ children }) => {
       const q = query(collection(db, "orders"));
       const querySnapshot = await getDocs(q);
       const fetchedOrders = [];
-      querySnapshot.forEach((doc) => {
-        fetchedOrders.push(doc.data());
-      });
-      // sort by timestamp descending
+      querySnapshot.forEach((doc) => { fetchedOrders.push(doc.data()); });
       fetchedOrders.sort((a, b) => b.timestamp - a.timestamp);
       return fetchedOrders;
     } catch (error) {
@@ -386,9 +400,7 @@ export const ShopProvider = ({ children }) => {
       const q = query(collection(db, "orders"), where("userId", "==", userId));
       const querySnapshot = await getDocs(q);
       const fetchedOrders = [];
-      querySnapshot.forEach((doc) => {
-        fetchedOrders.push(doc.data());
-      });
+      querySnapshot.forEach((doc) => { fetchedOrders.push(doc.data()); });
       fetchedOrders.sort((a, b) => b.timestamp - a.timestamp);
       return fetchedOrders;
     } catch (error) {
@@ -400,14 +412,8 @@ export const ShopProvider = ({ children }) => {
   const updateOrderStatus = async (orderId, newStatus, adminMessage) => {
     try {
       const orderRef = doc(db, "orders", orderId.toString());
-      await updateDoc(orderRef, {
-        status: newStatus,
-        adminMessage: adminMessage
-      });
-      // Update local state if the order exists there
-      setOrders(prev => prev.map(o => 
-        o.id === orderId ? { ...o, status: newStatus, adminMessage: adminMessage } : o
-      ));
+      await updateDoc(orderRef, { status: newStatus, adminMessage });
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus, adminMessage } : o));
       return true;
     } catch (error) {
       console.error("Error updating order status: ", error);
@@ -415,16 +421,16 @@ export const ShopProvider = ({ children }) => {
     }
   };
 
-  // Coupon state
-  const [appliedCoupon, setAppliedCoupon] = useState(null);
-
-  const applyCoupon = async (codeStr) => {
+  // Product-Level Coupon Validation Function
+  const validateCouponForProduct = async (codeStr, product) => {
     if (!codeStr || !codeStr.trim()) {
       return { success: false, error: "Please enter a coupon code." };
     }
+    if (!product) {
+      return { success: false, error: "Product not found." };
+    }
     const cleanCode = cleanInput(codeStr.trim().toUpperCase());
 
-    // Rate limit: max 10 coupon attempts per minute
     if (isRateLimited('coupon_apply', 10, 60000)) {
       return { success: false, error: "Too many attempts. Please wait a moment and try again." };
     }
@@ -450,7 +456,6 @@ export const ShopProvider = ({ children }) => {
         return { success: false, error: "This coupon is currently inactive." };
       }
 
-      // Check Expiry Date
       if (couponData.expiryDate) {
         const expiry = new Date(couponData.expiryDate).getTime();
         const today = new Date().setHours(0,0,0,0);
@@ -459,7 +464,6 @@ export const ShopProvider = ({ children }) => {
         }
       }
 
-      // Check Usage Limit
       if (couponData.maxUses && couponData.maxUses > 0) {
         const usedCount = Number(couponData.usedCount) || 0;
         if (usedCount >= couponData.maxUses) {
@@ -467,13 +471,11 @@ export const ShopProvider = ({ children }) => {
         }
       }
 
-      // Check Min Order Amount
       const minAmount = Number(couponData.minOrderAmount) || 0;
-      if (cartTotal < minAmount) {
-        return { success: false, error: `Minimum order amount of ₹${minAmount} required to use this coupon.` };
+      if (product.price < minAmount) {
+        return { success: false, error: `Minimum product price of ₹${minAmount} required to use this coupon.` };
       }
 
-      // Check Multi-Category & Multi-Product Applicability
       const selCats = Array.isArray(couponData.assignedCategories)
         ? couponData.assignedCategories
         : (Array.isArray(couponData.categoryIds)
@@ -489,79 +491,107 @@ export const ShopProvider = ({ children }) => {
       const isAllCats = selCats.length === 0 || selCats.includes('All Categories');
       const isAllProds = selProds.length === 0 || selProds.includes('All Products');
 
-      // If specific categories or products are specified, validate cart items
-      if (!isAllCats || !isAllProds) {
-        const hasEligibleItem = cartWithProducts.some(item => {
-          const p = item.product;
-          if (!p) return false;
-
-          let catMatch = false;
-          if (isAllCats) {
-            catMatch = true;
-          } else {
-            const pCat = (p.category || '').trim().toLowerCase();
-            const pCats = Array.isArray(p.categories) ? p.categories.map(c => (c || '').trim().toLowerCase()) : [];
-            catMatch = selCats.some(sc => {
-              const cleanSC = String(sc).trim().toLowerCase();
-              return pCat === cleanSC || pCats.includes(cleanSC);
-            });
-          }
-
-          let prodMatch = false;
-          if (isAllProds) {
-            prodMatch = true;
-          } else {
-            const pTitle = (p.title || p.name || '').trim().toLowerCase();
-            const pId = String(p.id || '').trim().toLowerCase();
-            prodMatch = selProds.some(sp => {
-              const cleanSP = String(sp).trim().toLowerCase();
-              return pTitle === cleanSP || pId === cleanSP;
-            });
-          }
-
-          return catMatch || prodMatch;
+      let catMatch = false;
+      if (isAllCats) {
+        catMatch = true;
+      } else {
+        const pCat = (product.category || '').trim().toLowerCase();
+        const pCats = Array.isArray(product.categories) ? product.categories.map(c => (c || '').trim().toLowerCase()) : [];
+        catMatch = selCats.some(sc => {
+          const cleanSC = String(sc).trim().toLowerCase();
+          return pCat === cleanSC || pCats.includes(cleanSC);
         });
-
-        if (!hasEligibleItem) {
-          return { success: false, error: "This coupon is not applicable to any of the items in your cart." };
-        }
       }
 
-      // Calculate Discount Value
+      let prodMatch = false;
+      if (isAllProds) {
+        prodMatch = true;
+      } else {
+        const pTitle = (product.title || product.name || '').trim().toLowerCase();
+        const pId = String(product.id || '').trim().toLowerCase();
+        prodMatch = selProds.some(sp => {
+          const cleanSP = String(sp).trim().toLowerCase();
+          return pTitle === cleanSP || pId === cleanSP;
+        });
+      }
+
+      if (!isAllCats && !isAllProds && !catMatch && !prodMatch) {
+        return { success: false, error: "This coupon is not applicable to this product." };
+      }
+      if (!isAllCats && isAllProds && !catMatch) {
+        return { success: false, error: `This coupon is only valid for category: ${selCats.join(', ')}.` };
+      }
+      if (isAllCats && !isAllProds && !prodMatch) {
+        return { success: false, error: `This coupon is only valid for selected products.` };
+      }
+
       let discountAmt = 0;
       if (couponData.discountType === 'percentage') {
-        discountAmt = Math.round((cartTotal * Number(couponData.discountValue)) / 100);
+        discountAmt = Math.round((product.price * Number(couponData.discountValue)) / 100);
       } else {
         discountAmt = Number(couponData.discountValue) || 0;
       }
-      discountAmt = Math.min(discountAmt, cartTotal);
+      discountAmt = Math.min(discountAmt, product.price);
+      const discountedPrice = Math.max(0, product.price - discountAmt);
 
-      setAppliedCoupon({ ...couponData, discountAmount: discountAmt });
-      return { success: true, discount: discountAmt, message: `Coupon '${cleanCode}' applied! You save ₹${discountAmt}.` };
+      const couponObj = {
+        code: cleanCode,
+        discountType: couponData.discountType,
+        discountValue: couponData.discountValue,
+        discountAmount: discountAmt,
+        originalPrice: product.price,
+        discountedPrice: discountedPrice
+      };
+
+      return {
+        success: true,
+        coupon: couponObj,
+        message: `Coupon '${cleanCode}' applied! You save ₹${discountAmt.toFixed(2)}.`
+      };
     } catch (err) {
-      console.error("Error applying coupon:", err);
-      return { success: false, error: "Failed to validate coupon code. Please try again." };
+      console.error("Error validating product coupon:", err);
+      return { success: false, error: "Failed to validate coupon code." };
     }
-  };
-
-  const removeCoupon = () => {
-    setAppliedCoupon(null);
   };
 
   // Derived state
   const cartWithProducts = cartItems.map(item => {
     const product = products.find(p => p.id === item.productId);
-    return { product, quantity: item.quantity };
-  }).filter(item => item.product);
+    if (!product) return null;
 
-  const cartTotal = cartWithProducts.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    const coupon = item.appliedCoupon;
+    let discountAmount = 0;
+    let discountedUnitPrice = product.price;
+
+    if (coupon) {
+      if (coupon.discountType === 'percentage') {
+        discountAmount = Math.round((product.price * Number(coupon.discountValue)) / 100);
+      } else if (coupon.discountType === 'flat') {
+        discountAmount = Number(coupon.discountValue) || 0;
+      } else {
+        discountAmount = Number(coupon.discountAmount) || 0;
+      }
+      discountAmount = Math.min(discountAmount, product.price);
+      discountedUnitPrice = Math.max(0, product.price - discountAmount);
+    }
+
+    return {
+      product,
+      quantity: item.quantity,
+      unitPrice: product.price,
+      discountedUnitPrice,
+      discountAmountPerUnit: discountAmount,
+      itemSubtotal: discountedUnitPrice * item.quantity,
+      appliedCoupon: coupon || null
+    };
+  }).filter(Boolean);
+
+  const cartTotal = cartWithProducts.reduce((sum, item) => sum + item.itemSubtotal, 0);
   const deliveryFee = cartWithProducts.reduce((sum, item) => {
     const charge = item.product.deliveryCharge !== undefined ? Number(item.product.deliveryCharge) : 80;
     return sum + (charge * item.quantity);
   }, 0);
-
-  const couponDiscount = appliedCoupon ? Math.min(appliedCoupon.discountAmount || 0, cartTotal) : 0;
-  const finalTotal = Math.max(0, cartTotal + deliveryFee - couponDiscount);
+  const finalTotal = cartTotal + deliveryFee;
   const totalItemsInCart = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const filteredProducts = products.filter(p => {
@@ -587,11 +617,8 @@ export const ShopProvider = ({ children }) => {
       cartWithProducts,
       cartTotal,
       deliveryFee,
-      appliedCoupon,
-      couponDiscount,
       finalTotal,
-      applyCoupon,
-      removeCoupon,
+      validateCouponForProduct,
       totalItemsInCart,
       toggleWishlist,
       addToCart,

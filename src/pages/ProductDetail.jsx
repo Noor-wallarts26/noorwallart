@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Star, Zap, ShoppingCart, Share2, Tag } from 'lucide-react';
+import { ArrowLeft, Heart, Star, Zap, ShoppingCart, Share2, Tag, CheckCircle2, X } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -19,7 +19,7 @@ const categoryStyles = {
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { products, toggleWishlist, addToCart, addReview } = useContext(ShopContext);
+  const { products, toggleWishlist, addToCart, addReview, validateCouponForProduct } = useContext(ShopContext);
   
   const product = products.find(p => String(p.id) === String(id));
 
@@ -27,6 +27,36 @@ const ProductDetail = () => {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [productCoupon, setProductCoupon] = useState(null);
+
+  const [couponCodeInput, setCouponCodeInput] = useState('');
+  const [couponMsg, setCouponMsg] = useState({ text: '', isError: false });
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [appliedProductCoupon, setAppliedProductCoupon] = useState(null);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCodeInput.trim()) {
+      setCouponMsg({ text: 'Please enter a coupon code.', isError: true });
+      return;
+    }
+    setCouponLoading(true);
+    setCouponMsg({ text: '', isError: false });
+    const result = await validateCouponForProduct(couponCodeInput, product);
+    setCouponLoading(false);
+
+    if (result.success) {
+      setAppliedProductCoupon(result.coupon);
+      setCouponMsg({ text: result.message, isError: false });
+    } else {
+      setAppliedProductCoupon(null);
+      setCouponMsg({ text: result.error, isError: true });
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedProductCoupon(null);
+    setCouponCodeInput('');
+    setCouponMsg({ text: '', isError: false });
+  };
 
   // Fetch coupon linked to product
   useEffect(() => {
@@ -190,8 +220,24 @@ const ProductDetail = () => {
           <span className="detail-reviews" style={{ fontSize: '0.9rem', color: '#3B82F6', fontWeight: '500' }}>{product.reviewsCount} ratings</span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem', marginBottom: '0.75rem' }}>
-          <div className="detail-price" style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: 0, color: 'var(--text-primary)', lineHeight: 1 }}>₹{product.price.toFixed(2)}</div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+          {appliedProductCoupon ? (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.6rem' }}>
+              <span style={{ fontSize: '1.8rem', fontWeight: '800', color: '#16A34A', lineHeight: 1 }}>
+                ₹{appliedProductCoupon.discountedPrice.toFixed(2)}
+              </span>
+              <span style={{ fontSize: '1.1rem', color: '#94A3B8', textDecoration: 'line-through' }}>
+                ₹{product.price.toFixed(2)}
+              </span>
+              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#15803D', backgroundColor: '#DCFCE7', padding: '0.2rem 0.6rem', borderRadius: '12px' }}>
+                Save ₹{appliedProductCoupon.discountAmount.toFixed(2)}
+              </span>
+            </div>
+          ) : (
+            <div className="detail-price" style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: 0, color: 'var(--text-primary)', lineHeight: 1 }}>
+              ₹{product.price.toFixed(2)}
+            </div>
+          )}
           <div style={{ 
             color: product.stock === 0 ? '#DC2626' : '#16A34A', 
             fontSize: '0.85rem', 
@@ -251,11 +297,102 @@ const ProductDetail = () => {
           <p>{product.description}</p>
         </div>
 
-        <div className="detail-actions" style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', marginBottom: '2.5rem' }}>
+        {/* Modern Product-Level Apply Coupon Section */}
+        <div style={{
+          marginTop: '1.5rem',
+          marginBottom: '1rem',
+          padding: '1rem',
+          border: '1.5px solid var(--border-color, #e2e8f0)',
+          borderRadius: '12px',
+          backgroundColor: 'var(--surface-color, #ffffff)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
+              <Tag size={18} color="var(--primary, #4f46e5)" />
+              <span>Apply Product Coupon</span>
+            </div>
+            {productCoupon && (
+              <span 
+                onClick={() => { setCouponCodeInput(productCoupon.code); }}
+                style={{ fontSize: '0.78rem', color: '#4f46e5', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                Use Code {productCoupon.code}
+              </span>
+            )}
+          </div>
+
+          {appliedProductCoupon ? (
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '0.75rem', backgroundColor: '#DCFCE7',
+              border: '1px solid #BBF7D0', borderRadius: '8px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <CheckCircle2 size={18} color="#16A34A" />
+                <div>
+                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#166534' }}>
+                    '{appliedProductCoupon.code}' Applied!
+                  </span>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#15803D' }}>
+                    Discounted Price: <strong>₹{appliedProductCoupon.discountedPrice.toFixed(2)}</strong> (Saved ₹{appliedProductCoupon.discountAmount.toFixed(2)})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleRemoveCoupon}
+                title="Remove coupon"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626', padding: '4px' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <input
+                type="text"
+                placeholder="Enter coupon code"
+                value={couponCodeInput}
+                onChange={e => setCouponCodeInput(e.target.value.toUpperCase())}
+                onKeyDown={e => e.key === 'Enter' && handleApplyCoupon()}
+                style={{
+                  flex: 1, padding: '0.65rem 0.85rem',
+                  borderRadius: '8px', border: '1px solid var(--border-color, #cbd5e1)',
+                  fontSize: '0.9rem', letterSpacing: '0.05em', outline: 'none'
+                }}
+              />
+              <button
+                type="button"
+                onClick={handleApplyCoupon}
+                disabled={couponLoading}
+                style={{
+                  padding: '0.65rem 1.25rem', borderRadius: '8px',
+                  backgroundColor: 'var(--primary, #4f46e5)', color: '#fff',
+                  border: 'none', cursor: 'pointer',
+                  fontSize: '0.9rem', fontWeight: 600, whiteSpace: 'nowrap'
+                }}
+              >
+                {couponLoading ? 'Validating...' : 'Apply Coupon'}
+              </button>
+            </div>
+          )}
+
+          {couponMsg.text && (
+            <p style={{
+              margin: '0.6rem 0 0 0', fontSize: '0.82rem',
+              color: couponMsg.isError ? '#DC2626' : '#16A34A', fontWeight: 600
+            }}>
+              {couponMsg.isError ? '⚠️ ' : '✅ '}{couponMsg.text}
+            </p>
+          )}
+        </div>
+
+        <div className="detail-actions" style={{ display: 'flex', gap: '1rem', marginTop: '1rem', marginBottom: '2.5rem' }}>
           <button 
             onClick={() => {
-              addToCart(product.id);
-              navigate('/');
+              addToCart(product.id, 1, {}, appliedProductCoupon);
+              navigate('/cart');
             }}
             disabled={product.stock === 0}
             style={{ 

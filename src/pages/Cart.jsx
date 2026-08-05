@@ -1,6 +1,6 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Trash2, Plus, Minus, Tag, X, CheckCircle } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, Tag } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import './Cart.css';
 
@@ -20,39 +20,11 @@ const categoryStyles = {
 const Cart = () => {
   const {
     cartWithProducts, cartTotal, deliveryFee, totalItemsInCart,
-    updateCartQuantity, removeFromCart, user,
-    appliedCoupon, couponDiscount, finalTotal, applyCoupon, removeCoupon
+    updateCartQuantity, removeFromCart, user, finalTotal
   } = useContext(ShopContext);
 
   const navigate = useNavigate();
   const location = useLocation();
-
-  const [couponCode, setCouponCode] = useState('');
-  const [couponMsg, setCouponMsg] = useState({ text: '', isError: false });
-  const [couponLoading, setCouponLoading] = useState(false);
-
-  const handleApplyCoupon = async () => {
-    if (!couponCode.trim()) {
-      setCouponMsg({ text: 'Please enter a coupon code.', isError: true });
-      return;
-    }
-    setCouponLoading(true);
-    setCouponMsg({ text: '', isError: false });
-    const result = await applyCoupon(couponCode);
-    setCouponLoading(false);
-    if (result.success) {
-      setCouponMsg({ text: result.message, isError: false });
-      setCouponCode('');
-    } else {
-      setCouponMsg({ text: result.error, isError: true });
-    }
-  };
-
-  const handleRemoveCoupon = () => {
-    removeCoupon();
-    setCouponMsg({ text: '', isError: false });
-    setCouponCode('');
-  };
 
   const handleCheckoutClick = () => {
     if (!user) {
@@ -80,8 +52,10 @@ const Cart = () => {
           <div className="cart-content">
             {/* CART ITEMS */}
             <div className="cart-items-list">
-              {cartWithProducts.map(({ product, quantity }) => {
+              {cartWithProducts.map(({ product, quantity, unitPrice, discountedUnitPrice, discountAmountPerUnit, appliedCoupon }) => {
                 const { color, icon } = categoryStyles[product.category] || { color: '#94A3B8', icon: '📦' };
+                const hasDiscount = discountAmountPerUnit > 0;
+
                 return (
                   <div key={product.id} className="cart-item card">
                     <div
@@ -101,7 +75,35 @@ const Cart = () => {
                         <h3 title={product.title}>{product.title}</h3>
                       </Link>
                       <span className="cart-item-category">{product.category}</span>
-                      <div className="cart-item-price">₹{product.price.toFixed(2)}</div>
+                      
+                      {/* PER-ITEM PRICE DISPLAY */}
+                      <div className="cart-item-price" style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginTop: '0.25rem' }}>
+                        {hasDiscount ? (
+                          <>
+                            <span style={{ fontWeight: 800, color: '#16A34A', fontSize: '1.1rem' }}>
+                              ₹{discountedUnitPrice.toFixed(2)}
+                            </span>
+                            <span style={{ fontSize: '0.85rem', color: '#94A3B8', textDecoration: 'line-through' }}>
+                              ₹{unitPrice.toFixed(2)}
+                            </span>
+                          </>
+                        ) : (
+                          <span style={{ fontWeight: 700 }}>₹{unitPrice.toFixed(2)}</span>
+                        )}
+                      </div>
+
+                      {/* APPLIED COUPON BADGE */}
+                      {appliedCoupon && (
+                        <div style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                          marginTop: '0.4rem', padding: '0.2rem 0.55rem', borderRadius: '12px',
+                          backgroundColor: '#DCFCE7', border: '1px solid #BBF7D0',
+                          fontSize: '0.75rem', fontWeight: 600, color: '#15803D'
+                        }}>
+                          <Tag size={12} color="#16A34A" />
+                          <span>Coupon '{appliedCoupon.code}' (-₹{discountAmountPerUnit.toFixed(2)})</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="cart-item-actions">
@@ -135,7 +137,7 @@ const Cart = () => {
                 <span>Subtotal ({totalItemsInCart} items)</span>
                 <span>₹{cartTotal.toFixed(2)}</span>
               </div>
-              <div className="cart-summary-row">
+              <div className="cart-summary-row" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.75rem' }}>
                 <span>
                   Shipping
                   <span style={{ fontSize: '0.8rem', display: 'block', color: 'var(--text-secondary)' }}>
@@ -145,91 +147,11 @@ const Cart = () => {
                 <span>{deliveryFee === 0 ? 'Free' : `₹${deliveryFee.toFixed(2)}`}</span>
               </div>
 
-              {/* ── COUPON SECTION ── */}
-              <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                  <Tag size={16} color="var(--primary)" />
-                  <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Apply Coupon</span>
-                </div>
-
-                {appliedCoupon ? (
-                  /* Coupon applied – show badge */
-                  <div style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '0.75rem', backgroundColor: '#DCFCE7',
-                    border: '1px solid #BBF7D0', borderRadius: '8px'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <CheckCircle size={16} color="#16A34A" />
-                      <div>
-                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#166534' }}>{appliedCoupon.code}</span>
-                        <p style={{ margin: 0, fontSize: '0.75rem', color: '#15803D' }}>
-                          {appliedCoupon.discountType === 'percentage'
-                            ? `${appliedCoupon.discountValue}% OFF`
-                            : `₹${appliedCoupon.discountValue} OFF`} Applied!
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleRemoveCoupon}
-                      title="Remove coupon"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626', padding: '4px' }}
-                    >
-                      <X size={18} />
-                    </button>
-                  </div>
-                ) : (
-                  /* Coupon input */
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <input
-                      type="text"
-                      placeholder="Enter coupon code"
-                      value={couponCode}
-                      onChange={e => setCouponCode(e.target.value.toUpperCase())}
-                      onKeyDown={e => e.key === 'Enter' && handleApplyCoupon()}
-                      style={{
-                        flex: 1, padding: '0.6rem 0.75rem',
-                        borderRadius: '8px', border: '1px solid var(--border-color)',
-                        fontSize: '0.875rem', letterSpacing: '0.05em'
-                      }}
-                    />
-                    <button
-                      onClick={handleApplyCoupon}
-                      disabled={couponLoading}
-                      style={{
-                        padding: '0.6rem 1rem', borderRadius: '8px',
-                        backgroundColor: 'var(--primary)', color: '#fff',
-                        border: 'none', cursor: 'pointer',
-                        fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap'
-                      }}
-                    >
-                      {couponLoading ? '...' : 'Apply'}
-                    </button>
-                  </div>
-                )}
-
-                {couponMsg.text && (
-                  <p style={{
-                    margin: '0.5rem 0 0 0', fontSize: '0.8rem',
-                    color: couponMsg.isError ? '#DC2626' : '#16A34A', fontWeight: 500
-                  }}>
-                    {couponMsg.isError ? '⚠️ ' : '✅ '}{couponMsg.text}
-                  </p>
-                )}
-              </div>
-
               <hr className="detail-divider" style={{ margin: '1rem 0' }} />
 
-              {couponDiscount > 0 && (
-                <div className="summary-row" style={{ color: '#16A34A', fontWeight: 600 }}>
-                  <span>Coupon Discount ({appliedCoupon?.code})</span>
-                  <span>-₹{couponDiscount.toFixed(2)}</span>
-                </div>
-              )}
-
-              <div className="summary-row total">
+              <div className="summary-row total" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem', fontWeight: 800 }}>
                 <span>Total</span>
-                <span>₹{(finalTotal ?? (cartTotal + deliveryFee)).toFixed(2)}</span>
+                <span>₹{finalTotal.toFixed(2)}</span>
               </div>
 
               <button
