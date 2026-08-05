@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, CreditCard, Lock, ShieldCheck, Wallet, MessageCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, CreditCard, Lock, ShieldCheck, MessageCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import MapPicker from '../components/MapPicker';
 import indiaData from '../utils/indiaStatesDistricts.json';
@@ -11,7 +11,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  const [paymentMethod, setPaymentMethod] = useState('Razorpay');
+  const paymentMethod = 'Razorpay';
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(null);
   const [paymentError, setPaymentError] = useState(null);
@@ -101,87 +101,73 @@ const Checkout = () => {
     setPaymentError(null);
     setIsProcessing(true);
 
-    if (paymentMethod === 'Razorpay') {
-      const isScriptLoaded = await loadRazorpayScript();
-      if (!isScriptLoaded) {
-        alert("Failed to load Razorpay Payment Gateway. Please check your internet connection.");
-        setIsProcessing(false);
-        return;
-      }
-      
-      try {
-        const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || paymentSettings?.razorpayKeyId || storeSettings?.razorpayKeyId || 'rzp_live_default';
+    const isScriptLoaded = await loadRazorpayScript();
+    if (!isScriptLoaded) {
+      alert("Failed to load Razorpay Payment Gateway. Please check your internet connection.");
+      setIsProcessing(false);
+      return;
+    }
+    
+    try {
+      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || paymentSettings?.razorpayKeyId || storeSettings?.razorpayKeyId || 'rzp_live_default';
 
-        const options = {
-          key: razorpayKey,
-          amount: Math.round(finalTotal * 100),
-          currency: 'INR',
-          name: "NOOR WALLARTS & GIFTS",
-          description: `Order Payment (${totalItemsInCart} items)`,
-          image: storeSettings?.logoUrl || '/logo.jpg',
-          handler: async function (response) {
-            try {
-              setIsProcessing(true);
-              const paymentDetails = {
-                transactionId: response.razorpay_payment_id || `PAY_${Date.now()}`,
-                razorpayOrderId: response.razorpay_order_id || 'N/A',
-                razorpaySignature: response.razorpay_signature || 'N/A',
-                paymentStatus: 'Paid'
-              };
-              const finalOrder = await placeOrder(formData, 'Razorpay', paymentDetails);
-              if (finalOrder) {
-                setOrderPlaced(finalOrder);
-              }
-            } catch (err) {
-              console.error("Order creation error:", err);
-              setPaymentError("Payment succeeded but order creation failed. Please contact customer support.");
-            } finally {
-              setIsProcessing(false);
+      const options = {
+        key: razorpayKey,
+        amount: Math.round(finalTotal * 100),
+        currency: 'INR',
+        name: "NOOR WALLARTS & GIFTS",
+        description: `Order Payment (${totalItemsInCart} items)`,
+        image: storeSettings?.logoUrl || '/logo.jpg',
+        handler: async function (response) {
+          try {
+            setIsProcessing(true);
+            const paymentDetails = {
+              transactionId: response.razorpay_payment_id || `PAY_${Date.now()}`,
+              razorpayOrderId: response.razorpay_order_id || 'N/A',
+              razorpaySignature: response.razorpay_signature || 'N/A',
+              paymentStatus: 'Paid'
+            };
+            const finalOrder = await placeOrder(formData, 'Razorpay', paymentDetails);
+            if (finalOrder) {
+              setOrderPlaced(finalOrder);
             }
-          },
-          prefill: {
-            name: formData.name,
-            contact: formData.phone,
-            email: user?.email || ''
-          },
-          theme: {
-            color: "#D4AF37"
-          },
-          modal: {
-            ondismiss: function() {
-              setIsProcessing(false);
-              setPaymentError("Payment window was closed before completion. You can retry payment below.");
-            }
+          } catch (err) {
+            console.error("Order creation error:", err);
+            setPaymentError("Payment succeeded but order creation failed. Please contact customer support.");
+          } finally {
+            setIsProcessing(false);
           }
-        };
-
-        const rzp = new window.Razorpay(options);
-        
-        rzp.on('payment.failed', function (response) {
-          console.error("Razorpay Payment Failed:", response.error);
-          setIsProcessing(false);
-          const errorMsg = response.error?.description || "Payment failed or was declined. Please try again.";
-          setPaymentError(errorMsg);
-        });
-
-        rzp.open();
-      } catch (err) {
-        console.error("Razorpay Checkout Error:", err);
-        setPaymentError(err.message || "An unexpected error occurred while launching payment gateway.");
-        setIsProcessing(false);
-      }
-    } else {
-      try {
-        const order = await placeOrder(formData, 'COD', { paymentStatus: 'Pending (COD)' });
-        setIsProcessing(false);
-        if (order) {
-          setOrderPlaced(order);
+        },
+        prefill: {
+          name: formData.name,
+          contact: formData.phone,
+          email: user?.email || ''
+        },
+        theme: {
+          color: "#D4AF37"
+        },
+        modal: {
+          ondismiss: function() {
+            setIsProcessing(false);
+            setPaymentError("Payment window was closed before completion. You can retry payment below.");
+          }
         }
-      } catch (err) {
-        console.error("COD order error:", err);
-        setPaymentError(err.message || "Failed to place COD order.");
+      };
+
+      const rzp = new window.Razorpay(options);
+      
+      rzp.on('payment.failed', function (response) {
+        console.error("Razorpay Payment Failed:", response.error);
         setIsProcessing(false);
-      }
+        const errorMsg = response.error?.description || "Payment failed or was declined. Please try again.";
+        setPaymentError(errorMsg);
+      });
+
+      rzp.open();
+    } catch (err) {
+      console.error("Razorpay Checkout Error:", err);
+      setPaymentError(err.message || "An unexpected error occurred while launching payment gateway.");
+      setIsProcessing(false);
     }
   };
 
@@ -380,82 +366,32 @@ Thank you for shopping with Noor Wall Arts!`;
           </div>
 
           <h3 className="mt-4" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <CreditCard size={20} className="text-primary" /> Select Payment Method
+            <CreditCard size={20} className="text-primary" /> Payment Gateway
           </h3>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-            
-            <label 
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1.25rem',
-                border: paymentMethod === 'Razorpay' ? '2px solid var(--primary)' : '1px solid var(--border-color)',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                backgroundColor: paymentMethod === 'Razorpay' ? 'var(--surface-hover)' : 'var(--bg-color)',
-                transition: 'all 0.2s'
-              }}
-              onClick={() => setPaymentMethod('Razorpay')}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <input 
-                  type="radio" 
-                  name="paymentMethod" 
-                  checked={paymentMethod === 'Razorpay'} 
-                  onChange={() => setPaymentMethod('Razorpay')}
-                  style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
-                />
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    Razorpay Secure Checkout
-                    <span style={{ fontSize: '0.75rem', padding: '2px 8px', backgroundColor: '#D4AF37', color: '#000', borderRadius: '12px', fontWeight: 'bold' }}>Instant</span>
-                  </div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                    UPI (Google Pay, PhonePe, Paytm), Debit/Credit Cards, NetBanking, Wallets, EMI
-                  </div>
-                </div>
+          <div style={{ marginTop: '1rem', padding: '1.25rem', border: '2px solid var(--primary)', borderRadius: '12px', backgroundColor: 'var(--surface-hover)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+              <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                Razorpay Secure Checkout
+                <span style={{ fontSize: '0.75rem', padding: '2px 8px', backgroundColor: '#D4AF37', color: '#000', borderRadius: '12px', fontWeight: 'bold' }}>Instant</span>
               </div>
-              <ShieldCheck size={24} style={{ color: 'var(--primary)' }} />
-            </label>
+              <ShieldCheck size={28} style={{ color: 'var(--primary)' }} />
+            </div>
 
-            <label 
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1.25rem',
-                border: paymentMethod === 'COD' ? '2px solid var(--primary)' : '1px solid var(--border-color)',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                backgroundColor: paymentMethod === 'COD' ? 'var(--surface-hover)' : 'var(--bg-color)',
-                transition: 'all 0.2s'
-              }}
-              onClick={() => setPaymentMethod('COD')}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <input 
-                  type="radio" 
-                  name="paymentMethod" 
-                  checked={paymentMethod === 'COD'} 
-                  onChange={() => setPaymentMethod('COD')}
-                  style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
-                />
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: '1rem' }}>Cash on Delivery (COD)</div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                    Pay in cash upon doorstep delivery
-                  </div>
-                </div>
-              </div>
-              <Wallet size={24} style={{ color: 'var(--text-secondary)' }} />
-            </label>
+            <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+              Pay instantly using <strong>UPI (Google Pay, PhonePe, Paytm, BHIM)</strong>, Debit / Credit Cards (Visa, MasterCard, RuPay), NetBanking, Wallets, or EMI.
+            </p>
 
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              <span style={{ padding: '4px 10px', backgroundColor: 'var(--bg-color)', borderRadius: '6px', border: '1px solid var(--border-color)' }}>💳 Cards</span>
+              <span style={{ padding: '4px 10px', backgroundColor: 'var(--bg-color)', borderRadius: '6px', border: '1px solid var(--border-color)' }}>📱 UPI (GPay/PhonePe)</span>
+              <span style={{ padding: '4px 10px', backgroundColor: 'var(--bg-color)', borderRadius: '6px', border: '1px solid var(--border-color)' }}>🏦 Net Banking</span>
+              <span style={{ padding: '4px 10px', backgroundColor: 'var(--bg-color)', borderRadius: '6px', border: '1px solid var(--border-color)' }}>🔒 256-Bit SSL Encrypted</span>
+            </div>
           </div>
 
           {paymentError && (
-            <div style={{ marginTop: '1.5rem', padding: '1.25rem', backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '12px', color: '#991B1B' }}>
+            <div style={{ marginTop: '1.5rem', padding: '1.25rem', backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '12px', color '#991B1B' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, fontSize: '1rem', marginBottom: '0.5rem' }}>
                 <AlertCircle size={20} color="#DC2626" />
                 Payment Unsuccessful
@@ -503,7 +439,7 @@ Thank you for shopping with Noor Wall Arts!`;
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
           >
             <Lock size={18} />
-            {isProcessing ? 'Processing Payment...' : (paymentMethod === 'Razorpay' ? `Pay Now via Razorpay (₹${finalTotal.toFixed(2)})` : `Place COD Order (₹${finalTotal.toFixed(2)})`)}
+            {isProcessing ? 'Processing Payment...' : `Pay Now via Razorpay (₹${finalTotal.toFixed(2)})`}
           </button>
           {!isFormValid() && (
             <p style={{ color: 'var(--error)', fontSize: '0.8rem', textAlign: 'center', marginTop: '0.75rem' }}>
