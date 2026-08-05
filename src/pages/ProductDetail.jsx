@@ -164,22 +164,10 @@ const ProductDetail = () => {
     fetchCoupon();
   }, [product?.couponId]);
 
-  const handleReviewSubmit = async (e) => {
-    e.preventDefault();
-    if (!reviewForm.name.trim() || !reviewForm.comment.trim()) return;
-    
-    setIsSubmittingReview(true);
-    const success = await addReview(product.id, reviewForm);
-    if (success) {
-      setReviewForm({ name: '', rating: 5, comment: '' });
-    }
-    setIsSubmittingReview(false);
-  };
-
   // Scroll to top and reset state on load or when product id changes
   useEffect(() => {
     window.scrollTo(0, 0);
-    setReviewForm({ name: '', rating: 5, comment: '' });
+    setReviewForm({ rating: 5, title: '', comment: '' });
   }, [id]);
 
   if (!product) {
