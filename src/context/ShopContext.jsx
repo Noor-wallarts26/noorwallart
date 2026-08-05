@@ -353,6 +353,7 @@ export const ShopProvider = ({ children }) => {
 
     const sanitized = sanitizeOrder(rawOrderPayload);
 
+    // Deduct stock
     setProducts(prev => prev.map(p => {
       const cartItem = cartItems.find(c => c.productId === p.id);
       if (cartItem) {
@@ -365,6 +366,40 @@ export const ShopProvider = ({ children }) => {
       await setDoc(doc(db, "orders", sanitized.id), sanitized);
     } catch(err) {
       console.error("Error saving order: ", err);
+    }
+
+    // Auto Expire & Record Redemption for coupons used in order
+    const usedCouponCodes = Array.from(new Set(
+      cartWithProducts
+        .map(i => i.appliedCoupon?.code)
+        .filter(Boolean)
+    ));
+
+    for (const code of usedCouponCodes) {
+      try {
+        const q = query(collection(db, "coupons"), where("code", "==", code.toUpperCase()));
+        const snap = await getDocs(q);
+        snap.forEach(async (docSnap) => {
+          const cData = docSnap.data();
+          const newUsedCount = (Number(cData.usedCount) || 0) + 1;
+          const updates = {
+            usedCount: newUsedCount,
+            updatedAt: new Date().toISOString()
+          };
+
+          if (cData.usageMode === 'one_time' || (cData.usageLimit > 0 && newUsedCount >= cData.usageLimit)) {
+            updates.isActive = false;
+            updates.status = 'Expired';
+            updates.redeemedAt = new Date().toISOString();
+            updates.redeemedBy = customerDetails?.name || customerDetails?.phone || user?.uid || 'Customer';
+            updates.redeemedOrderId = sanitized.id;
+          }
+
+          await updateDoc(doc(db, "coupons", docSnap.id), updates);
+        });
+      } catch (cErr) {
+        console.error("Error updating coupon usage:", cErr);
+      }
     }
 
     setOrders(prev => [sanitized, ...prev]);
@@ -452,10 +487,25 @@ export const ShopProvider = ({ children }) => {
         couponData = { id: docSnap.id, ...docSnap.data() };
       });
 
-      if (!couponData.isActive) {
+      if (!couponData.isActive || couponData.status === 'Disabled') {
         return { success: false, error: "This coupon is currently inactive." };
       }
 
+      // Check One-Time Use / Auto Expire
+      if (couponData.usageMode === 'one_time' && (couponData.usedCount > 0 || couponData.redeemedAt || couponData.status === 'Expired')) {
+        return { success: false, error: "This coupon has already been used and has expired." };
+      }
+
+      // Check Start Date
+      if (couponData.startDate) {
+        const start = new Date(couponData.startDate).getTime();
+        const today = new Date().setHours(0,0,0,0);
+        if (start > today) {
+          return { success: false, error: `This coupon will become valid on ${new Date(couponData.startDate).toLocaleDateString()}.` };
+        }
+      }
+
+      // Check Expiry Date
       if (couponData.expiryDate) {
         const expiry = new Date(couponData.expiryDate).getTime();
         const today = new Date().setHours(0,0,0,0);
@@ -464,10 +514,11 @@ export const ShopProvider = ({ children }) => {
         }
       }
 
-      if (couponData.maxUses && couponData.maxUses > 0) {
+      // Check Usage Limit
+      if (couponData.usageLimit && couponData.usageLimit > 0) {
         const usedCount = Number(couponData.usedCount) || 0;
-        if (usedCount >= couponData.maxUses) {
-          return { success: false, error: "This coupon has reached its usage limit." };
+        if (usedCount >= couponData.usageLimit) {
+          return { success: false, error: "This coupon has reached its usage limit and has expired." };
         }
       }
 
