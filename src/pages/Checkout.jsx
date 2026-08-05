@@ -1,17 +1,20 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, CreditCard, Lock, Wallet, MessageCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, CreditCard, Lock, ShieldCheck, Wallet, MessageCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import MapPicker from '../components/MapPicker';
 import indiaData from '../utils/indiaStatesDistricts.json';
 import './Checkout.css';
 
 const Checkout = () => {
-  const { cartTotal, deliveryFee, totalItemsInCart, placeOrder, user, loading, deliveryAddress, appliedCoupon, couponDiscount, finalTotal: contextFinalTotal, paymentSettings } = useContext(ShopContext);
+  const { cartTotal, deliveryFee, totalItemsInCart, placeOrder, user, loading, deliveryAddress, appliedCoupon, couponDiscount, finalTotal: contextFinalTotal, paymentSettings, storeSettings } = useContext(ShopContext);
   const navigate = useNavigate();
   const location = useLocation();
   
-  const [paymentMethod, setPaymentMethod] = useState('UPI');
+  const [paymentMethod, setPaymentMethod] = useState('Razorpay');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(null);
+  const [paymentError, setPaymentError] = useState(null);
   
   const [formData, setFormData] = useState({
     name: deliveryAddress?.name || '',
@@ -27,7 +30,6 @@ const Checkout = () => {
     pincode: deliveryAddress?.pincode || '',
     addressType: deliveryAddress?.addressType || 'Home',
     instructions: deliveryAddress?.instructions || '',
-    upiRef: '',
     lat: deliveryAddress?.lat || null,
     lng: deliveryAddress?.lng || null
   });
@@ -41,13 +43,9 @@ const Checkout = () => {
       formData.area.trim() !== '' &&
       formData.district.trim() !== '' &&
       formData.state.trim() !== '' &&
-      formData.pincode.trim() !== '' &&
-      (paymentMethod !== 'UPI' || formData.upiRef.trim() !== '')
+      formData.pincode.trim() !== ''
     );
   };
-
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [orderPlaced, setOrderPlaced] = useState(null);
 
   const statesList = React.useMemo(() => {
     return indiaData.states.map(s => s.state).sort((a, b) => a.localeCompare(b));
@@ -65,6 +63,10 @@ const Checkout = () => {
     setFormData(prev => ({ ...prev, state: e.target.value, district: '' }));
   };
 
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   useEffect(() => {
     if (!loading) {
       if (!user) {
@@ -78,10 +80,6 @@ const Checkout = () => {
   if (loading || !user) {
     return <div className="checkout-page animate-fade-in"><div className="container" style={{padding: '2rem'}}>Loading...</div></div>;
   }
-
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -97,88 +95,92 @@ const Checkout = () => {
     });
   };
 
+  const finalTotal = contextFinalTotal ?? (cartTotal + deliveryFee);
+
   const handleCheckout = async () => {
+    setPaymentError(null);
     setIsProcessing(true);
 
-    if (paymentMethod === 'Online') {
+    if (paymentMethod === 'Razorpay') {
       const isScriptLoaded = await loadRazorpayScript();
       if (!isScriptLoaded) {
-        alert("Failed to load Razorpay SDK. Please check your internet connection.");
+        alert("Failed to load Razorpay Payment Gateway. Please check your internet connection.");
         setIsProcessing(false);
         return;
       }
       
       try {
-        const orderRes = await fetch('/api/create-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: finalTotal })
-        });
-        
-        const orderData = await orderRes.json();
-        
-        if (!orderRes.ok) throw new Error(orderData.error || 'Failed to create order');
-        
+        const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || paymentSettings?.razorpayKeyId || storeSettings?.razorpayKeyId || 'rzp_live_default';
+
         const options = {
-          key: orderData.key_id,
-          amount: orderData.amount,
-          currency: orderData.currency,
-          name: "Noor Wall Arts",
-          description: "Purchase Payment",
-          order_id: orderData.id,
+          key: razorpayKey,
+          amount: Math.round(finalTotal * 100),
+          currency: 'INR',
+          name: "NOOR WALLARTS & GIFTS",
+          description: `Order Payment (${totalItemsInCart} items)`,
+          image: storeSettings?.logoUrl || '/logo.jpg',
           handler: async function (response) {
             try {
               setIsProcessing(true);
-              const verifyRes = await fetch('/api/verify-payment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(response)
-              });
-              
-              const verifyData = await verifyRes.json();
-              if (verifyData.success) {
-                const finalOrder = await placeOrder(formData, 'Online', { transactionId: response.razorpay_payment_id });
-                if (finalOrder) setOrderPlaced(finalOrder);
-              } else {
-                alert("Payment verification failed! If money was deducted, it will be refunded.");
+              const paymentDetails = {
+                transactionId: response.razorpay_payment_id || `PAY_${Date.now()}`,
+                razorpayOrderId: response.razorpay_order_id || 'N/A',
+                razorpaySignature: response.razorpay_signature || 'N/A',
+                paymentStatus: 'Paid'
+              };
+              const finalOrder = await placeOrder(formData, 'Razorpay', paymentDetails);
+              if (finalOrder) {
+                setOrderPlaced(finalOrder);
               }
-              setIsProcessing(false);
             } catch (err) {
-              alert("Error verifying payment.");
+              console.error("Order creation error:", err);
+              setPaymentError("Payment succeeded but order creation failed. Please contact customer support.");
+            } finally {
               setIsProcessing(false);
             }
           },
           prefill: {
             name: formData.name,
             contact: formData.phone,
+            email: user?.email || ''
           },
           theme: {
-            color: "#d4af37"
+            color: "#D4AF37"
+          },
+          modal: {
+            ondismiss: function() {
+              setIsProcessing(false);
+              setPaymentError("Payment window was closed before completion. You can retry payment below.");
+            }
           }
         };
-        
+
         const rzp = new window.Razorpay(options);
+        
         rzp.on('payment.failed', function (response) {
-          alert("Payment Failed: " + response.error.description);
+          console.error("Razorpay Payment Failed:", response.error);
           setIsProcessing(false);
+          const errorMsg = response.error?.description || "Payment failed or was declined. Please try again.";
+          setPaymentError(errorMsg);
         });
+
         rzp.open();
       } catch (err) {
-        console.error("Payment error:", err);
-        alert(err.message || "Something went wrong with the payment system.");
+        console.error("Razorpay Checkout Error:", err);
+        setPaymentError(err.message || "An unexpected error occurred while launching payment gateway.");
         setIsProcessing(false);
       }
-    } else if (paymentMethod === 'UPI') {
-      const order = await placeOrder(formData, 'UPI');
-      setIsProcessing(false);
-      if (order) {
-        setOrderPlaced(order);
-      }
     } else {
-      const order = await placeOrder(formData, 'COD');
-      setIsProcessing(false);
-      if (order) {
-        setOrderPlaced(order);
+      try {
+        const order = await placeOrder(formData, 'COD', { paymentStatus: 'Pending (COD)' });
+        setIsProcessing(false);
+        if (order) {
+          setOrderPlaced(order);
+        }
+      } catch (err) {
+        console.error("COD order error:", err);
+        setPaymentError(err.message || "Failed to place COD order.");
+        setIsProcessing(false);
       }
     }
   };
@@ -198,53 +200,32 @@ const Checkout = () => {
     ].filter(Boolean).join(', ');
 
     const mapLink = order.customer?.lat && order.customer?.lng 
-      ? `https://www.google.com/maps/search/?api=1&query=${order.customer.lat},${order.customer.lng}` 
-      : null;
+      ? `https://maps.google.com/?q=${order.customer.lat},${order.customer.lng}`
+      : 'N/A';
 
-    const dateStr = order.timestamp 
-      ? new Date(order.timestamp).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
-      : new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+    const message = `🛍️ *NEW ORDER PLACED!*
 
-    const message = `🚨 *NEW ORDER ALERT* 🚨
+📦 *Order ID:* ${order.id}
+👤 *Customer:* ${order.customer?.name}
+📞 *Phone:* ${order.customer?.phone}
+🏠 *Delivery Address:* ${addressDetails}
+📍 *Google Maps:* ${mapLink}
 
-*Order ID:* ${order.id}
-*Order Date & Time:* ${dateStr}
+💳 *Payment Method:* ${order.paymentMethod}
+💰 *Total Amount:* ₹${order.totalPrice?.toFixed(2)}
+🔥 *Status:* ${order.status}
 
-*Customer Details:*
-• *Customer Name:* ${order.customer?.name || 'N/A'}
-• *Customer Phone Number:* ${order.customer?.phone || 'N/A'}
+🛒 *Ordered Products:*
+${order.itemsSummary}
 
-*Product(s):*
-${order.itemsSummary || 'N/A'}
+Thank you for shopping with Noor Wall Arts!`;
 
-*Order Details:*
-• *Total Amount:* ₹${order.totalPrice ? order.totalPrice.toFixed(2) : '0.00'}
-• *Payment Method:* ${order.paymentMethod || 'COD'}
-
-*Delivery Address:*
-${addressDetails || 'N/A'}${mapLink ? `\n*Location Map:* ${mapLink}` : ''}`;
-
-    const bizPhone = (storeSettings?.whatsapp || '8925325330').replace(/\D/g, '');
-    const whatsappNumber = bizPhone.startsWith('91') || bizPhone.length > 10 ? bizPhone : `91${bizPhone}`;
-    const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-
-    try {
-      window.open(waUrl, '_blank');
-    } catch (e) {
-      console.error("Error launching WhatsApp:", e);
-    }
+    const whatsappUrl = `https://wa.me/918925325330?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
-  useEffect(() => {
-    if (orderPlaced) {
-      sendInstantWhatsAppNotification(orderPlaced);
-    }
-  }, [orderPlaced]);
-
   const handleWhatsAppOrder = () => {
-    if (orderPlaced) {
-      sendInstantWhatsAppNotification(orderPlaced);
-    }
+    sendInstantWhatsAppNotification(orderPlaced);
   };
 
   if (orderPlaced) {
@@ -255,7 +236,7 @@ ${addressDetails || 'N/A'}${mapLink ? `\n*Location Map:* ${mapLink}` : ''}`;
             <CheckCircle2 size={64} color="var(--success)" className="success-icon" />
             <h2>Order Placed Successfully!</h2>
             <p className="order-id">Order ID: <strong>{orderPlaced.id}</strong></p>
-            <p className="order-msg">Thank you for shopping with Noor Wall Arts. Your order is being processed and will be shipped soon.</p>
+            <p className="order-msg">Thank you for shopping with Noor Wall Arts & Gifts. Your order is confirmed and will be shipped soon.</p>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem', flexWrap: 'wrap' }}>
               <button className="btn-primary" onClick={() => navigate('/')}>Continue Shopping</button>
               <button 
@@ -271,8 +252,6 @@ ${addressDetails || 'N/A'}${mapLink ? `\n*Location Map:* ${mapLink}` : ''}`;
       </div>
     );
   }
-
-  const finalTotal = contextFinalTotal ?? (cartTotal + deliveryFee);
 
   return (
     <div className="checkout-page animate-fade-in">
@@ -401,75 +380,98 @@ ${addressDetails || 'N/A'}${mapLink ? `\n*Location Map:* ${mapLink}` : ''}`;
           </div>
 
           <h3 className="mt-4" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Wallet size={20} className="text-primary" /> Payment
+            <CreditCard size={20} className="text-primary" /> Select Payment Method
           </h3>
 
-          {paymentMethod === 'UPI' && (
-            <div className="stripe-mock-container animate-fade-in" style={{ textAlign: 'center', padding: '2rem', marginTop: '1.5rem', background: 'var(--surface-variant)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-              <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
-                Scan the QR Code to pay <strong>&#8377;{finalTotal.toFixed(2)}</strong> via any UPI App.
-              </p>
-
-              {/* QR Code with Noor Wallarts logo overlay in center */}
-              <div style={{ display: 'inline-block', position: 'relative', background: '#fff', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                {paymentSettings?.qrCodeUrl ? (
-                  <>
-                    <img
-                      src={paymentSettings.qrCodeUrl}
-                      alt="Payment QR Code"
-                      style={{ width: '200px', height: '200px', display: 'block', borderRadius: '4px' }}
-                    />
-                    {/* Noor Wallarts Logo – center overlay */}
-                    <div style={{
-                      position: 'absolute',
-                      top: '50%', left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      width: '44px', height: '44px',
-                      borderRadius: '50%',
-                      overflow: 'hidden',
-                      border: '3px solid #fff',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
-                      backgroundColor: '#fff',
-                      pointerEvents: 'none'
-                    }}>
-                      <img
-                        src="/logo.jpg"
-                        alt="Noor Wallarts"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <div style={{ width: '200px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94A3B8', fontSize: '0.85rem', flexDirection: 'column', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '2rem' }}>&#x1F4F7;</span>
-                    <span>QR Code not set.<br/>Please contact support.</span>
-                  </div>
-                )}
-              </div>
-
-              {paymentSettings?.upiId && (
-                <p style={{ marginTop: '1rem', fontWeight: 'bold', fontSize: '0.95rem' }}>
-                  UPI ID: <span style={{ color: 'var(--primary)', letterSpacing: '0.03em' }}>{paymentSettings.upiId}</span>
-                </p>
-              )}
-              
-              <div className="form-group stripe-input-group" style={{ marginTop: '2rem', textAlign: 'left' }}>
-                <label>UPI Transaction Reference Number *</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+            
+            <label 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '1.25rem',
+                border: paymentMethod === 'Razorpay' ? '2px solid var(--primary)' : '1px solid var(--border-color)',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                backgroundColor: paymentMethod === 'Razorpay' ? 'var(--surface-hover)' : 'var(--bg-color)',
+                transition: 'all 0.2s'
+              }}
+              onClick={() => setPaymentMethod('Razorpay')}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <input 
-                  type="text" 
-                  name="upiRef" 
-                  value={formData.upiRef} 
-                  onChange={handleInputChange} 
-                  placeholder="Enter 12-digit UPI reference number" 
-                  required
+                  type="radio" 
+                  name="paymentMethod" 
+                  checked={paymentMethod === 'Razorpay'} 
+                  onChange={() => setPaymentMethod('Razorpay')}
+                  style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
                 />
-                <p style={{ fontSize: '0.85rem', color: '#B45309', backgroundColor: '#FEF3C7', padding: '0.75rem', borderRadius: '8px', marginTop: '0.75rem', border: '1px solid #FCD34D', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <span>&#x26A0;&#xFE0F;</span>
-                  <span><strong>Important:</strong> Please enter the correct 12-digit Transaction ID. Incorrect IDs will result in order cancellation.</span>
-                </p>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    Razorpay Secure Checkout
+                    <span style={{ fontSize: '0.75rem', padding: '2px 8px', backgroundColor: '#D4AF37', color: '#000', borderRadius: '12px', fontWeight: 'bold' }}>Instant</span>
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                    UPI (Google Pay, PhonePe, Paytm), Debit/Credit Cards, NetBanking, Wallets, EMI
+                  </div>
+                </div>
               </div>
+              <ShieldCheck size={24} style={{ color: 'var(--primary)' }} />
+            </label>
+
+            <label 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '1.25rem',
+                border: paymentMethod === 'COD' ? '2px solid var(--primary)' : '1px solid var(--border-color)',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                backgroundColor: paymentMethod === 'COD' ? 'var(--surface-hover)' : 'var(--bg-color)',
+                transition: 'all 0.2s'
+              }}
+              onClick={() => setPaymentMethod('COD')}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <input 
+                  type="radio" 
+                  name="paymentMethod" 
+                  checked={paymentMethod === 'COD'} 
+                  onChange={() => setPaymentMethod('COD')}
+                  style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
+                />
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '1rem' }}>Cash on Delivery (COD)</div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                    Pay in cash upon doorstep delivery
+                  </div>
+                </div>
+              </div>
+              <Wallet size={24} style={{ color: 'var(--text-secondary)' }} />
+            </label>
+
+          </div>
+
+          {paymentError && (
+            <div style={{ marginTop: '1.5rem', padding: '1.25rem', backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '12px', color: '#991B1B' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, fontSize: '1rem', marginBottom: '0.5rem' }}>
+                <AlertCircle size={20} color="#DC2626" />
+                Payment Unsuccessful
+              </div>
+              <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: '#7F1D1D' }}>{paymentError}</p>
+              <button 
+                type="button" 
+                className="btn-primary" 
+                onClick={handleCheckout} 
+                style={{ padding: '0.6rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', backgroundColor: '#DC2626' }}
+              >
+                <RefreshCw size={16} /> Retry Payment
+              </button>
             </div>
           )}
+
         </div>
 
         <div className="checkout-summary card">
@@ -498,8 +500,10 @@ ${addressDetails || 'N/A'}${mapLink ? `\n*Location Map:* ${mapLink}` : ''}`;
             className="btn-primary checkout-btn" 
             onClick={handleCheckout} 
             disabled={isProcessing || !isFormValid()}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
           >
-            {isProcessing ? 'Processing Order...' : `Complete Order (₹${finalTotal.toFixed(2)})`}
+            <Lock size={18} />
+            {isProcessing ? 'Processing Payment...' : (paymentMethod === 'Razorpay' ? `Pay Now via Razorpay (₹${finalTotal.toFixed(2)})` : `Place COD Order (₹${finalTotal.toFixed(2)})`)}
           </button>
           {!isFormValid() && (
             <p style={{ color: 'var(--error)', fontSize: '0.8rem', textAlign: 'center', marginTop: '0.75rem' }}>

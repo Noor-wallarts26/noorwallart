@@ -325,7 +325,9 @@ export const ShopProvider = ({ children }) => {
       adminMessage: "",
       paymentMethod: paymentMethod,
       transactionId: paymentDetails?.transactionId || "N/A",
-      paymentStatus: paymentMethod === 'COD' ? 'Pending (COD)' : 'Paid Verification',
+      razorpayOrderId: paymentDetails?.razorpayOrderId || "N/A",
+      razorpaySignature: paymentDetails?.razorpaySignature || "N/A",
+      paymentStatus: paymentMethod === 'COD' ? 'Pending (COD)' : (paymentDetails?.paymentStatus || 'Paid'),
       customer: customerDetails,
       items: cartWithProducts
     };
