@@ -9,7 +9,7 @@ const Footer = () => {
   // Use settings from DB, fallback to defaults
   const rawWhatsapp = storeSettings?.whatsapp || '8925325330';
   const whatsapp = (rawWhatsapp === '8525325330') ? '8925325330' : rawWhatsapp;
-  const email = storeSettings?.email || 'noorwallartsofficial@gmail.com';
+  const email = storeSettings?.email || 'noorkarts.in@gmail.com';
   const instagram = storeSettings?.instagram || '@noor.wallarts';
   
   // Format instagram handle for link (remove @ if present)
@@ -30,7 +30,7 @@ const Footer = () => {
               <Phone size={18} />
               Call: +91 8925325330
             </a>
-            <a href="mailto:noorwallartsofficial@gmail.com" className="btn-outline contact-btn" style={{ padding: '0.5rem 1rem', width: 'fit-content' }}>
+            <a href="mailto:noorkarts.in@gmail.com" className="btn-outline contact-btn" style={{ padding: '0.5rem 1rem', width: 'fit-content' }}>
               <Mail size={18} />
               Email Us
             </a>
