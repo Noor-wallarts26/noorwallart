@@ -473,6 +473,60 @@ export const ShopProvider = ({ children }) => {
         return { success: false, error: `Minimum order amount of ₹${minAmount} required to use this coupon.` };
       }
 
+      // Check Multi-Category & Multi-Product Applicability
+      const selCats = Array.isArray(couponData.assignedCategories)
+        ? couponData.assignedCategories
+        : (Array.isArray(couponData.categoryIds)
+          ? couponData.categoryIds
+          : (couponData.assignedCategory ? [couponData.assignedCategory] : ['All Categories']));
+
+      const selProds = Array.isArray(couponData.assignedProducts)
+        ? couponData.assignedProducts
+        : (Array.isArray(couponData.productIds)
+          ? couponData.productIds
+          : (couponData.assignedProduct ? [couponData.assignedProduct] : ['All Products']));
+
+      const isAllCats = selCats.length === 0 || selCats.includes('All Categories');
+      const isAllProds = selProds.length === 0 || selProds.includes('All Products');
+
+      // If specific categories or products are specified, validate cart items
+      if (!isAllCats || !isAllProds) {
+        const hasEligibleItem = cartWithProducts.some(item => {
+          const p = item.product;
+          if (!p) return false;
+
+          let catMatch = false;
+          if (isAllCats) {
+            catMatch = true;
+          } else {
+            const pCat = (p.category || '').trim().toLowerCase();
+            const pCats = Array.isArray(p.categories) ? p.categories.map(c => (c || '').trim().toLowerCase()) : [];
+            catMatch = selCats.some(sc => {
+              const cleanSC = String(sc).trim().toLowerCase();
+              return pCat === cleanSC || pCats.includes(cleanSC);
+            });
+          }
+
+          let prodMatch = false;
+          if (isAllProds) {
+            prodMatch = true;
+          } else {
+            const pTitle = (p.title || p.name || '').trim().toLowerCase();
+            const pId = String(p.id || '').trim().toLowerCase();
+            prodMatch = selProds.some(sp => {
+              const cleanSP = String(sp).trim().toLowerCase();
+              return pTitle === cleanSP || pId === cleanSP;
+            });
+          }
+
+          return catMatch || prodMatch;
+        });
+
+        if (!hasEligibleItem) {
+          return { success: false, error: "This coupon is not applicable to any of the items in your cart." };
+        }
+      }
+
       // Calculate Discount Value
       let discountAmt = 0;
       if (couponData.discountType === 'percentage') {
