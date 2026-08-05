@@ -147,14 +147,50 @@ const Account = () => {
                           <span className="order-total-mini" style={{ fontWeight: 'bold', color: 'var(--primary)' }}>₹{order.totalPrice.toFixed(2)}</span>
                         </div>
                         
-                        <p className="order-status-mini" style={{ 
-                          fontWeight: '600',
-                          color: order.status === 'Delivered' ? 'var(--success, #10b981)' 
-                               : order.status === 'Cancelled' ? 'var(--error, #ef4444)' 
-                               : 'var(--warning, #f59e0b)' 
-                        }}>
-                          Status: {order.status}
-                        </p>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                          <span className="order-status-mini" style={{ 
+                            fontWeight: '600',
+                            color: (order.status || '').toLowerCase() === 'delivered' ? '#16a34a' 
+                                 : (order.status || '').toLowerCase() === 'cancelled' ? '#ef4444' 
+                                 : '#f59e0b' 
+                          }}>
+                            Status: {order.status}
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                            {new Date(order.timestamp).toLocaleDateString()}
+                          </span>
+                        </div>
+
+                        {/* ORDER ITEMS LIST */}
+                        {Array.isArray(order.items) && order.items.length > 0 && (
+                          <div style={{ marginTop: '0.75rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.75rem' }}>
+                            {order.items.map((item, idx) => (
+                              <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.6rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                  <img src={item.imageUrl || '/logo.jpg'} alt={item.title} style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover' }} />
+                                  <div>
+                                    <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{item.title}</p>
+                                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Qty: {item.quantity} × ₹{item.price}</p>
+                                  </div>
+                                </div>
+
+                                {(order.status || '').toLowerCase() === 'delivered' && (
+                                  <button
+                                    onClick={() => navigate(`/product/${item.productId}`)}
+                                    style={{
+                                      padding: '0.35rem 0.75rem', borderRadius: '6px',
+                                      backgroundColor: 'var(--primary, #4f46e5)', color: '#fff',
+                                      border: 'none', fontSize: '0.75rem', fontWeight: 600,
+                                      cursor: 'pointer', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '0.25rem'
+                                    }}
+                                  >
+                                    ⭐ Write Review
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         
                         {order.adminMessage && (
                           <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: 'var(--surface-variant)', borderRadius: '8px', borderLeft: '3px solid var(--primary)' }}>

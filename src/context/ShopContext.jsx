@@ -222,21 +222,117 @@ export const ShopProvider = ({ children }) => {
     setCartItems(prev => prev.filter(item => item.productId !== productId));
   };
 
-  const addReview = async (productId, reviewData) => {
+  const checkUserProductReviewEligibility = async (userId, productId) => {
+    if (!userId || !productId) {
+      return { canReview: false, reason: "NOT_LOGGED_IN", message: "Only customers who have purchased and received this product can leave a review." };
+    }
+
     try {
-      const productRef = doc(db, 'products', productId.toString());
+      const userOrders = await fetchMyOrders(userId);
+
+      const deliveredOrdersWithProduct = userOrders.filter(order => {
+        const isDelivered = (order.status || '').toLowerCase() === 'delivered';
+        const hasProduct = Array.isArray(order.items) && order.items.some(item => String(item.productId) === String(productId));
+        return isDelivered && hasProduct;
+      });
+
+      if (deliveredOrdersWithProduct.length === 0) {
+        return { 
+          canReview: false, 
+          reason: "NOT_DELIVERED", 
+          message: "Only customers who have purchased and received this product can leave a review." 
+        };
+      }
+
+      const q = query(
+        collection(db, "reviews"),
+        where("userId", "==", userId),
+        where("productId", "==", String(productId))
+      );
+      const reviewSnap = await getDocs(q);
+      const existingReviews = [];
+      reviewSnap.forEach(d => existingReviews.push({ id: d.id, ...d.data() }));
+
+      const unreviewedOrders = deliveredOrdersWithProduct.filter(order => {
+        return !existingReviews.some(rev => String(rev.orderId) === String(order.id));
+      });
+
+      if (unreviewedOrders.length === 0) {
+        return {
+          canReview: false,
+          reason: "ALREADY_REVIEWED",
+          message: "You have already reviewed this product for your purchase.",
+          existingReview: existingReviews[0]
+        };
+      }
+
+      return {
+        canReview: true,
+        reason: "ELIGIBLE",
+        eligibleOrders: unreviewedOrders,
+        targetOrderId: unreviewedOrders[0].id
+      };
+    } catch (err) {
+      console.error("Error checking review eligibility:", err);
+      return { canReview: false, reason: "ERROR", message: "Failed to verify review eligibility." };
+    }
+  };
+
+  const addVerifiedReview = async ({ productId, orderId, rating, title, comment, imageUrls = [] }) => {
+    if (!user) return { success: false, error: "Please log in to submit a review." };
+
+    const eligibility = await checkUserProductReviewEligibility(user.uid, productId);
+    if (!eligibility.canReview) {
+      return { success: false, error: eligibility.message };
+    }
+
+    const product = products.find(p => String(p.id) === String(productId));
+    if (!product) return { success: false, error: "Product not found." };
+
+    if (Array.isArray(imageUrls) && imageUrls.length > 2) {
+      return { success: false, error: "Maximum 2 review images allowed." };
+    }
+
+    const reviewDoc = {
+      id: `REV-${Date.now()}`,
+      userId: user.uid,
+      userName: user.displayName || user.email || user.phoneNumber || 'Verified Customer',
+      userPhone: user.phoneNumber || '',
+      productId: String(productId),
+      productTitle: product.title || 'Product',
+      orderId: String(orderId || eligibility.targetOrderId || 'N/A'),
+      rating: Number(rating) || 5,
+      title: (title || '').trim(),
+      comment: (comment || '').trim(),
+      imageUrls: imageUrls || [],
+      isVerifiedPurchase: true,
+      approved: true,
+      status: 'Approved',
+      createdAt: new Date().toISOString(),
+      timestamp: Date.now()
+    };
+
+    try {
+      await addDoc(collection(db, "reviews"), reviewDoc);
+
+      const productRef = doc(db, 'products', String(productId));
       await updateDoc(productRef, {
         reviews: arrayUnion({
-          ...reviewData,
-          timestamp: Date.now(),
-          id: Math.random().toString(36).substring(7)
+          id: reviewDoc.id,
+          name: reviewDoc.userName,
+          rating: reviewDoc.rating,
+          title: reviewDoc.title,
+          comment: reviewDoc.comment,
+          imageUrls: reviewDoc.imageUrls,
+          isVerifiedPurchase: true,
+          timestamp: reviewDoc.timestamp
         })
       });
-      
+
       setProducts(prev => prev.map(p => {
-        if (p.id === productId) {
-          const newReviews = [...(p.reviews || []), { ...reviewData, timestamp: Date.now(), id: 'temp' }];
-          const newRating = newReviews.reduce((acc, r) => acc + r.rating, 0) / newReviews.length;
+        if (String(p.id) === String(productId)) {
+          const newReviews = [...(p.reviews || []), reviewDoc];
+          const newRating = newReviews.reduce((acc, r) => acc + (r.rating || 5), 0) / newReviews.length;
           return {
             ...p,
             reviews: newReviews,
@@ -246,11 +342,16 @@ export const ShopProvider = ({ children }) => {
         }
         return p;
       }));
-      return true;
-    } catch (error) {
-      console.error("Error adding review: ", error);
-      return false;
+
+      return { success: true, message: "Thank you! Your verified review has been submitted." };
+    } catch (err) {
+      console.error("Error submitting verified review:", err);
+      return { success: false, error: "Failed to submit review. Please try again." };
     }
+  };
+
+  const addReview = async (productId, reviewData) => {
+    return addVerifiedReview({ productId, ...reviewData });
   };
 
   const updateProductSliderStatus = async (productId, showInSlider) => {
@@ -680,6 +781,8 @@ export const ShopProvider = ({ children }) => {
       fetchMyOrders,
       updateOrderStatus,
       addReview,
+      addVerifiedReview,
+      checkUserProductReviewEligibility,
       updateProductSliderStatus,
       updateProductDeliveryCharge,
       user,
