@@ -8,17 +8,26 @@ import './Home.css';
 
 
 const PromoBanner = ({ storeSettings }) => {
+  const [videoError, setVideoError] = React.useState(false);
+
+  React.useEffect(() => {
+    setVideoError(false);
+  }, [storeSettings?.homepageVideoUrl]);
+
   return (
     <div className="promo-banner">
-      {storeSettings?.homepageVideoUrl ? (
+      {storeSettings?.homepageVideoUrl && !videoError ? (
         <video 
+          key={storeSettings.homepageVideoUrl}
           src={storeSettings.homepageVideoUrl} 
           autoPlay 
           loop 
           muted 
           playsInline 
+          preload="auto"
+          onError={() => setVideoError(true)}
           className="promo-img" 
-          style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+          style={{ objectFit: 'cover', width: '100%', height: '100%', display: 'block' }}
         />
       ) : (
         <img src={storeSettings?.homepageBannerUrl || "/modern_wall_decor.png"} alt="Premium Wall Decor" className="promo-img" />
