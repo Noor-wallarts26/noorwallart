@@ -423,7 +423,9 @@ export const ShopProvider = ({ children }) => {
       };
     }).filter(Boolean);
 
-    const subtotal = cartWithProducts.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const origSubtotal = cartWithProducts.reduce((sum, item) => sum + (item.originalPrice * item.quantity), 0);
+    const totDiscount = cartWithProducts.reduce((sum, item) => sum + (item.discountAmount * item.quantity), 0);
+    const discountedSubtotal = cartWithProducts.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const deliveryFee = cartWithProducts.reduce((sum, item) => {
       const charge = item.product.deliveryCharge !== undefined ? Number(item.product.deliveryCharge) : 80;
       return sum + (charge * item.quantity);
@@ -436,10 +438,11 @@ export const ShopProvider = ({ children }) => {
       id: orderId,
       userId: user?.uid || null,
       timestamp: Date.now(),
-      subtotal: subtotal,
+      originalSubtotal: origSubtotal,
+      subtotal: origSubtotal,
       deliveryFee: deliveryFee,
-      discount: 0,
-      totalPrice: subtotal + deliveryFee,
+      discount: totDiscount,
+      totalPrice: discountedSubtotal + deliveryFee,
       itemsSummary: summary,
       status: "Pending",
       adminMessage: "",
@@ -738,7 +741,9 @@ export const ShopProvider = ({ children }) => {
     };
   }).filter(Boolean);
 
+  const originalSubtotal = cartWithProducts.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
   const cartTotal = cartWithProducts.reduce((sum, item) => sum + item.itemSubtotal, 0);
+  const totalCouponDiscount = originalSubtotal - cartTotal;
   const deliveryFee = cartWithProducts.reduce((sum, item) => {
     const charge = item.product.deliveryCharge !== undefined ? Number(item.product.deliveryCharge) : 80;
     return sum + (charge * item.quantity);
@@ -767,6 +772,8 @@ export const ShopProvider = ({ children }) => {
       filteredProducts,
       wishlistedProducts: products.filter(p => p.isWishlisted),
       cartWithProducts,
+      originalSubtotal,
+      totalCouponDiscount,
       cartTotal,
       deliveryFee,
       finalTotal,

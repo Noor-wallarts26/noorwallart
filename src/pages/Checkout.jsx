@@ -7,7 +7,7 @@ import indiaData from '../utils/indiaStatesDistricts.json';
 import './Checkout.css';
 
 const Checkout = () => {
-  const { cartTotal, deliveryFee, totalItemsInCart, placeOrder, user, loading, deliveryAddress, appliedCoupon, couponDiscount, finalTotal: contextFinalTotal, paymentSettings, storeSettings } = useContext(ShopContext);
+  const { cartWithProducts, originalSubtotal, totalCouponDiscount, cartTotal, deliveryFee, totalItemsInCart, placeOrder, user, loading, deliveryAddress, finalTotal: contextFinalTotal, paymentSettings, storeSettings } = useContext(ShopContext);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -411,25 +411,25 @@ Thank you for shopping with Noor Wall Arts!`;
         </div>
 
         <div className="checkout-summary card">
-          <h3>Order Total</h3>
+          <h3>Order Summary</h3>
           <div className="summary-row">
-            <span>Items ({totalItemsInCart})</span>
-            <span>₹{cartTotal.toFixed(2)}</span>
+            <span>Original Price ({totalItemsInCart} items)</span>
+            <span>₹{(originalSubtotal || cartTotal).toFixed(2)}</span>
           </div>
-          <div className="summary-row">
-            <span>Shipping</span>
-            <span>{deliveryFee === 0 ? 'Free' : `₹${deliveryFee.toFixed(2)}`}</span>
-          </div>
-          {couponDiscount > 0 && (
+          {totalCouponDiscount > 0 && (
             <div className="summary-row" style={{ color: '#16A34A', fontWeight: 600 }}>
-              <span>Coupon ({appliedCoupon?.code})</span>
-              <span>-₹{couponDiscount.toFixed(2)}</span>
+              <span>Coupon Discount</span>
+              <span>-₹{totalCouponDiscount.toFixed(2)}</span>
             </div>
           )}
+          <div className="summary-row">
+            <span>Shipping Charge</span>
+            <span>{deliveryFee === 0 ? 'FREE' : `₹${deliveryFee.toFixed(2)}`}</span>
+          </div>
           <hr className="detail-divider" />
           <div className="summary-row total">
-            <span>Total Payable</span>
-            <span>₹{finalTotal.toFixed(2)}</span>
+            <span>Final Payable Amount</span>
+            <span style={{ color: 'var(--primary)', fontWeight: 800 }}>₹{finalTotal.toFixed(2)}</span>
           </div>
 
           <button 
