@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
-import { ShopProvider } from './context/ShopContext';
+import { ShopProvider, ShopContext } from './context/ShopContext';
 import Navbar from './components/Navbar';
 import TopBar from './components/TopBar';
 import Footer from './components/Footer';

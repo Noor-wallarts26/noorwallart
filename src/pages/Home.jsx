@@ -4,23 +4,46 @@ import { Search, X, ShoppingBag } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import ProductCard from '../components/ProductCard';
 import HeroSlider from '../components/HeroSlider';
-import BannerSlider from '../components/BannerSlider';
 import './Home.css';
+
+
+const PromoBanner = ({ storeSettings }) => {
+  return (
+    <div className="promo-banner">
+      {storeSettings?.homepageVideoUrl ? (
+        <video 
+          src={storeSettings.homepageVideoUrl} 
+          autoPlay 
+          loop 
+          muted 
+          playsInline 
+          className="promo-img" 
+          style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+        />
+      ) : (
+        <img src={storeSettings?.homepageBannerUrl || "/modern_wall_decor.png"} alt="Premium Wall Decor" className="promo-img" />
+      )}
+      <div className="promo-overlay"></div>
+      <div className="promo-content">
+        <h2 className="brand-title" style={{ color: '#ffffff' }}>Noor Wall Arts & Gifts</h2>
+        <p style={{ color: '#ffffff' }}>Premium Wall Decor <br />& Customized Gifts</p>
+      </div>
+    </div>
+  );
+};
 
 const Home = () => {
   const { 
     searchQuery, setSearchQuery, 
     selectedCategory, setSelectedCategory, 
     filteredProducts, products, isProductsLoading,
-    storeSettings,
-    banners
+    storeSettings
   } = useContext(ShopContext);
 
   const sliderProducts = products.filter(p => p.showInSlider).length > 0 
     ? products.filter(p => p.showInSlider)
     : products.slice(0, 10); // Fallback to first 10 products if none are explicitly set
 
-  const activeBanners = banners ? banners.filter(b => b.isActive && b.showOnHomepage) : [];
 
   return (
     <div className="home-page animate-fade-in">
@@ -55,21 +78,8 @@ const Home = () => {
         </div>
       </header>
       <div className="container">
-        
-        {storeSettings?.homepageVideoUrl ? (
-          <div style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', marginBottom: '2rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-            <video 
-              src={storeSettings.homepageVideoUrl} 
-              autoPlay 
-              loop 
-              muted 
-              playsInline 
-              style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '85vh', objectFit: 'cover' }} 
-            />
-          </div>
-        ) : activeBanners.length > 0 ? (
-          <BannerSlider banners={activeBanners} />
-        ) : null}
+
+        <PromoBanner storeSettings={storeSettings} />
         {sliderProducts.length > 0 && <HeroSlider products={sliderProducts} />}
 
         {isProductsLoading ? (

@@ -37,13 +37,28 @@ export const ShopProvider = ({ children }) => {
   // Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      // FORCE LOGOUT ALL EXISTING USERS (V1)
+      try {
+        const hasForcedLogout = localStorage.getItem('v1_forced_logout');
+        if (!hasForcedLogout) {
+          if (currentUser) {
+            signOut(auth).then(() => {
+              localStorage.setItem('v1_forced_logout', 'true');
+            });
+            setUser(null);
+            setLoading(false);
+            return;
+          } else {
+            localStorage.setItem('v1_forced_logout', 'true');
+          }
+        }
+      } catch(e) {}
+
       setUser(currentUser);
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
-
-  const [banners, setBanners] = useState([]);
 
   // Fetch products from Firestore
   useEffect(() => {
@@ -76,45 +91,6 @@ export const ShopProvider = ({ children }) => {
         // Fallback to initial products if Firestore fails (e.g. rules issues)
         setProducts(initialProducts);
         setIsProductsLoading(false);
-      });
-      return () => unsubscribe();
-    });
-  }, []);
-
-  // Fetch banners from Firestore
-  useEffect(() => {
-    import('firebase/firestore').then(({ collection, onSnapshot }) => {
-      const unsubscribe = onSnapshot(collection(db, "banners"), (snapshot) => {
-        const bannersData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        // Force newest banners to show first unconditionally
-        bannersData.sort((a, b) => {
-          return (b.createdAt || 0) - (a.createdAt || 0);
-        });
-        setBanners(bannersData);
-      }, (error) => {
-        console.error("Error fetching banners: ", error);
-      });
-      return () => unsubscribe();
-    });
-  }, []);
-
-  const [categories, setCategories] = useState([]);
-
-  // Fetch categories from Firestore
-  useEffect(() => {
-    import('firebase/firestore').then(({ collection, onSnapshot }) => {
-      const unsubscribe = onSnapshot(collection(db, "categories"), (snapshot) => {
-        const cats = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        cats.sort((a, b) => (a.order || 0) - (b.order || 0));
-        setCategories(cats);
-      }, (error) => {
-        console.error("Error fetching categories: ", error);
       });
       return () => unsubscribe();
     });
@@ -541,8 +517,6 @@ export const ShopProvider = ({ children }) => {
 
   return (
     <ShopContext.Provider value={{
-      categories,
-      banners,
       products,
       cartItems,
       orders,
