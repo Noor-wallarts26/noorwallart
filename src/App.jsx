@@ -19,33 +19,36 @@ import Categories from './pages/Categories';
 import Admin from './pages/Admin';
 import SplashScreen from './components/SplashScreen';
 import SwipeNavigator from './components/SwipeNavigator';
+import MaintenanceGuard from './components/MaintenanceGuard';
 
 function App() {
   return (
     <ShopProvider>
-      <SplashScreen />
-      <HashRouter>
-        <SwipeNavigator>
-          <TopBar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/store-info" element={<StoreInfo />} />
-            <Route path="/categories" element={<Categories />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="*" element={<Home />} />
-          </Routes>
-          <Navbar />
-          <WhatsAppButton />
-        </SwipeNavigator>
-      </HashRouter>
+      <MaintenanceGuard>
+        <SplashScreen />
+        <HashRouter>
+          <SwipeNavigator>
+            <TopBar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/account" element={<Account />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/store-info" element={<StoreInfo />} />
+              <Route path="/categories" element={<Categories />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="*" element={<Home />} />
+            </Routes>
+            <Navbar />
+            <WhatsAppButton />
+          </SwipeNavigator>
+        </HashRouter>
+      </MaintenanceGuard>
     </ShopProvider>
   );
 }

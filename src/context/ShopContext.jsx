@@ -3,6 +3,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { doc, updateDoc, arrayUnion, collection, query, where, getDocs, setDoc } from 'firebase/firestore';
 import { cleanInput, isRateLimited, isValidCouponCode } from '../utils/security';
+import { generateUniqueOrderId, sanitizeOrder, sendWhatsAppOrderNotification } from '../utils/orderUtils';
 
 export const ShopContext = createContext();
 
@@ -311,32 +312,49 @@ export const ShopProvider = ({ children }) => {
 
     const cartWithProducts = cartItems.map(item => {
       const product = products.find(p => p.id === item.productId);
-      return { product, quantity: item.quantity };
+      return { 
+        title: product?.title || 'Product',
+        imageUrl: product?.imageUrl || product?.logoUrl || '/logo.jpg',
+        price: product?.price || 0,
+        quantity: item.quantity,
+        variant: item.variant || 'N/A',
+        size: item.size || 'N/A',
+        color: item.color || 'N/A',
+        frameType: item.frameType || 'N/A',
+        product: product 
+      };
     }).filter(i => i.product);
 
-    const total = cartWithProducts.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    const subtotal = cartWithProducts.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const deliveryFee = cartWithProducts.reduce((sum, item) => {
       const charge = item.product.deliveryCharge !== undefined ? Number(item.product.deliveryCharge) : 80;
       return sum + (charge * item.quantity);
     }, 0);
-    const summary = cartWithProducts.map(item => `${item.product.title} (x${item.quantity})`).join(", ");
+    const discount = appliedCoupon ? Math.min(appliedCoupon.discountAmount || 0, subtotal) : 0;
+    const summary = cartWithProducts.map(item => `${item.title} (x${item.quantity})`).join(", ");
 
-    const orderId = "AMZ" + Math.floor(100000 + Math.random() * 900000);
-    const order = {
+    // Generate unique Order ID starting with NWA + 6 digits (e.g. NWA123456)
+    const orderId = await generateUniqueOrderId(db);
+
+    const rawOrderPayload = {
       id: orderId,
       userId: user?.uid || null,
       timestamp: Date.now(),
-      totalPrice: total + deliveryFee,
+      subtotal: subtotal,
+      deliveryFee: deliveryFee,
+      discount: discount,
+      totalPrice: Math.max(0, subtotal + deliveryFee - discount),
       itemsSummary: summary,
       status: "Pending",
       adminMessage: "",
-      deliveryFee: deliveryFee,
       paymentMethod: paymentMethod,
       transactionId: paymentDetails?.transactionId || "N/A",
-      paymentStatus: "Pending Verification",
+      paymentStatus: paymentMethod === 'COD' ? 'Pending (COD)' : 'Paid Verification',
       customer: customerDetails,
-      items: cartItems
+      items: cartWithProducts
     };
+
+    const sanitized = sanitizeOrder(rawOrderPayload);
 
     // Deduct stock
     setProducts(prev => prev.map(p => {
@@ -348,15 +366,23 @@ export const ShopProvider = ({ children }) => {
     }));
 
     try {
-      await setDoc(doc(db, "orders", orderId), order);
+      await setDoc(doc(db, "orders", sanitized.id), sanitized);
     } catch(err) {
       console.error("Error saving order: ", err);
     }
 
-    setOrders(prev => [order, ...prev]);
+    setOrders(prev => [sanitized, ...prev]);
     setCartItems([]);
 
-    return order;
+    // Automatically send WhatsApp order notification to business WhatsApp
+    try {
+      const businessWhatsapp = storeSettings?.whatsapp || '8925325330';
+      sendWhatsAppOrderNotification(sanitized, businessWhatsapp);
+    } catch (waErr) {
+      console.error("WhatsApp notification error:", waErr);
+    }
+
+    return sanitized;
   };
 
   const fetchAllOrders = async () => {
