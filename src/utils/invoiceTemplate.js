@@ -221,8 +221,8 @@ export const generateInvoiceHTML = (rawOrder, storeSettings = {}) => {
 <body>
 
   <div class="print-actions no-print">
-    <button className="btn-action" onclick="window.print()">🖨️ Print Invoice</button>
-    <button className="btn-action" style="background: #059669;" onclick="window.print()">📄 Save as PDF</button>
+    <button class="btn-action" onclick="window.print()">🖨️ Print Invoice</button>
+    <button class="btn-action" style="background: #059669;" onclick="window.print()">📄 Save as PDF</button>
   </div>
 
   <div class="invoice-container">
