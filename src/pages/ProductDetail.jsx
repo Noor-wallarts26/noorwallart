@@ -199,7 +199,7 @@ const ProductDetail = () => {
   };
 
   const handleBuyNow = () => {
-    addToCart(product.id);
+    addToCart(product.id, 1, {}, appliedProductCoupon);
     navigate('/cart');
   };
 
