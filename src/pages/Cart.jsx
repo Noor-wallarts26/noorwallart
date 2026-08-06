@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Trash2, Plus, Minus, Tag } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, Tag, Lock } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import './Cart.css';
 
@@ -110,19 +110,31 @@ const Cart = () => {
                       <button className="remove-btn" onClick={() => removeFromCart(product.id)}>
                         <Trash2 size={18} />
                       </button>
-                      <div className="quantity-controls">
-                        <button className="qty-btn" onClick={() => updateCartQuantity(product.id, quantity - 1)}>
-                          <Minus size={14} />
-                        </button>
-                        <span className="qty-value">{quantity}</span>
-                        <button
-                          className="qty-btn"
-                          disabled={quantity >= product.stock}
-                          onClick={() => updateCartQuantity(product.id, quantity + 1)}
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
+                      {appliedCoupon ? (
+                        <div style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                          padding: '0.45rem 0.75rem', borderRadius: '8px',
+                          backgroundColor: '#F1F5F9', border: '1px solid #CBD5E1',
+                          fontSize: '0.8rem', fontWeight: 700, color: '#475569'
+                        }} title="Coupon products are limited to 1 quantity.">
+                          <Lock size={13} color="#64748B" />
+                          <span>Qty: 1 (Locked)</span>
+                        </div>
+                      ) : (
+                        <div className="quantity-controls">
+                          <button className="qty-btn" onClick={() => updateCartQuantity(product.id, quantity - 1)}>
+                            <Minus size={14} />
+                          </button>
+                          <span className="qty-value">{quantity}</span>
+                          <button
+                            className="qty-btn"
+                            disabled={quantity >= product.stock}
+                            onClick={() => updateCartQuantity(product.id, quantity + 1)}
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );

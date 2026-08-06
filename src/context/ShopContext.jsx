@@ -201,22 +201,28 @@ export const ShopProvider = ({ children }) => {
       const existingIndex = prev.findIndex(item => item.productId === productId);
       if (existingIndex > -1) {
         const existing = prev[existingIndex];
+
+        // COUPON QUANTITY LOCK RULE: If item already has a coupon applied, reject duplicate addition
+        if (existing.appliedCoupon || couponInfo) {
+          alert("This discounted product cannot be added more than once. Coupon products are limited to 1 quantity.");
+          return prev;
+        }
+
         const newQuantity = existing.quantity + quantity;
         if (newQuantity <= product.stock) {
           const updated = [...prev];
           updated[existingIndex] = {
             ...existing,
             quantity: newQuantity,
-            appliedCoupon: couponInfo || existing.appliedCoupon || null
+            appliedCoupon: null
           };
           return updated;
         }
         return prev;
       } else {
-        if (quantity <= product.stock) {
-          return [...prev, { productId, quantity, appliedCoupon: couponInfo || null }];
-        }
-        return prev;
+        // Enforce quantity = 1 if coupon is applied
+        const initialQty = couponInfo ? 1 : Math.min(quantity, product.stock);
+        return [...prev, { productId, quantity: initialQty, appliedCoupon: couponInfo || null }];
       }
     });
   };
@@ -228,7 +234,17 @@ export const ShopProvider = ({ children }) => {
     }
     const product = products.find(p => p.id === productId);
     if (product && quantity <= product.stock) {
-      setCartItems(prev => prev.map(item => item.productId === productId ? { ...item, quantity } : item));
+      setCartItems(prev => prev.map(item => {
+        if (item.productId === productId) {
+          // COUPON QUANTITY LOCK RULE: Lock coupon product quantity to 1
+          if (item.appliedCoupon && quantity > 1) {
+            alert("Coupon products are limited to 1 quantity.");
+            return { ...item, quantity: 1 };
+          }
+          return { ...item, quantity };
+        }
+        return item;
+      }));
     }
   };
 
@@ -422,7 +438,7 @@ export const ShopProvider = ({ children }) => {
         price: discountedUnitPrice,
         originalPrice: product.price,
         discountAmount: discountAmount,
-        quantity: item.quantity,
+        quantity: coupon ? 1 : item.quantity,
         appliedCoupon: coupon ? {
           code: coupon.code,
           discountType: coupon.discountType,
@@ -781,13 +797,14 @@ export const ShopProvider = ({ children }) => {
       discountedUnitPrice = Math.max(0, product.price - discountAmount);
     }
 
+    const effectiveQuantity = coupon ? 1 : item.quantity;
     return {
       product,
-      quantity: item.quantity,
+      quantity: effectiveQuantity,
       unitPrice: product.price,
       discountedUnitPrice,
       discountAmountPerUnit: discountAmount,
-      itemSubtotal: discountedUnitPrice * item.quantity,
+      itemSubtotal: discountedUnitPrice * effectiveQuantity,
       appliedCoupon: coupon || null
     };
   }).filter(Boolean);
