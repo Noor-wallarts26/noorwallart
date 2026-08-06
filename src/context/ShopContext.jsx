@@ -438,15 +438,15 @@ export const ShopProvider = ({ children }) => {
     }).filter(Boolean);
 
     // SECURITY AUDIT: Ensure no duplicate coupon codes are used across different products in the same order
-    const usedCouponCodes = new Set();
+    const validatedCouponCodesSet = new Set();
     for (const item of cartWithProducts) {
       if (item.appliedCoupon?.code) {
         const code = item.appliedCoupon.code.trim().toUpperCase();
-        if (usedCouponCodes.has(code)) {
+        if (validatedCouponCodesSet.has(code)) {
           alert(`Security Violation: Coupon '${code}' has already been used for another product in your cart. Remove the duplicate discounted product before placing your order.`);
           return { success: false, error: `Coupon '${code}' can only be applied to one product per order.` };
         }
-        usedCouponCodes.add(code);
+        validatedCouponCodesSet.add(code);
       }
     }
 
@@ -500,13 +500,13 @@ export const ShopProvider = ({ children }) => {
     }
 
     // Auto Expire & Record Redemption for coupons used in order
-    const usedCouponCodes = Array.from(new Set(
+    const redeemedCouponCodes = Array.from(new Set(
       cartWithProducts
         .map(i => i.appliedCoupon?.code)
         .filter(Boolean)
     ));
 
-    for (const code of usedCouponCodes) {
+    for (const code of redeemedCouponCodes) {
       try {
         const q = query(collection(db, "coupons"), where("code", "==", code.toUpperCase()));
         const snap = await getDocs(q);
