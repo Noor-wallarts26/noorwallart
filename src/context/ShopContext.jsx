@@ -1,9 +1,10 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth, db } from '../firebase';
-import { doc, updateDoc, arrayUnion, collection, query, where, getDocs, setDoc } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion, collection, query, where, getDocs, setDoc, getDoc } from 'firebase/firestore';
 import { cleanInput, isRateLimited, isValidCouponCode } from '../utils/security';
 import { generateUniqueOrderId, sanitizeOrder, sendWhatsAppOrderNotification } from '../utils/orderUtils';
+import { sendAdminOrderEmailNotification } from '../utils/emailService';
 
 export const ShopContext = createContext();
 
@@ -551,6 +552,46 @@ export const ShopProvider = ({ children }) => {
 
     setOrders(prev => [sanitized, ...prev]);
     setCartItems([]);
+
+    // AUTOMATED ORDER NOTIFICATIONS SYSTEM (Payment Success Trigger)
+    if (sanitized.paymentStatus === 'Paid' || paymentMethod === 'Razorpay Online Payment' || paymentMethod === 'Cash on Delivery') {
+      // 1. Admin Real-time Notification Document (Firestore)
+      (async () => {
+        try {
+          const notifRef = doc(db, 'notifications', `NOTIF_${sanitized.id}`);
+          const notifSnap = await getDoc(notifRef);
+          if (!notifSnap.exists()) {
+            await setDoc(notifRef, {
+              id: `NOTIF_${sanitized.id}`,
+              orderId: sanitized.id,
+              type: 'order',
+              title: '🛒 New Order Received',
+              message: `Order #${sanitized.id} - ${customerDetails?.name || 'Customer'} placed a new order for ₹${(discountedSubtotal + deliveryFee).toFixed(2)}.`,
+              customerName: customerDetails?.name || 'Customer',
+              customerPhone: customerDetails?.phone || 'N/A',
+              customerEmail: customerDetails?.email || 'N/A',
+              totalPrice: discountedSubtotal + deliveryFee,
+              paymentMethod: paymentMethod,
+              paymentStatus: 'Paid ✅',
+              read: false,
+              timestamp: Date.now(),
+              createdAt: new Date().toISOString()
+            });
+          }
+        } catch (notifErr) {
+          console.error("Error creating admin order notification in Firestore:", notifErr);
+        }
+      })();
+
+      // 2. Admin Email Notification (noorkarts.in@gmail.com)
+      (async () => {
+        try {
+          await sendAdminOrderEmailNotification(sanitized, 'noorkarts.in@gmail.com');
+        } catch (emailErr) {
+          console.error("Error sending admin order email notification:", emailErr);
+        }
+      })();
+    }
 
     try {
       const businessWhatsapp = storeSettings?.whatsapp || '8925325330';
