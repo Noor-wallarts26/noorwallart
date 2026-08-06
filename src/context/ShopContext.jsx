@@ -183,6 +183,20 @@ export const ShopProvider = ({ children }) => {
     const product = products.find(p => p.id === productId);
     if (!product || product.stock === 0) return;
 
+    if (couponInfo && couponInfo.code) {
+      const cleanCode = couponInfo.code.trim().toUpperCase();
+      const isAlreadyUsed = cartItems.some(item => {
+        if (item.productId === productId) return false;
+        const appliedCode = item.appliedCoupon?.code || item.couponCode;
+        return appliedCode && appliedCode.trim().toUpperCase() === cleanCode;
+      });
+
+      if (isAlreadyUsed) {
+        alert("This coupon has already been used for another product in your cart. Remove the existing discounted product before using this coupon again.");
+        return;
+      }
+    }
+
     setCartItems(prev => {
       const existingIndex = prev.findIndex(item => item.productId === productId);
       if (existingIndex > -1) {
@@ -423,6 +437,19 @@ export const ShopProvider = ({ children }) => {
       };
     }).filter(Boolean);
 
+    // SECURITY AUDIT: Ensure no duplicate coupon codes are used across different products in the same order
+    const usedCouponCodes = new Set();
+    for (const item of cartWithProducts) {
+      if (item.appliedCoupon?.code) {
+        const code = item.appliedCoupon.code.trim().toUpperCase();
+        if (usedCouponCodes.has(code)) {
+          alert(`Security Violation: Coupon '${code}' has already been used for another product in your cart. Remove the duplicate discounted product before placing your order.`);
+          return { success: false, error: `Coupon '${code}' can only be applied to one product per order.` };
+        }
+        usedCouponCodes.add(code);
+      }
+    }
+
     const origSubtotal = cartWithProducts.reduce((sum, item) => sum + (item.originalPrice * item.quantity), 0);
     const totDiscount = cartWithProducts.reduce((sum, item) => sum + (item.discountAmount * item.quantity), 0);
     const discountedSubtotal = cartWithProducts.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -592,7 +619,22 @@ export const ShopProvider = ({ children }) => {
       });
 
       if (!couponData.isActive || couponData.status === 'Disabled') {
-        return { success: false, error: "This coupon is currently inactive." };
+        return { success: false, error: "This coupon is no longer valid." };
+      }
+
+      // SECURITY CHECK: A coupon can only be applied to ONE product per cart/order
+      const cleanCodeUpper = cleanCode.toUpperCase();
+      const isAlreadyUsedInCart = cartItems.some(item => {
+        if (item.productId === product.id) return false;
+        const appliedCode = item.appliedCoupon?.code || item.couponCode;
+        return appliedCode && appliedCode.trim().toUpperCase() === cleanCodeUpper;
+      });
+
+      if (isAlreadyUsedInCart) {
+        return {
+          success: false,
+          error: "This coupon has already been used for another product in your cart. Remove the existing discounted product before using this coupon again."
+        };
       }
 
       // Check One-Time Use / Auto Expire
