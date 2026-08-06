@@ -19,7 +19,7 @@ const categoryStyles = {
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, products, toggleWishlist, addToCart, validateCouponForProduct, checkUserProductReviewEligibility, addVerifiedReview } = useContext(ShopContext);
+  const { user, products, cartItems, toggleWishlist, addToCart, validateCouponForProduct, checkUserProductReviewEligibility, addVerifiedReview } = useContext(ShopContext);
   
   const product = products.find(p => String(p.id) === String(id));
 
@@ -164,11 +164,19 @@ const ProductDetail = () => {
     fetchCoupon();
   }, [product?.couponId]);
 
-  // Scroll to top and reset state on load or when product id changes
+  // Scroll to top and sync existing cart item coupon state on load or when product id changes
   useEffect(() => {
     window.scrollTo(0, 0);
     setReviewForm({ rating: 5, title: '', comment: '' });
-  }, [id]);
+
+    if (id && Array.isArray(cartItems)) {
+      const existingInCart = cartItems.find(item => String(item.productId) === String(id));
+      if (existingInCart && existingInCart.appliedCoupon) {
+        setAppliedProductCoupon(existingInCart.appliedCoupon);
+        setCouponMsg({ text: `Coupon '${existingInCart.appliedCoupon.code}' has already been applied for this product.`, isError: false });
+      }
+    }
+  }, [id, cartItems]);
 
   if (!product) {
     return (

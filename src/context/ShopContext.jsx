@@ -622,15 +622,24 @@ export const ShopProvider = ({ children }) => {
         return { success: false, error: "This coupon is no longer valid." };
       }
 
-      // SECURITY CHECK: A coupon can only be applied to ONE product per cart/order
+      // SECURITY CHECK 1: Check if THIS product in cart already has a coupon applied
       const cleanCodeUpper = cleanCode.toUpperCase();
-      const isAlreadyUsedInCart = cartItems.some(item => {
+      const existingCartItemForProduct = cartItems.find(item => item.productId === product.id);
+      if (existingCartItemForProduct && existingCartItemForProduct.appliedCoupon) {
+        return {
+          success: false,
+          error: "This coupon has already been applied for this product."
+        };
+      }
+
+      // SECURITY CHECK 2: Check if ANOTHER product in cart is using this same coupon code
+      const isUsedByAnotherProduct = cartItems.some(item => {
         if (item.productId === product.id) return false;
         const appliedCode = item.appliedCoupon?.code || item.couponCode;
         return appliedCode && appliedCode.trim().toUpperCase() === cleanCodeUpper;
       });
 
-      if (isAlreadyUsedInCart) {
+      if (isUsedByAnotherProduct) {
         return {
           success: false,
           error: "This coupon has already been used for another product in your cart. Remove the existing discounted product before using this coupon again."
