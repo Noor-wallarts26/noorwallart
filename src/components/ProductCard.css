@@ -4,41 +4,22 @@
   flex-direction: column;
   height: 100%;
   
-  /* Glassmorphism - Apple iPhone Style */
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  /* Glassmorphism - Premium Clean Style */
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.9);
   
   border-radius: 20px;
-  /* Stronger, more pronounced drop shadow for the background */
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(255,255,255,0.2);
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.07);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   z-index: 1; 
 }
 
-.product-card::before {
-  content: '';
-  position: absolute;
-  /* Expand the pseudo element slightly outside the card to create a shadow/glow */
-  top: 5px; left: -5px; right: -5px; bottom: -5px;
-  border-radius: 24px;
-  background: rgba(0, 0, 0, 0.08); /* Darker shadow base */
-  filter: blur(20px); 
-  z-index: -1;
-  opacity: 1; 
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.product-card:hover::before {
-  opacity: 1;
-  background: rgba(0, 0, 0, 0.12); /* Deepen shadow on hover */
-}
-
 .product-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(255,255,255,0.5);
+  transform: translateY(-4px);
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.12);
 }
 
 .product-image-area {

@@ -34,8 +34,8 @@ const PromoBanner = ({ storeSettings }) => {
       )}
       <div className="promo-overlay"></div>
       <div className="promo-content">
-        <h2 className="brand-title" style={{ color: '#ffffff' }}>Noor Wall Arts & Gifts</h2>
-        <p style={{ color: '#ffffff' }}>Premium Wall Decor <br />& Customized Gifts</p>
+        <h2 className="brand-title" style={{ color: '#ffffff' }}>NOORKARTS</h2>
+        <p style={{ color: '#ffffff' }}>PREMIUM QUALITY ARTS & GIFTS</p>
       </div>
     </div>
   );
@@ -59,11 +59,11 @@ const Home = () => {
       <div className="top-brand-header container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 0 0.5rem 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
           <Link to="/store-info" style={{ display: 'flex', alignItems: 'center' }}>
-            <img src="/logo.jpg" alt="Noor Wall Arts & Gifts Logo" className="site-logo" />
+            <img src="/logo.jpg" alt="NOORKARTS Logo" className="site-logo" />
           </Link>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <h2 style={{ fontFamily: 'var(--font-heading)', margin: 0, fontSize: '1.4rem' }}>NOOR WALL ARTS & GIFTS</h2>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>PREMIUM QUALITY</span>
+            <h2 style={{ fontFamily: 'var(--font-heading)', margin: 0, fontSize: '1.4rem', fontWeight: 900, letterSpacing: '0.5px' }}>NOOR KARTS</h2>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.5px' }}>PREMIUM QUALITY ARTS & GIFTS</span>
           </div>
         </div>
       </div>
