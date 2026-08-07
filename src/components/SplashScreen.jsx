@@ -3,7 +3,7 @@ import { ShopContext } from '../context/ShopContext';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import './SplashScreen.css';
 
-// Inline Instagram SVG to guarantee 100% build compatibility without lucide-react export issues
+// Inline Instagram SVG icon for 100% build reliability
 const InstagramIcon = ({ size = 18 }) => (
   <svg 
     width={size} 
@@ -26,7 +26,7 @@ const SplashScreen = () => {
 
   // Phase states: 'logo' -> 'offer' -> 'fading' -> 'done'
   const [phase, setPhase] = useState('logo');
-  const instagramUrl = 'https://instagram.com/noor.wallarts';
+  const instagramUrl = 'https://www.instagram.com/noorkarts.in/';
 
   // Dynamic campaign check from admin panel settings
   const isCampaignActive = storeSettings?.independenceDayCampaignActive !== false;
@@ -50,10 +50,10 @@ const SplashScreen = () => {
 
   useEffect(() => {
     if (phase === 'offer') {
-      // 2. Display Offer Screen for ~3 seconds then fade out to homepage
+      // 2. Display Offer Screen for ~5 seconds then automatically fade out to homepage
       const offerTimer = setTimeout(() => {
         setPhase('fading');
-      }, 3500);
+      }, 5000);
 
       return () => clearTimeout(offerTimer);
     }
@@ -70,12 +70,18 @@ const SplashScreen = () => {
 
   if (phase === 'done') return null;
 
-  const handleShopNow = () => {
+  const handleShopNow = (e) => {
+    e.stopPropagation();
+    setPhase('fading');
+  };
+
+  const handleOverlayClick = (e) => {
+    // Close immediately if user clicks/taps outside the card
     setPhase('fading');
   };
 
   return (
-    <div className={`splash-overlay ${phase}`}>
+    <div className={`splash-overlay ${phase}`} onClick={handleOverlayClick}>
       <div className="splash-ambient-bg">
         <div className="ambient-orb orb-saffron"></div>
         <div className="ambient-orb orb-green"></div>
@@ -83,7 +89,7 @@ const SplashScreen = () => {
 
       {/* PHASE 1: LOGO INTRO SCREEN */}
       {phase === 'logo' && (
-        <div className="logo-intro-box animate-logo-intro">
+        <div className="logo-intro-box animate-logo-intro" onClick={(e) => e.stopPropagation()}>
           <div className="logo-wrapper">
             <img 
               src={storeSettings?.logoUrl || "/logo.jpg"} 
@@ -98,9 +104,12 @@ const SplashScreen = () => {
         </div>
       )}
 
-      {/* PHASE 2: INDEPENDENCE DAY OFFER SCREEN (Visible ~3s) */}
+      {/* PHASE 2: INDEPENDENCE DAY OFFER SCREEN (Visible ~5s) */}
       {(phase === 'offer' || (phase === 'fading' && shouldShowOffer)) && (
-        <div className="offer-intro-card animate-card-appear">
+        <div 
+          className="offer-intro-card animate-card-appear" 
+          onClick={(e) => e.stopPropagation()}
+        >
           
           <div className="tricolor-top-bar">
             <span className="bar-orange"></span>
@@ -122,17 +131,18 @@ const SplashScreen = () => {
               <Sparkles size={14} color="#D4AF37" /> SPECIAL LAUNCH DISCOUNT
             </div>
             <p className="instagram-instruction">
-              Get your exclusive discount code from our Instagram page.
+              Get your exclusive discount coupon from our Instagram page.
             </p>
             
             <a 
               href={instagramUrl} 
               target="_blank" 
-              rel="noreferrer" 
+              rel="noopener noreferrer" 
               className="instagram-follow-btn"
+              onClick={(e) => e.stopPropagation()}
             >
               <InstagramIcon size={18} />
-              <span>Follow us on Instagram & get your code</span>
+              <span>Follow us on Instagram & get your coupon</span>
             </a>
           </div>
 
