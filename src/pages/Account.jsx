@@ -377,7 +377,7 @@ const Account = () => {
           
           <div className="contact-divider"></div>
           
-          <a href="mailto:noorwallartsofficial@gmail.com" className="contact-list-item">
+          <a href="mailto:noorkarts.in@gmail.com" className="contact-list-item">
             <div className="contact-icon-mini email">
               <Mail size={20} />
             </div>
