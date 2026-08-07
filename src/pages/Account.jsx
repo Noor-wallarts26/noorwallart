@@ -8,12 +8,16 @@ import Login from './Login';
 import { useNavigate } from 'react-router-dom';
 import indiaData from '../utils/indiaStatesDistricts.json';
 
+import { lookupIndianPincode } from '../utils/pincodeService';
+
 const Account = () => {
   const { user, loading, logout, deliveryAddress, setDeliveryAddress, saveDeliveryAddressToDB, fetchMyOrders } = useContext(ShopContext);
   const navigate = useNavigate();
   
   const [expandedSection, setExpandedSection] = useState(null); // 'orders' | 'address' | null
   const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [isPincodeLoading, setIsPincodeLoading] = useState(false);
+  const [pincodeError, setPincodeError] = useState('');
   
   const defaultAddressState = {
     name: '', phone: '', houseNo: '', building: '', street: '', 
@@ -29,7 +33,7 @@ const Account = () => {
   // Sync address input when deliveryAddress loads from Firestore
   useEffect(() => {
     if (deliveryAddress) {
-      setAddressInput(deliveryAddress);
+      setAddressInput({ ...deliveryAddress, country: 'India' });
     }
   }, [deliveryAddress]);
 
@@ -64,6 +68,31 @@ const Account = () => {
     }
   };
 
+  const handlePincodeChange = async (e) => {
+    const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setAddressInput(prev => ({ ...prev, pincode: val }));
+    setPincodeError('');
+
+    if (val.length === 6) {
+      setIsPincodeLoading(true);
+      const res = await lookupIndianPincode(val);
+      setIsPincodeLoading(false);
+
+      if (res.success) {
+        setAddressInput(prev => ({
+          ...prev,
+          pincode: val,
+          state: res.state || prev.state,
+          district: res.district || prev.district,
+          area: prev.area || res.primaryLocality || '',
+          country: 'India'
+        }));
+      } else {
+        setPincodeError(res.message);
+      }
+    }
+  };
+
   const isAddressValid = () => {
     return (
       !!addressInput.name?.trim() &&
@@ -73,7 +102,8 @@ const Account = () => {
       !!addressInput.area?.trim() &&
       !!addressInput.district?.trim() &&
       !!addressInput.state?.trim() &&
-      !!addressInput.pincode?.trim()
+      !!addressInput.pincode?.trim() &&
+      /^[1-9][0-9]{5}$/.test(addressInput.pincode.trim())
     );
   };
 
@@ -285,8 +315,7 @@ const Account = () => {
                         deliveryAddress.landmark ? `(Near ${deliveryAddress.landmark})` : '',
                         deliveryAddress.district,
                         deliveryAddress.state,
-                        deliveryAddress.pincode ? `- ${deliveryAddress.pincode}` : '',
-                        deliveryAddress.country
+                        deliveryAddress.pincode ? `- ${deliveryAddress.pincode}` : ''
                       ].filter(Boolean).join(', ')}
                     </div>
 
@@ -348,50 +377,28 @@ const Account = () => {
                         <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Mobile Number *</label>
                         <input type="tel" name="phone" value={addressInput.phone || ''} onChange={handleAddressChange} placeholder="Enter your 10-digit mobile number" maxLength="10" pattern="[0-9]{10}" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
                       </div>
-                      
-                      <div className="form-group">
-                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>House / Door No. *</label>
-                        <input type="text" name="houseNo" value={addressInput.houseNo || ''} onChange={handleAddressChange} placeholder="Enter house number" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
-                      </div>
-                      
-                      <div className="form-group">
-                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Building (Optional)</label>
-                        <input type="text" name="building" value={addressInput.building || ''} onChange={handleAddressChange} placeholder="Enter building" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
-                      </div>
 
-                      <div className="form-group">
-                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Street / Road *</label>
-                        <input type="text" name="street" value={addressInput.street || ''} onChange={handleAddressChange} placeholder="Enter street" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
-                      </div>
-
-                      <div className="form-group">
-                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Area / Locality *</label>
-                        <input type="text" name="area" value={addressInput.area || ''} onChange={handleAddressChange} placeholder="Enter area" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
-                      </div>
-
-                      <div className="form-group">
-                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Landmark (Optional)</label>
-                        <input type="text" name="landmark" value={addressInput.landmark || ''} onChange={handleAddressChange} placeholder="Enter landmark" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
-                      </div>
-
-                      <div className="form-group">
-                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Country *</label>
-                        <select name="country" value={addressInput.country || 'India'} onChange={handleAddressChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--surface-variant)' }}>
-                          <option value="India">India</option>
-                          <option value="United States">United States</option>
-                          <option value="United Kingdom">United Kingdom</option>
-                          <option value="Canada">Canada</option>
-                          <option value="Australia">Australia</option>
-                          <option value="United Arab Emirates">United Arab Emirates</option>
-                          <option value="Saudi Arabia">Saudi Arabia</option>
-                          <option value="Singapore">Singapore</option>
-                          <option value="Malaysia">Malaysia</option>
-                          <option value="Sri Lanka">Sri Lanka</option>
-                          <option value="New Zealand">New Zealand</option>
-                          <option value="Germany">Germany</option>
-                          <option value="France">France</option>
-                          <option value="Other">Other</option>
-                        </select>
+                      <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Pincode (6-Digit Indian Pincode) *</label>
+                        <input
+                          type="text"
+                          name="pincode"
+                          value={addressInput.pincode || ''}
+                          onChange={handlePincodeChange}
+                          placeholder="Enter 6-digit Indian Pincode (e.g. 629001)"
+                          maxLength="6"
+                          style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}
+                        />
+                        {isPincodeLoading && (
+                          <p style={{ fontSize: '0.78rem', color: '#059669', margin: '0.3rem 0 0 0', fontWeight: 600 }}>
+                            ⏳ Detecting State & District from Pincode...
+                          </p>
+                        )}
+                        {pincodeError && (
+                          <p style={{ fontSize: '0.78rem', color: '#DC2626', margin: '0.3rem 0 0 0', fontWeight: 600 }}>
+                            ⚠️ {pincodeError}
+                          </p>
+                        )}
                       </div>
 
                       <div className="form-group">
@@ -415,8 +422,28 @@ const Account = () => {
                       </div>
 
                       <div className="form-group">
-                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Pincode *</label>
-                        <input type="text" name="pincode" value={addressInput.pincode || ''} onChange={handleAddressChange} placeholder="Enter pincode" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>House / Door No. *</label>
+                        <input type="text" name="houseNo" value={addressInput.houseNo || ''} onChange={handleAddressChange} placeholder="Enter house number" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Building (Optional)</label>
+                        <input type="text" name="building" value={addressInput.building || ''} onChange={handleAddressChange} placeholder="Enter building" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                      </div>
+
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Street / Road *</label>
+                        <input type="text" name="street" value={addressInput.street || ''} onChange={handleAddressChange} placeholder="Enter street" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                      </div>
+
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Area / Locality *</label>
+                        <input type="text" name="area" value={addressInput.area || ''} onChange={handleAddressChange} placeholder="Enter area or town" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                      </div>
+
+                      <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Landmark (Optional)</label>
+                        <input type="text" name="landmark" value={addressInput.landmark || ''} onChange={handleAddressChange} placeholder="Enter landmark" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
                       </div>
                       
                       <div className="form-group" style={{ gridColumn: '1 / -1' }}>

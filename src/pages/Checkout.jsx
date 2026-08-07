@@ -6,6 +6,8 @@ import MapPicker from '../components/MapPicker';
 import indiaData from '../utils/indiaStatesDistricts.json';
 import './Checkout.css';
 
+import { lookupIndianPincode } from '../utils/pincodeService';
+
 const Checkout = () => {
   const { cartWithProducts, originalSubtotal, totalCouponDiscount, cartTotal, deliveryFee, totalItemsInCart, placeOrder, user, loading, deliveryAddress, finalTotal: contextFinalTotal, paymentSettings, storeSettings } = useContext(ShopContext);
   const navigate = useNavigate();
@@ -15,6 +17,8 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(null);
   const [paymentError, setPaymentError] = useState(null);
+  const [isPincodeLoading, setIsPincodeLoading] = useState(false);
+  const [pincodeError, setPincodeError] = useState('');
   
   const [formData, setFormData] = useState({
     name: deliveryAddress?.name || '',
@@ -26,7 +30,7 @@ const Checkout = () => {
     landmark: deliveryAddress?.landmark || '',
     district: deliveryAddress?.district || '',
     state: deliveryAddress?.state || '',
-    country: deliveryAddress?.country || 'India',
+    country: 'India',
     pincode: deliveryAddress?.pincode || '',
     addressType: deliveryAddress?.addressType || 'Home',
     instructions: deliveryAddress?.instructions || '',
@@ -43,7 +47,8 @@ const Checkout = () => {
       formData.area.trim() !== '' &&
       formData.district.trim() !== '' &&
       formData.state.trim() !== '' &&
-      formData.pincode.trim() !== ''
+      formData.pincode.trim() !== '' &&
+      /^[1-9][0-9]{5}$/.test(formData.pincode.trim())
     );
   };
 
@@ -65,6 +70,31 @@ const Checkout = () => {
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handlePincodeChange = async (e) => {
+    const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setFormData(prev => ({ ...prev, pincode: val }));
+    setPincodeError('');
+
+    if (val.length === 6) {
+      setIsPincodeLoading(true);
+      const res = await lookupIndianPincode(val);
+      setIsPincodeLoading(false);
+
+      if (res.success) {
+        setFormData(prev => ({
+          ...prev,
+          pincode: val,
+          state: res.state || prev.state,
+          district: res.district || prev.district,
+          area: prev.area || res.primaryLocality || '',
+          country: 'India'
+        }));
+      } else {
+        setPincodeError(res.message);
+      }
+    }
   };
 
   useEffect(() => {
@@ -436,50 +466,28 @@ Thank you for shopping with Noor WallArts & Gifts! Please send this message to r
               <label>Mobile Number *</label>
               <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="Enter your 10-digit mobile number" maxLength="10" pattern="[0-9]{10}" required />
             </div>
-            
-            <div className="form-group">
-              <label>House / Flat / Door No. *</label>
-              <input type="text" name="houseNo" value={formData.houseNo} onChange={handleInputChange} placeholder="Enter your house number" required />
-            </div>
-            
-            <div className="form-group">
-              <label>Building / Apartment Name (Optional)</label>
-              <input type="text" name="building" value={formData.building} onChange={handleInputChange} placeholder="Enter building name" />
-            </div>
 
-            <div className="form-group">
-              <label>Street / Road Name *</label>
-              <input type="text" name="street" value={formData.street} onChange={handleInputChange} placeholder="Enter street or road name" required />
-            </div>
-
-            <div className="form-group">
-              <label>Area / Locality *</label>
-              <input type="text" name="area" value={formData.area} onChange={handleInputChange} placeholder="Enter your area" required />
-            </div>
-
-            <div className="form-group">
-              <label>Landmark (Optional)</label>
-              <input type="text" name="landmark" value={formData.landmark} onChange={handleInputChange} placeholder="Enter a landmark" />
-            </div>
-
-            <div className="form-group">
-              <label>Country *</label>
-              <select name="country" value={formData.country} onChange={handleInputChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--surface-variant)' }}>
-                <option value="India">India</option>
-                <option value="United States">United States</option>
-                <option value="United Kingdom">United Kingdom</option>
-                <option value="Canada">Canada</option>
-                <option value="Australia">Australia</option>
-                <option value="United Arab Emirates">United Arab Emirates</option>
-                <option value="Saudi Arabia">Saudi Arabia</option>
-                <option value="Singapore">Singapore</option>
-                <option value="Malaysia">Malaysia</option>
-                <option value="Sri Lanka">Sri Lanka</option>
-                <option value="New Zealand">New Zealand</option>
-                <option value="Germany">Germany</option>
-                <option value="France">France</option>
-                <option value="Other">Other</option>
-              </select>
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label>Pincode (6-Digit Indian Pincode) *</label>
+              <input
+                type="text"
+                name="pincode"
+                value={formData.pincode}
+                onChange={handlePincodeChange}
+                placeholder="Enter 6-digit Indian Pincode (e.g. 629001)"
+                maxLength="6"
+                required
+              />
+              {isPincodeLoading && (
+                <p style={{ fontSize: '0.78rem', color: '#059669', margin: '0.3rem 0 0 0', fontWeight: 600 }}>
+                  ⏳ Detecting State & District from Pincode...
+                </p>
+              )}
+              {pincodeError && (
+                <p style={{ fontSize: '0.78rem', color: '#DC2626', margin: '0.3rem 0 0 0', fontWeight: 600 }}>
+                  ⚠️ {pincodeError}
+                </p>
+              )}
             </div>
 
             <div className="form-group">
@@ -501,10 +509,30 @@ Thank you for shopping with Noor WallArts & Gifts! Please send this message to r
                 ))}
               </select>
             </div>
+            
+            <div className="form-group">
+              <label>House / Flat / Door No. *</label>
+              <input type="text" name="houseNo" value={formData.houseNo} onChange={handleInputChange} placeholder="Enter your house number" required />
+            </div>
+            
+            <div className="form-group">
+              <label>Building / Apartment Name (Optional)</label>
+              <input type="text" name="building" value={formData.building} onChange={handleInputChange} placeholder="Enter building name" />
+            </div>
 
             <div className="form-group">
-              <label>Pincode / Zipcode *</label>
-              <input type="text" name="pincode" value={formData.pincode} onChange={handleInputChange} placeholder="Enter your pincode/zipcode" required />
+              <label>Street / Road Name *</label>
+              <input type="text" name="street" value={formData.street} onChange={handleInputChange} placeholder="Enter street or road name" required />
+            </div>
+
+            <div className="form-group">
+              <label>Area / Locality *</label>
+              <input type="text" name="area" value={formData.area} onChange={handleInputChange} placeholder="Enter your area or town" required />
+            </div>
+
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label>Landmark (Optional)</label>
+              <input type="text" name="landmark" value={formData.landmark} onChange={handleInputChange} placeholder="Enter a landmark" />
             </div>
             
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
