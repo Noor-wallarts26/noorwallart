@@ -3,24 +3,30 @@ import { Link } from 'react-router-dom';
 import './HeroSlider.css';
 
 const HeroSlider = ({ products }) => {
-  const [currentIndex, setCurrentIndex] = useState(1);
+  const n = products ? products.length : 0;
+  
+  // Real product index starts at 2 (since indices 0 and 1 are buffer clones for seamless backward swiping)
+  const [currentIndex, setCurrentIndex] = useState(2);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const touchStartX = useRef(null);
-  
-  // Extended array for infinite loop: [last, 0, 1, 2, ..., last, 0]
-  const extendedProducts = products && products.length > 0 ? [
-    products[products.length - 1],
+
+  // Double buffer clone array to guarantee seamless multi-swipe infinite loop without glitches:
+  // [P(n-2), P(n-1), P0, P1, P2, ..., P(n-1), P0, P1]
+  const extendedProducts = n > 0 ? [
+    products[n - 2 >= 0 ? n - 2 : 0],
+    products[n - 1],
     ...products,
-    products[0]
+    products[0],
+    products[1 % n]
   ] : [];
 
   useEffect(() => {
-    if (!products || products.length === 0) return;
+    if (n === 0) return;
     const interval = setInterval(() => {
       handleNext();
-    }, 5000); // 5 seconds
+    }, 4500); // 4.5 seconds autoplay
     return () => clearInterval(interval);
-  }, [products]);
+  }, [n]);
 
   const handleNext = () => {
     setIsTransitioning(true);
@@ -33,17 +39,17 @@ const HeroSlider = ({ products }) => {
   };
 
   const handleTransitionEnd = () => {
-    // Jump instantly to real slides when reaching the cloned edges
-    if (currentIndex === 0) {
+    // Jump silently without transition when reaching the cloned buffer edges
+    if (currentIndex >= n + 2) {
       setIsTransitioning(false);
-      setCurrentIndex(products.length);
-    } else if (currentIndex === extendedProducts.length - 1) {
+      setCurrentIndex(currentIndex - n);
+    } else if (currentIndex < 2) {
       setIsTransitioning(false);
-      setCurrentIndex(1);
+      setCurrentIndex(currentIndex + n);
     }
   };
 
-  if (!products || products.length === 0) {
+  if (!products || n === 0) {
     return null;
   }
 
@@ -57,7 +63,7 @@ const HeroSlider = ({ products }) => {
     const touchEndX = e.changedTouches[0].clientX;
     const diff = touchStartX.current - touchEndX;
 
-    if (Math.abs(diff) > 50) {
+    if (Math.abs(diff) > 35) {
       if (diff > 0) {
         handleNext();
       } else {
@@ -67,16 +73,36 @@ const HeroSlider = ({ products }) => {
     touchStartX.current = null;
   };
 
-  const handleDotClick = (index) => {
-    setIsTransitioning(true);
-    setCurrentIndex(index + 1);
-  };
+  // Calculate real product index (0 to n - 1)
+  let realIndex = 0;
+  if (n > 0) {
+    realIndex = (currentIndex - 2 + n) % n;
+  }
 
-  // The actual displayed index for the dots (0 to products.length - 1)
-  const activeDotIndex = 
-    currentIndex === 0 ? products.length - 1 : 
-    currentIndex === extendedProducts.length - 1 ? 0 : 
-    currentIndex - 1;
+  // Map realIndex (0 to n - 1) to EXACTLY 3 pagination dots (0 = Start, 1 = Middle, 2 = End)
+  let active3DotIndex = 0;
+  if (n > 1) {
+    const ratio = realIndex / (n - 1);
+    if (ratio <= 0.34) {
+      active3DotIndex = 0;
+    } else if (ratio <= 0.67) {
+      active3DotIndex = 1;
+    } else {
+      active3DotIndex = 2;
+    }
+  }
+
+  // Clicking dot 0 (Start), 1 (Middle), or 2 (End)
+  const handle3DotClick = (dotIdx) => {
+    setIsTransitioning(true);
+    if (dotIdx === 0) {
+      setCurrentIndex(2); // First product
+    } else if (dotIdx === 1) {
+      setCurrentIndex(2 + Math.floor(n / 2)); // Middle product
+    } else {
+      setCurrentIndex(2 + n - 1); // Last product
+    }
+  };
 
   return (
     <div 
@@ -118,13 +144,14 @@ const HeroSlider = ({ products }) => {
         ))}
       </div>
       
+      {/* EXACTLY 3 PAGINATION DOTS CENTERED BELOW SLIDER */}
       <div className="hero-slider-dots">
-        {products.map((_, index) => (
+        {[0, 1, 2].map((dotIdx) => (
           <button 
-            key={index} 
-            className={`hero-slider-dot ${index === activeDotIndex ? 'active' : ''}`}
-            onClick={() => handleDotClick(index)}
-            aria-label={`Go to slide ${index + 1}`}
+            key={dotIdx} 
+            className={`hero-slider-dot ${dotIdx === active3DotIndex ? 'active' : ''}`}
+            onClick={() => handle3DotClick(dotIdx)}
+            aria-label={`Go to section ${dotIdx + 1}`}
           />
         ))}
       </div>
