@@ -72,10 +72,33 @@ const Checkout = () => {
       if (!user) {
         navigate('/login', { state: { from: location.pathname, message: 'Please login to checkout' }, replace: true });
       } else {
-        setFormData(prev => ({ ...prev, phone: user.phoneNumber || '' }));
+        setFormData(prev => ({ ...prev, phone: user.phoneNumber || prev.phone || '' }));
       }
     }
   }, [user, loading, navigate, location]);
+
+  useEffect(() => {
+    if (deliveryAddress) {
+      setFormData(prev => ({
+        ...prev,
+        name: deliveryAddress.name || prev.name || '',
+        phone: deliveryAddress.phone || user?.phoneNumber || prev.phone || '',
+        houseNo: deliveryAddress.houseNo || prev.houseNo || '',
+        building: deliveryAddress.building || prev.building || '',
+        street: deliveryAddress.street || prev.street || '',
+        area: deliveryAddress.area || prev.area || '',
+        landmark: deliveryAddress.landmark || prev.landmark || '',
+        district: deliveryAddress.district || prev.district || '',
+        state: deliveryAddress.state || prev.state || '',
+        country: deliveryAddress.country || prev.country || 'India',
+        pincode: deliveryAddress.pincode || prev.pincode || '',
+        addressType: deliveryAddress.addressType || prev.addressType || 'Home',
+        instructions: deliveryAddress.instructions || prev.instructions || '',
+        lat: deliveryAddress.lat ?? prev.lat,
+        lng: deliveryAddress.lng ?? prev.lng
+      }));
+    }
+  }, [deliveryAddress, user]);
 
   if (loading || !user) {
     return <div className="checkout-page animate-fade-in"><div className="container" style={{padding: '2rem'}}>Loading...</div></div>;
@@ -385,6 +408,8 @@ Thank you for shopping with Noor WallArts & Gifts! Please send this message to r
           <h3>Shipping Information</h3>
 
           <MapPicker 
+            defaultLat={formData.lat}
+            defaultLng={formData.lng}
             onLocationSelect={(loc) => {
               const addr = loc.addressObj;
               setFormData(prev => ({

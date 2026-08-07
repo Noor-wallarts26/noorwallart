@@ -9,10 +9,11 @@ import { useNavigate } from 'react-router-dom';
 import indiaData from '../utils/indiaStatesDistricts.json';
 
 const Account = () => {
-  const { user, loading, logout, deliveryAddress, setDeliveryAddress, fetchMyOrders } = useContext(ShopContext);
+  const { user, loading, logout, deliveryAddress, setDeliveryAddress, saveDeliveryAddressToDB, fetchMyOrders } = useContext(ShopContext);
   const navigate = useNavigate();
   
   const [expandedSection, setExpandedSection] = useState(null); // 'orders' | 'address' | null
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
   
   const defaultAddressState = {
     name: '', phone: '', houseNo: '', building: '', street: '', 
@@ -24,6 +25,13 @@ const Account = () => {
   const [isSaved, setIsSaved] = useState(false);
   const [myOrders, setMyOrders] = useState([]);
   const [isOrdersLoading, setIsOrdersLoading] = useState(false);
+
+  // Sync address input when deliveryAddress loads from Firestore
+  useEffect(() => {
+    if (deliveryAddress) {
+      setAddressInput(deliveryAddress);
+    }
+  }, [deliveryAddress]);
 
   const statesList = React.useMemo(() => {
     return indiaData.states.map(s => s.state).sort((a, b) => a.localeCompare(b));
@@ -77,9 +85,14 @@ const Account = () => {
     setExpandedSection(prev => prev === section ? null : section);
   };
 
-  const handleSaveAddress = () => {
-    setDeliveryAddress(addressInput);
+  const handleSaveAddress = async () => {
+    if (saveDeliveryAddressToDB) {
+      await saveDeliveryAddressToDB(addressInput);
+    } else {
+      setDeliveryAddress(addressInput);
+    }
     setIsSaved(true);
+    setIsEditingAddress(false);
     setTimeout(() => setIsSaved(false), 3000);
   };
 
@@ -226,130 +239,214 @@ const Account = () => {
             {/* Expanded Address Section */}
             {expandedSection === 'address' && (
               <div className="menu-expanded-content">
-                <MapPicker 
-                  onLocationSelect={(loc) => {
-                    const addr = loc.addressObj;
-                    setAddressInput(prev => ({
-                      ...prev,
-                      lat: loc.lat,
-                      lng: loc.lng,
-                      houseNo: addr?.house_number || prev.houseNo,
-                      street: addr?.road || prev.street,
-                      area: addr?.suburb || addr?.neighbourhood || prev.area,
-                      district: addr?.city_district || addr?.county || addr?.city || prev.district,
-                      state: addr?.state || prev.state,
-                      pincode: addr?.postcode || prev.pincode
-                    }));
-                  }} 
-                />
+                {deliveryAddress && !isEditingAddress ? (
+                  /* SAVED DEFAULT ADDRESS CARD */
+                  <div style={{
+                    backgroundColor: '#F8FAFC',
+                    border: '1.5px solid #CBD5E1',
+                    borderRadius: '14px',
+                    padding: '1.25rem',
+                    marginBottom: '1rem'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <span style={{
+                        fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase',
+                        backgroundColor: '#10B981', color: '#FFFFFF', padding: '0.25rem 0.6rem',
+                        borderRadius: '6px', letterSpacing: '0.5px'
+                      }}>
+                        Default Active Delivery Address
+                      </span>
+                      <button
+                        onClick={() => setIsEditingAddress(true)}
+                        style={{
+                          backgroundColor: '#0F172A', color: '#FFFFFF',
+                          border: 'none', padding: '0.45rem 0.9rem', borderRadius: '8px',
+                          fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer',
+                          display: 'inline-flex', alignItems: 'center', gap: '0.3rem'
+                        }}
+                      >
+                        ✏️ Edit Address
+                      </button>
+                    </div>
 
-                <div className="address-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
-                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Full Name *</label>
-                    <input type="text" name="name" value={addressInput.name || ''} onChange={handleAddressChange} placeholder="Enter your full name" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
-                  </div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.25rem' }}>
+                      {deliveryAddress.name}
+                    </div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>
+                      📞 Mobile: <strong>{deliveryAddress.phone}</strong>
+                    </div>
 
-                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Mobile Number *</label>
-                    <input type="tel" name="phone" value={addressInput.phone || ''} onChange={handleAddressChange} placeholder="Enter your 10-digit mobile number" maxLength="10" pattern="[0-9]{10}" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>House / Door No. *</label>
-                    <input type="text" name="houseNo" value={addressInput.houseNo || ''} onChange={handleAddressChange} placeholder="Enter house number" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Building (Optional)</label>
-                    <input type="text" name="building" value={addressInput.building || ''} onChange={handleAddressChange} placeholder="Enter building" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
-                  </div>
+                    <div style={{ fontSize: '0.85rem', color: '#334155', lineHeight: '1.5', marginBottom: '0.75rem' }}>
+                      {[
+                        deliveryAddress.houseNo ? `#${deliveryAddress.houseNo}` : '',
+                        deliveryAddress.building,
+                        deliveryAddress.street,
+                        deliveryAddress.area,
+                        deliveryAddress.landmark ? `(Near ${deliveryAddress.landmark})` : '',
+                        deliveryAddress.district,
+                        deliveryAddress.state,
+                        deliveryAddress.pincode ? `- ${deliveryAddress.pincode}` : '',
+                        deliveryAddress.country
+                      ].filter(Boolean).join(', ')}
+                    </div>
 
-                  <div className="form-group">
-                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Street / Road *</label>
-                    <input type="text" name="street" value={addressInput.street || ''} onChange={handleAddressChange} placeholder="Enter street" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                    {typeof deliveryAddress.lat === 'number' && typeof deliveryAddress.lng === 'number' && (
+                      <div style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                        fontSize: '0.75rem', color: '#059669', backgroundColor: '#ECFDF5',
+                        padding: '0.3rem 0.6rem', borderRadius: '6px', fontWeight: 600,
+                        border: '1px solid #A7F3D0'
+                      }}>
+                        <MapPin size={14} /> Pinned Location: {deliveryAddress.lat.toFixed(4)}, {deliveryAddress.lng.toFixed(4)}
+                      </div>
+                    )}
                   </div>
+                ) : (
+                  /* EDIT / NEW ADDRESS FORM WITH GOOGLE MAP PICKER */
+                  <div>
+                    {deliveryAddress && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        <h5 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0F172A' }}>Editing Delivery Address</h5>
+                        <button
+                          onClick={() => setIsEditingAddress(false)}
+                          style={{
+                            backgroundColor: 'transparent', color: '#64748B', border: '1px solid #CBD5E1',
+                            padding: '0.3rem 0.7rem', borderRadius: '6px', fontSize: '0.78rem', cursor: 'pointer'
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
 
-                  <div className="form-group">
-                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Area / Locality *</label>
-                    <input type="text" name="area" value={addressInput.area || ''} onChange={handleAddressChange} placeholder="Enter area" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                    <MapPicker 
+                      defaultLat={addressInput.lat}
+                      defaultLng={addressInput.lng}
+                      onLocationSelect={(loc) => {
+                        const addr = loc.addressObj;
+                        setAddressInput(prev => ({
+                          ...prev,
+                          lat: loc.lat,
+                          lng: loc.lng,
+                          houseNo: addr?.house_number || prev.houseNo,
+                          street: addr?.road || prev.street,
+                          area: addr?.suburb || addr?.neighbourhood || prev.area,
+                          district: addr?.city_district || addr?.county || addr?.city || prev.district,
+                          state: addr?.state || prev.state,
+                          pincode: addr?.postcode || prev.pincode
+                        }));
+                      }} 
+                    />
+
+                    <div className="address-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                      <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Full Name *</label>
+                        <input type="text" name="name" value={addressInput.name || ''} onChange={handleAddressChange} placeholder="Enter your full name" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                      </div>
+
+                      <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Mobile Number *</label>
+                        <input type="tel" name="phone" value={addressInput.phone || ''} onChange={handleAddressChange} placeholder="Enter your 10-digit mobile number" maxLength="10" pattern="[0-9]{10}" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>House / Door No. *</label>
+                        <input type="text" name="houseNo" value={addressInput.houseNo || ''} onChange={handleAddressChange} placeholder="Enter house number" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Building (Optional)</label>
+                        <input type="text" name="building" value={addressInput.building || ''} onChange={handleAddressChange} placeholder="Enter building" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                      </div>
+
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Street / Road *</label>
+                        <input type="text" name="street" value={addressInput.street || ''} onChange={handleAddressChange} placeholder="Enter street" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                      </div>
+
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Area / Locality *</label>
+                        <input type="text" name="area" value={addressInput.area || ''} onChange={handleAddressChange} placeholder="Enter area" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                      </div>
+
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Landmark (Optional)</label>
+                        <input type="text" name="landmark" value={addressInput.landmark || ''} onChange={handleAddressChange} placeholder="Enter landmark" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                      </div>
+
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Country *</label>
+                        <select name="country" value={addressInput.country || 'India'} onChange={handleAddressChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--surface-variant)' }}>
+                          <option value="India">India</option>
+                          <option value="United States">United States</option>
+                          <option value="United Kingdom">United Kingdom</option>
+                          <option value="Canada">Canada</option>
+                          <option value="Australia">Australia</option>
+                          <option value="United Arab Emirates">United Arab Emirates</option>
+                          <option value="Saudi Arabia">Saudi Arabia</option>
+                          <option value="Singapore">Singapore</option>
+                          <option value="Malaysia">Malaysia</option>
+                          <option value="Sri Lanka">Sri Lanka</option>
+                          <option value="New Zealand">New Zealand</option>
+                          <option value="Germany">Germany</option>
+                          <option value="France">France</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>State *</label>
+                        <select name="state" value={addressInput.state || ''} onChange={handleAddressChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--surface-variant)' }}>
+                          <option value="">Select State</option>
+                          {statesList.map(state => (
+                            <option key={state} value={state}>{state}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>District / City *</label>
+                        <select name="district" value={addressInput.district || ''} onChange={handleAddressChange} disabled={!addressInput.state} style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: addressInput.state ? 'var(--surface-variant)' : 'var(--bg-color)', cursor: addressInput.state ? 'pointer' : 'not-allowed' }}>
+                          <option value="">Select District</option>
+                          {districtsList.map(district => (
+                            <option key={district} value={district}>{district}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Pincode *</label>
+                        <input type="text" name="pincode" value={addressInput.pincode || ''} onChange={handleAddressChange} placeholder="Enter pincode" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
+                      </div>
+                      
+                      <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Address Type *</label>
+                        <select name="addressType" value={addressInput.addressType || 'Home'} onChange={handleAddressChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--surface-variant)' }}>
+                          <option value="Home">Home (All day delivery)</option>
+                          <option value="Office">Office (Delivery between 10 AM - 5 PM)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="form-group" style={{ marginTop: '1rem' }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Delivery Instructions (Optional)</label>
+                      <textarea name="instructions" value={addressInput.instructions || ''} onChange={handleAddressChange} rows="2" placeholder="Describe your delivery instructions" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}></textarea>
+                    </div>
+
+                    {!isAddressValid() && (
+                      <p style={{ color: 'var(--error)', fontSize: '0.8rem', marginTop: '0.75rem' }}>
+                        Please fill all mandatory (*) fields to save your address.
+                      </p>
+                    )}
+
+                    <div className="address-actions mt-2" style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '1rem' }}>
+                      <button onClick={handleSaveAddress} className="btn-primary" style={{ padding: '0.75rem 1.5rem', width: '100%' }} disabled={!isAddressValid()}>
+                        Save Address
+                      </button>
+                      {isSaved && <span className="save-success" style={{ color: 'var(--success)', fontWeight: 'bold' }}>Saved!</span>}
+                    </div>
                   </div>
-
-                  <div className="form-group">
-                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Landmark (Optional)</label>
-                    <input type="text" name="landmark" value={addressInput.landmark || ''} onChange={handleAddressChange} placeholder="Enter landmark" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
-                  </div>
-
-                  <div className="form-group">
-                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Country *</label>
-                    <select name="country" value={addressInput.country || 'India'} onChange={handleAddressChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--surface-variant)' }}>
-                      <option value="India">India</option>
-                      <option value="United States">United States</option>
-                      <option value="United Kingdom">United Kingdom</option>
-                      <option value="Canada">Canada</option>
-                      <option value="Australia">Australia</option>
-                      <option value="United Arab Emirates">United Arab Emirates</option>
-                      <option value="Saudi Arabia">Saudi Arabia</option>
-                      <option value="Singapore">Singapore</option>
-                      <option value="Malaysia">Malaysia</option>
-                      <option value="Sri Lanka">Sri Lanka</option>
-                      <option value="New Zealand">New Zealand</option>
-                      <option value="Germany">Germany</option>
-                      <option value="France">France</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>State *</label>
-                    <select name="state" value={addressInput.state || ''} onChange={handleAddressChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--surface-variant)' }}>
-                      <option value="">Select State</option>
-                      {statesList.map(state => (
-                        <option key={state} value={state}>{state}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>District / City *</label>
-                    <select name="district" value={addressInput.district || ''} onChange={handleAddressChange} disabled={!addressInput.state} style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: addressInput.state ? 'var(--surface-variant)' : 'var(--bg-color)', cursor: addressInput.state ? 'pointer' : 'not-allowed' }}>
-                      <option value="">Select District</option>
-                      {districtsList.map(district => (
-                        <option key={district} value={district}>{district}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Pincode *</label>
-                    <input type="text" name="pincode" value={addressInput.pincode || ''} onChange={handleAddressChange} placeholder="Enter pincode" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }} />
-                  </div>
-                  
-                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Address Type *</label>
-                    <select name="addressType" value={addressInput.addressType || 'Home'} onChange={handleAddressChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--surface-variant)' }}>
-                      <option value="Home">Home (All day delivery)</option>
-                      <option value="Office">Office (Delivery between 10 AM - 5 PM)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="form-group" style={{ marginTop: '1rem' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Delivery Instructions (Optional)</label>
-                  <textarea name="instructions" value={addressInput.instructions || ''} onChange={handleAddressChange} rows="2" placeholder="Describe your delivery instructions" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}></textarea>
-                </div>
-
-                {!isAddressValid() && (
-                  <p style={{ color: 'var(--error)', fontSize: '0.8rem', marginTop: '0.75rem' }}>
-                    Please fill all mandatory (*) fields to save your address.
-                  </p>
                 )}
-
-                <div className="address-actions mt-2" style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '1rem' }}>
-                  <button onClick={handleSaveAddress} className="btn-primary" style={{ padding: '0.75rem 1.5rem', width: '100%' }} disabled={!isAddressValid()}>
-                    Save Address
-                  </button>
-                  {isSaved && <span className="save-success" style={{ color: 'var(--success)', fontWeight: 'bold' }}>Saved!</span>}
-                </div>
               </div>
             )}
           </div>

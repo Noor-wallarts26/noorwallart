@@ -148,11 +148,69 @@ export const ShopProvider = ({ children }) => {
       try {
         setDeliveryAddress(JSON.parse(savedAddress));
       } catch (e) {
-        // Fallback for old string addresses
         setDeliveryAddress(null);
       }
     }
   }, []);
+
+  // Sync authenticated user's saved delivery address from Firestore
+  useEffect(() => {
+    if (user?.uid) {
+      import('firebase/firestore').then(({ doc, onSnapshot }) => {
+        const unsubscribe = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+          if (docSnap.exists() && docSnap.data().deliveryAddress) {
+            const dbAddress = docSnap.data().deliveryAddress;
+            setDeliveryAddress(dbAddress);
+            try {
+              localStorage.setItem('deliveryAddress', JSON.stringify(dbAddress));
+            } catch(e){}
+          }
+        });
+        return () => unsubscribe();
+      });
+    }
+  }, [user?.uid]);
+
+  const saveDeliveryAddressToDB = async (addressData) => {
+    if (!addressData) return false;
+    
+    const sanitizedAddress = {
+      name: addressData.name?.trim() || '',
+      phone: addressData.phone?.trim() || '',
+      houseNo: addressData.houseNo?.trim() || '',
+      building: addressData.building?.trim() || '',
+      street: addressData.street?.trim() || '',
+      area: addressData.area?.trim() || '',
+      landmark: addressData.landmark?.trim() || '',
+      district: addressData.district?.trim() || '',
+      state: addressData.state?.trim() || '',
+      country: addressData.country?.trim() || 'India',
+      pincode: addressData.pincode?.trim() || '',
+      addressType: addressData.addressType || 'Home',
+      instructions: addressData.instructions?.trim() || '',
+      lat: typeof addressData.lat === 'number' && !isNaN(addressData.lat) ? addressData.lat : null,
+      lng: typeof addressData.lng === 'number' && !isNaN(addressData.lng) ? addressData.lng : null,
+      updatedAt: new Date().toISOString()
+    };
+
+    setDeliveryAddress(sanitizedAddress);
+    try {
+      localStorage.setItem('deliveryAddress', JSON.stringify(sanitizedAddress));
+    } catch(e){}
+
+    if (user?.uid) {
+      try {
+        const { doc, setDoc } = await import('firebase/firestore');
+        await setDoc(doc(db, "users", user.uid), {
+          deliveryAddress: sanitizedAddress,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+      } catch (err) {
+        console.error("Error persisting delivery address to Firestore:", err);
+      }
+    }
+    return true;
+  };
 
   // Save to local storage on change
   useEffect(() => {
@@ -878,6 +936,7 @@ export const ShopProvider = ({ children }) => {
       setSelectedCategory,
       deliveryAddress,
       setDeliveryAddress,
+      saveDeliveryAddressToDB,
       filteredProducts,
       wishlistedProducts: products.filter(p => p.isWishlisted),
       cartWithProducts,
