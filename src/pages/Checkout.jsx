@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, CreditCard, Lock, ShieldCheck, MessageCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
@@ -171,40 +171,36 @@ const Checkout = () => {
     }
   };
 
+  const autoWhatsAppTriggeredRef = useRef(false);
+
   const sendInstantWhatsAppNotification = (order) => {
     if (!order) return;
     
-    const addressDetails = [
-      order.customer?.houseNo,
-      order.customer?.building,
-      order.customer?.street,
-      order.customer?.area,
-      order.customer?.landmark,
-      order.customer?.district,
-      order.customer?.state,
-      order.customer?.pincode
-    ].filter(Boolean).join(', ');
+    const customerName = order.customer?.name || 'Valued Customer';
+    const customerPhone = order.customer?.phone || 'N/A';
+    const totalAmount = Number(order.totalPrice || 0).toFixed(2);
+    const paymentStatus = order.paymentStatus || 'Paid ✅';
+    const orderId = order.id || 'N/A';
 
-    const mapLink = order.customer?.lat && order.customer?.lng 
-      ? `https://maps.google.com/?q=${order.customer.lat},${order.customer.lng}`
-      : 'N/A';
+    const productsText = (order.items || []).map((item, idx) => {
+      const name = item.title || item.product?.title || 'Product';
+      const qty = item.quantity || 1;
+      const price = Number(item.price || item.unitPrice || 0).toFixed(2);
+      return `${idx + 1}. ${name} (Qty: ${qty}) - ₹${price}`;
+    }).join('\n') || (order.itemsSummary || 'Products ordered');
 
-    const message = `🛍️ *NEW ORDER PLACED!*
+    const message = `🎉 *NEW ORDER CONFIRMED - NOOR KARTS* 🎉
 
-📦 *Order ID:* ${order.id}
-👤 *Customer:* ${order.customer?.name}
-📞 *Phone:* ${order.customer?.phone}
-🏠 *Delivery Address:* ${addressDetails}
-📍 *Google Maps:* ${mapLink}
-
-💳 *Payment Method:* ${order.paymentMethod}
-💰 *Total Amount:* ₹${order.totalPrice?.toFixed(2)}
-🔥 *Status:* ${order.status}
+📦 *Order ID:* #${orderId}
+👤 *Customer Name:* ${customerName}
+📞 *Mobile Number:* ${customerPhone}
+💳 *Payment Status:* ${paymentStatus} (${order.paymentMethod || 'Online Payment'})
+💰 *Total Paid Amount:* ₹${totalAmount}
 
 🛒 *Ordered Products:*
-${order.itemsSummary}
+${productsText}
 
-Thank you for shopping with Noor Wall Arts!`;
+Thank you for shopping with Noor WallArts & Gifts! Please send this message to receive instant order updates on WhatsApp.`;
 
     const whatsappUrl = `https://wa.me/918925325330?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -214,26 +210,161 @@ Thank you for shopping with Noor Wall Arts!`;
     sendInstantWhatsAppNotification(orderPlaced);
   };
 
+  // AUTOMATIC WHATSAPP POPUP DISPATCH (1.5s delay after order completion)
+  useEffect(() => {
+    if (orderPlaced && !autoWhatsAppTriggeredRef.current) {
+      autoWhatsAppTriggeredRef.current = true;
+      const timer = setTimeout(() => {
+        try {
+          sendInstantWhatsAppNotification(orderPlaced);
+        } catch (e) {
+          console.log("Automatic WhatsApp launch blocked by browser popup blocker:", e);
+        }
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [orderPlaced]);
+
   if (orderPlaced) {
+    const customerName = orderPlaced.customer?.name || 'Valued Customer';
+    const customerPhone = orderPlaced.customer?.phone || 'N/A';
+    const customerAddress = [
+      orderPlaced.customer?.houseNo,
+      orderPlaced.customer?.building,
+      orderPlaced.customer?.street,
+      orderPlaced.customer?.area,
+      orderPlaced.customer?.landmark,
+      orderPlaced.customer?.district,
+      orderPlaced.customer?.state,
+      orderPlaced.customer?.pincode
+    ].filter(Boolean).join(', ') || 'Address Provided';
+
     return (
-      <div className="checkout-page confirm-state animate-fade-in">
-        <div className="container">
-          <div className="order-success-card card">
-            <CheckCircle2 size={64} color="var(--success)" className="success-icon" />
-            <h2>Order Placed Successfully!</h2>
-            <p className="order-id">Order ID: <strong>{orderPlaced.id}</strong></p>
-            <p className="order-msg">Thank you for shopping with Noor Wall Arts & Gifts. Your order is confirmed and will be shipped soon.</p>
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem', flexWrap: 'wrap' }}>
-              <button className="btn-primary" onClick={() => navigate('/')}>Continue Shopping</button>
-              <button 
-                className="btn-outline" 
-                onClick={handleWhatsAppOrder}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: '#25D366', color: '#25D366' }}
-              >
-                <MessageCircle size={20} /> Send Order via WhatsApp
-              </button>
+      <div className="checkout-page confirm-state animate-fade-in" style={{ padding: '2rem 1rem' }}>
+        <div className="container" style={{ maxWidth: '680px', margin: '0 auto' }}>
+          
+          {/* SUCCESS HERO CARD */}
+          <div className="order-success-card card" style={{
+            textAlign: 'center',
+            padding: '2.5rem 1.5rem',
+            borderRadius: '20px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.01)',
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #E2E8F0',
+            marginBottom: '1.5rem'
+          }}>
+            <div style={{
+              width: '80px', height: '80px', borderRadius: '50%',
+              backgroundColor: '#DCFCE7', color: '#16A34A',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 1.25rem auto',
+              boxShadow: '0 4px 12px rgba(22, 163, 74, 0.2)'
+            }}>
+              <CheckCircle2 size={48} strokeWidth={2.5} />
+            </div>
+
+            <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0F172A', margin: '0 0 0.5rem 0' }}>
+              🎉 Order Placed Successfully!
+            </h2>
+            <p style={{ fontSize: '1rem', fontWeight: 600, color: '#16A34A', margin: '0 0 0.5rem 0' }}>
+              Your payment has been received successfully.
+            </p>
+            <p style={{ fontSize: '0.95rem', color: '#64748B', margin: 0 }}>
+              Your order has been confirmed and is now being processed.
+            </p>
+
+            <div style={{
+              marginTop: '1.25rem', padding: '0.6rem 1.2rem',
+              backgroundColor: '#F8FAFC', borderRadius: '12px',
+              display: 'inline-block', border: '1px solid #E2E8F0'
+            }}>
+              <span style={{ fontSize: '0.9rem', color: '#64748B' }}>Order Reference ID: </span>
+              <strong style={{ fontSize: '1rem', color: '#0F172A', fontFamily: 'monospace' }}>#{orderPlaced.id}</strong>
             </div>
           </div>
+
+          {/* ORDER SUMMARY OVERVIEW */}
+          <div className="card" style={{ padding: '1.5rem', borderRadius: '16px', marginBottom: '1.5rem' }}>
+            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', color: '#0F172A', borderBottom: '1px solid #F1F5F9', paddingBottom: '0.5rem' }}>
+              📦 Order Details Overview
+            </h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.9rem', marginBottom: '1rem' }}>
+              <div>
+                <span className="text-muted" style={{ display: 'block', fontSize: '0.78rem' }}>CUSTOMER</span>
+                <strong>{customerName}</strong>
+              </div>
+              <div>
+                <span className="text-muted" style={{ display: 'block', fontSize: '0.78rem' }}>CONTACT</span>
+                <strong>{customerPhone}</strong>
+              </div>
+              <div>
+                <span className="text-muted" style={{ display: 'block', fontSize: '0.78rem' }}>TOTAL PAID</span>
+                <strong style={{ color: '#16A34A' }}>₹{Number(orderPlaced.totalPrice || 0).toFixed(2)}</strong>
+              </div>
+              <div>
+                <span className="text-muted" style={{ display: 'block', fontSize: '0.78rem' }}>PAYMENT STATUS</span>
+                <strong style={{ color: '#16A34A' }}>{orderPlaced.paymentStatus || 'Paid ✅'}</strong>
+              </div>
+            </div>
+
+            <div style={{ fontSize: '0.85rem', color: '#475569', backgroundColor: '#F8FAFC', padding: '0.75rem', borderRadius: '8px' }}>
+              <span style={{ fontWeight: 700, color: '#334155', display: 'block', marginBottom: '0.2rem' }}>📍 Delivery Address:</span>
+              {customerAddress}
+            </div>
+          </div>
+
+          {/* FALLBACK WHATSAPP SECTION */}
+          <div className="whatsapp-fallback-card card" style={{
+            backgroundColor: '#F0FDF4',
+            border: '2px solid #86EFAC',
+            borderRadius: '16px',
+            padding: '1.75rem 1.5rem',
+            textAlign: 'center',
+            marginBottom: '1.5rem',
+            boxShadow: '0 4px 14px rgba(37, 211, 102, 0.12)'
+          }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#166534', margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+              <span>📲</span> Get Instant Order Updates on WhatsApp
+            </h3>
+            <p style={{ fontSize: '0.92rem', color: '#15803D', margin: '0 0 1.25rem 0', lineHeight: 1.5 }}>
+              Tap the button below to send your pre-filled order details and receive faster updates about your order.
+            </p>
+
+            <button 
+              onClick={handleWhatsAppOrder}
+              style={{
+                width: '100%',
+                backgroundColor: '#25D366',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '1rem 1.5rem',
+                borderRadius: '12px',
+                fontSize: '1.05rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.6rem',
+                boxShadow: '0 4px 12px rgba(37, 211, 102, 0.35)',
+                transition: 'transform 0.2s, background 0.2s'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#22C55E'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#25D366'; e.currentTarget.style.transform = 'none'; }}
+            >
+              <MessageCircle size={22} fill="#FFFFFF" color="#25D366" />
+              <span>💬 Send Order on WhatsApp for Quick Updates</span>
+            </button>
+          </div>
+
+          {/* ACTION BUTTONS */}
+          <div style={{ textAlign: 'center' }}>
+            <button className="btn-primary" onClick={() => navigate('/')} style={{ padding: '0.9rem 2rem', fontSize: '1rem', fontWeight: 700 }}>
+              Continue Shopping
+            </button>
+          </div>
+
         </div>
       </div>
     );
