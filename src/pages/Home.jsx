@@ -7,130 +7,6 @@ import HeroSlider from '../components/HeroSlider';
 import SmartSearchBar from '../components/SmartSearchBar';
 import './Home.css';
 
-const InstagramIcon = ({ size = 22, color = 'currentColor' }) => (
-  <svg 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke={color} 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-  >
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-  </svg>
-);
-
-const IndependenceDayHero = ({ storeSettings }) => {
-  const rawInstagram = storeSettings?.instagram || '@noorkarts';
-  const instagramUrl = rawInstagram.startsWith('http')
-    ? rawInstagram
-    : `https://instagram.com/${rawInstagram.replace('@', '').trim()}`;
-
-  const handleInstagramClick = () => {
-    window.open(instagramUrl, '_blank');
-  };
-
-  return (
-    <div className="independence-hero-section">
-      {/* Background Patriotic Glows */}
-      <div className="patriotic-glow glow-saffron"></div>
-      <div className="patriotic-glow glow-green"></div>
-
-      {/* Ashoka Chakra Background Watermark */}
-      <div className="chakra-watermark">
-        <svg viewBox="0 0 100 100" width="300" height="300" opacity="0.035">
-          <circle cx="50" cy="50" r="45" fill="none" stroke="#000080" strokeWidth="2.5" />
-          <circle cx="50" cy="50" r="6" fill="#000080" />
-          {[...Array(24)].map((_, i) => (
-            <line 
-              key={i} 
-              x1="50" 
-              y1="50" 
-              x2={50 + 45 * Math.cos((i * 15 * Math.PI) / 180)} 
-              y2={50 + 45 * Math.sin((i * 15 * Math.PI) / 180)} 
-              stroke="#000080" 
-              strokeWidth="1.2" 
-            />
-          ))}
-        </svg>
-      </div>
-
-      <div className="independence-container">
-        
-        {/* Left Indian Flag Decoration */}
-        <div className="flag-decor flag-left" title="Indian Flag 🇮🇳">
-          <div className="flag-stripe saffron"></div>
-          <div className="flag-stripe white">
-            <div className="flag-chakra-mini">
-              <svg viewBox="0 0 24 24" width="14" height="14">
-                <circle cx="12" cy="12" r="10" fill="none" stroke="#000080" strokeWidth="1" />
-                <circle cx="12" cy="12" r="2" fill="#000080" />
-              </svg>
-            </div>
-          </div>
-          <div className="flag-stripe green"></div>
-        </div>
-
-        {/* Center Content Column */}
-        <div className="independence-main-content">
-          
-          {/* NOOR WALLETS Logo & Title */}
-          <div className="hero-logo-wrapper">
-            <img 
-              src="/noor_arts_logo.jpg" 
-              onError={(e) => { e.target.src = '/logo.jpg'; }} 
-              alt="NOOR WALLETS Logo" 
-              className="hero-logo-img"
-            />
-            <span className="hero-brand-title">NOOR WALLETS</span>
-          </div>
-
-          {/* Main Headline */}
-          <h1 className="hero-main-title">
-            INDEPENDENCE DAY 🇮🇳
-          </h1>
-
-          {/* Subtitle */}
-          <p className="hero-sub-title">
-            Special Independence Day Offer
-          </p>
-
-          {/* Prominent CTA Button */}
-          <div className="hero-cta-wrapper">
-            <button 
-              onClick={handleInstagramClick}
-              className="cta-get-code-btn"
-            >
-              <InstagramIcon size={22} color="#FFFFFF" />
-              <span>GET YOUR CODE FROM INSTAGRAM</span>
-            </button>
-          </div>
-
-        </div>
-
-        {/* Right Indian Flag Decoration */}
-        <div className="flag-decor flag-right" title="Indian Flag 🇮🇳">
-          <div className="flag-stripe saffron"></div>
-          <div className="flag-stripe white">
-            <div className="flag-chakra-mini">
-              <svg viewBox="0 0 24 24" width="14" height="14">
-                <circle cx="12" cy="12" r="10" fill="none" stroke="#000080" strokeWidth="1" />
-                <circle cx="12" cy="12" r="2" fill="#000080" />
-              </svg>
-            </div>
-          </div>
-          <div className="flag-stripe green"></div>
-        </div>
-
-      </div>
-    </div>
-  );
-};
-
 const Home = () => {
   const { 
     searchQuery, setSearchQuery, 
@@ -268,7 +144,6 @@ const Home = () => {
       </header>
       <div className="container">
 
-        <IndependenceDayHero storeSettings={storeSettings} />
         {sliderProducts.length > 0 && <HeroSlider products={sliderProducts} />}
 
         {isProductsLoading ? (

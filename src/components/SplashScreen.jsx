@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { ShopContext } from '../context/ShopContext';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
 import './SplashScreen.css';
 
 // Inline Instagram SVG icon for 100% build reliability
-const InstagramIcon = ({ size = 18 }) => (
+const InstagramIcon = ({ size = 20, color = '#FFFFFF' }) => (
   <svg 
     width={size} 
     height={size} 
     viewBox="0 0 24 24" 
     fill="none" 
-    stroke="currentColor" 
+    stroke={color} 
     strokeWidth="2" 
     strokeLinecap="round" 
     strokeLinejoin="round"
@@ -23,137 +23,156 @@ const InstagramIcon = ({ size = 18 }) => (
 
 const SplashScreen = () => {
   const { storeSettings } = useContext(ShopContext);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
-  // Phase states: 'logo' -> 'offer' -> 'fading' -> 'done'
-  const [phase, setPhase] = useState('logo');
-  const instagramUrl = 'https://www.instagram.com/noorkarts.in/';
+  const rawInstagram = storeSettings?.instagram || '@noorkarts';
+  const instagramUrl = rawInstagram.startsWith('http')
+    ? rawInstagram
+    : `https://instagram.com/${rawInstagram.replace('@', '').trim()}`;
 
-  // Dynamic campaign check from admin panel settings
-  const isCampaignActive = storeSettings?.independenceDayCampaignActive !== false;
-  const campaignEndDateStr = storeSettings?.campaignEndDate || '2026-08-31T23:59:59';
-  const isExpired = new Date() > new Date(campaignEndDateStr);
-  const shouldShowOffer = isCampaignActive && !isExpired;
-
+  // 5-Second Auto Close Timer
   useEffect(() => {
-    // 1. Logo Intro Animation (1.5 seconds)
-    const logoTimer = setTimeout(() => {
-      if (shouldShowOffer) {
-        setPhase('offer');
-      } else {
-        // If campaign disabled or expired, fade out straight to homepage
-        setPhase('fading');
-      }
-    }, 1500);
+    const timer = setTimeout(() => {
+      handleClose();
+    }, 5000);
 
-    return () => clearTimeout(logoTimer);
-  }, [shouldShowOffer]);
+    return () => clearTimeout(timer);
+  }, []);
 
-  useEffect(() => {
-    if (phase === 'offer') {
-      // 2. Display Offer Screen for ~5 seconds then automatically fade out to homepage
-      const offerTimer = setTimeout(() => {
-        setPhase('fading');
-      }, 5000);
+  const handleClose = () => {
+    setIsFadingOut(true);
+    setTimeout(() => {
+      setIsVisible(false);
+    }, 500); // Matches CSS transition duration
+  };
 
-      return () => clearTimeout(offerTimer);
-    }
-
-    if (phase === 'fading') {
-      // 3. Complete fade out transition (0.6 seconds)
-      const fadeTimer = setTimeout(() => {
-        setPhase('done');
-      }, 600);
-
-      return () => clearTimeout(fadeTimer);
-    }
-  }, [phase]);
-
-  if (phase === 'done') return null;
-
-  const handleShopNow = (e) => {
+  const handleInstagramClick = (e) => {
     e.stopPropagation();
-    setPhase('fading');
+    window.open(instagramUrl, '_blank');
   };
 
-  const handleOverlayClick = (e) => {
-    // Close immediately if user clicks/taps outside the card
-    setPhase('fading');
-  };
+  if (!isVisible) return null;
 
   return (
-    <div className={`splash-overlay ${phase}`} onClick={handleOverlayClick}>
-      <div className="splash-ambient-bg">
-        <div className="ambient-orb orb-saffron"></div>
-        <div className="ambient-orb orb-green"></div>
+    <div className={`splash-fullscreen-overlay ${isFadingOut ? 'splash-fade-out' : ''}`}>
+      
+      {/* Top-Right Optional Skip Button */}
+      <button 
+        type="button" 
+        className="splash-skip-btn" 
+        onClick={handleClose}
+        aria-label="Skip to Homepage"
+      >
+        <span>Skip</span>
+        <X size={16} />
+      </button>
+
+      {/* Ambient Background Patriotic Glows */}
+      <div className="splash-glow glow-saffron"></div>
+      <div className="splash-glow glow-green"></div>
+
+      {/* Background Ashoka Chakra Watermark */}
+      <div className="splash-chakra-watermark">
+        <svg viewBox="0 0 100 100" width="340" height="340" opacity="0.035">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="#000080" strokeWidth="2.5" />
+          <circle cx="50" cy="50" r="6" fill="#000080" />
+          {[...Array(24)].map((_, i) => (
+            <line 
+              key={i} 
+              x1="50" 
+              y1="50" 
+              x2={50 + 45 * Math.cos((i * 15 * Math.PI) / 180)} 
+              y2={50 + 45 * Math.sin((i * 15 * Math.PI) / 180)} 
+              stroke="#000080" 
+              strokeWidth="1.2" 
+            />
+          ))}
+        </svg>
       </div>
 
-      {/* PHASE 1: LOGO INTRO SCREEN */}
-      {phase === 'logo' && (
-        <div className="logo-intro-box animate-logo-intro" onClick={(e) => e.stopPropagation()}>
-          <div className="logo-wrapper">
-            <img 
-              src={storeSettings?.logoUrl || "/logo.jpg"} 
-              alt="Yshift Logo" 
-              className="splash-logo-img"
-              onError={(e) => { e.target.src = "/logo.jpg"; }}
-            />
+      <div className="splash-main-container">
+        
+        {/* Left Indian Flag / Decoration */}
+        <div className="splash-flag-panel flag-left" title="Indian Flag 🇮🇳">
+          <div className="flag-stripe saffron"></div>
+          <div className="flag-stripe white">
+            <div className="flag-chakra-mini">
+              <svg viewBox="0 0 24 24" width="14" height="14">
+                <circle cx="12" cy="12" r="10" fill="none" stroke="#000080" strokeWidth="1" />
+                <circle cx="12" cy="12" r="2" fill="#000080" />
+              </svg>
+            </div>
           </div>
-          <div className="brand-tagline">
-            <span>NOORKARTS</span>
-          </div>
+          <div className="flag-stripe green"></div>
         </div>
-      )}
 
-      {/* PHASE 2: INDEPENDENCE DAY OFFER SCREEN (Visible ~5s) */}
-      {(phase === 'offer' || (phase === 'fading' && shouldShowOffer)) && (
-        <div 
-          className="offer-intro-card animate-card-appear" 
-          onClick={(e) => e.stopPropagation()}
-        >
+        {/* Center Content Area */}
+        <div className="splash-content-box">
           
-          <div className="tricolor-top-bar">
-            <span className="bar-orange"></span>
-            <span className="bar-white"></span>
-            <span className="bar-green"></span>
+          {/* BRANDING HEADER */}
+          <div className="splash-brand-header">
+            <div className="splash-logo-frame">
+              <img 
+                src="/noor_arts_logo.jpg" 
+                onError={(e) => { e.target.src = '/logo.jpg'; }} 
+                alt="NOOR WALLETS Logo" 
+              />
+            </div>
+            <h2 className="splash-brand-title">NOOR WALLETS</h2>
+            <span className="splash-brand-subtitle">PREMIUM ARTS &amp; GIFTS</span>
           </div>
 
-          <div className="offer-header">
-            <div className="flag-badge">
-              <span>🇮🇳</span> INDEPENDENCE DAY OFFER
-            </div>
-            <h2 className="celebrate-title">Celebrate Freedom. Shop Special.</h2>
+          {/* MAIN PROMOTION HEADINGS */}
+          <div className="splash-campaign-wrapper">
+            <div className="splash-flag-icon">🇮🇳</div>
+            <h1 className="splash-hero-headline">INDEPENDENCE DAY</h1>
+            <p className="splash-offer-badge">SPECIAL OFFER</p>
+            <h3 className="splash-coupon-title">SPECIAL COUPON CODE OFFER</h3>
           </div>
 
-          <div className="offer-divider"></div>
+          {/* URGENCY & COUPON BOX */}
+          <div className="splash-urgency-card">
+            <div className="splash-limited-tag">LIMITED OFFER</div>
+            <div className="splash-urgency-sub">FIRST 50 CUSTOMERS ONLY</div>
+            <div className="splash-fast-text">GET YOUR COUPON CODE FAST</div>
 
-          <div className="discount-section">
-            <div className="launch-badge">
-              <Sparkles size={14} color="#D4AF37" /> SPECIAL LAUNCH DISCOUNT
-            </div>
-            <p className="instagram-instruction">
-              Get your exclusive discount coupon from our Instagram page.
-            </p>
-            
-            <a 
-              href={instagramUrl} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="instagram-follow-btn"
-              onClick={(e) => e.stopPropagation()}
+            {/* INSTAGRAM CTA BUTTON */}
+            <button 
+              type="button" 
+              className="splash-cta-btn"
+              onClick={handleInstagramClick}
             >
-              <InstagramIcon size={18} />
-              <span>Follow us on Instagram & get your coupon</span>
-            </a>
+              <InstagramIcon size={20} color="#FFFFFF" />
+              <span>GET COUPON CODE 🇮🇳</span>
+            </button>
+
+            <div className="splash-inst-text">FOLLOW OUR INSTAGRAM PAGE</div>
+            <div className="splash-grab-tag">GRAB YOUR OFFER</div>
           </div>
 
-          <div className="offer-action">
-            <button className="btn-shop-now" onClick={handleShopNow}>
-              SHOP NOW <ArrowRight size={16} />
-            </button>
+          {/* BOTTOM FESTIVE GREETING */}
+          <div className="splash-bottom-greeting">
+            HAPPY INDEPENDENCE DAY 🇮🇳
           </div>
 
         </div>
-      )}
+
+        {/* Right Indian Flag / Decoration */}
+        <div className="splash-flag-panel flag-right" title="Indian Flag 🇮🇳">
+          <div className="flag-stripe saffron"></div>
+          <div className="flag-stripe white">
+            <div className="flag-chakra-mini">
+              <svg viewBox="0 0 24 24" width="14" height="14">
+                <circle cx="12" cy="12" r="10" fill="none" stroke="#000080" strokeWidth="1" />
+                <circle cx="12" cy="12" r="2" fill="#000080" />
+              </svg>
+            </div>
+          </div>
+          <div className="flag-stripe green"></div>
+        </div>
+
+      </div>
     </div>
   );
 };
