@@ -3,6 +3,7 @@ import { Search, X } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
+import SmartSearchBar from '../components/SmartSearchBar';
 import './Categories.css';
 
 const categoriesList = [
@@ -47,20 +48,7 @@ const Categories = () => {
       <header className="categories-header">
         <div className="container">
           
-          <div className="search-bar">
-            <Search size={20} className="search-icon" color="var(--text-secondary)" />
-            <input 
-              type="text" 
-              placeholder="Search products in categories..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="clear-search">
-                <X size={20} color="var(--text-secondary)" />
-              </button>
-            )}
-          </div>
+          <SmartSearchBar placeholder="Search products in categories..." />
 
           <div className="category-scroll-container">
             <div className="category-scroll">

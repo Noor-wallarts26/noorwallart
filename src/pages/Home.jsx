@@ -4,6 +4,7 @@ import { Search, X, ShoppingBag, User, Instagram } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import ProductCard from '../components/ProductCard';
 import HeroSlider from '../components/HeroSlider';
+import SmartSearchBar from '../components/SmartSearchBar';
 import './Home.css';
 
 const IndependenceDayHero = ({ storeSettings }) => {
@@ -268,20 +269,7 @@ const Home = () => {
 
       <header className="home-header">
         <div className="container">
-          <div className="search-bar">
-            <Search size={20} className="search-icon" color="var(--text-secondary)" />
-            <input 
-              type="text" 
-              placeholder="Search products, brands..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="clear-search">
-                <X size={20} color="var(--text-secondary)" />
-              </button>
-            )}
-          </div>
+          <SmartSearchBar placeholder="Search products, brands..." />
         </div>
       </header>
       <div className="container">
