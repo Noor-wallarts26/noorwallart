@@ -1,11 +1,28 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, X, ShoppingBag, User, Instagram } from 'lucide-react';
+import { Search, X, ShoppingBag, User } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import ProductCard from '../components/ProductCard';
 import HeroSlider from '../components/HeroSlider';
 import SmartSearchBar from '../components/SmartSearchBar';
 import './Home.css';
+
+const InstagramIcon = ({ size = 22, color = 'currentColor' }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke={color} 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+  </svg>
+);
 
 const IndependenceDayHero = ({ storeSettings }) => {
   const rawInstagram = storeSettings?.instagram || '@noorkarts';
@@ -88,7 +105,7 @@ const IndependenceDayHero = ({ storeSettings }) => {
               onClick={handleInstagramClick}
               className="cta-get-code-btn"
             >
-              <Instagram size={22} />
+              <InstagramIcon size={22} color="#FFFFFF" />
               <span>GET YOUR CODE FROM INSTAGRAM</span>
             </button>
           </div>
