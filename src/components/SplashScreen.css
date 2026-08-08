@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────
-   FULL-SCREEN INDEPENDENCE DAY INTRO SPLASH OVERLAY
+   AUTHENTIC & PREMIUM INDIAN INDEPENDENCE DAY SPLASH SCREEN
 ───────────────────────────────────────────────────────── */
 .splash-fullscreen-overlay {
   position: fixed;
@@ -8,11 +8,11 @@
   width: 100vw;
   height: 100vh;
   z-index: 99999;
-  background: linear-gradient(135deg, #FFF8F0 0%, #FFFFFF 50%, #F0FDF4 100%);
+  background: linear-gradient(135deg, #FFF9F2 0%, #FFFFFF 50%, #F0FDF4 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem 1rem;
+  padding: 2rem 1rem;
   overflow-y: auto;
   opacity: 1;
   transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -24,59 +24,88 @@
   pointer-events: none;
 }
 
+/* TOP AND BOTTOM TRICOLOR FABRIC DECORATIVE STRIPS */
+.tricolor-fabric-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  display: flex;
+  z-index: 5;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.tricolor-fabric-strip.top-strip {
+  top: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.tricolor-fabric-strip.bottom-strip {
+  bottom: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.strip-stripe {
+  flex: 1;
+  height: 100%;
+}
+.strip-stripe.saffron { background: linear-gradient(90deg, #FF9933 0%, #FF8000 100%); }
+.strip-stripe.white { background: #FFFFFF; }
+.strip-stripe.green { background: linear-gradient(90deg, #138808 0%, #0D6305 100%); }
+
 /* Top Right Skip Button */
 .splash-skip-btn {
   position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
+  top: 1.5rem;
+  right: 1.5rem;
   z-index: 10;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.4rem 0.85rem;
-  background: rgba(255, 255, 255, 0.92);
+  padding: 0.45rem 0.95rem;
+  background: rgba(255, 255, 255, 0.95);
   border: 1.5px solid #FED7AA;
   border-radius: 9999px;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 800;
   color: #7C2D12;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
   transition: all 0.2s ease;
 }
 
 .splash-skip-btn:hover {
   background: #FFFFFF;
   border-color: #EA580C;
-  transform: scale(1.04);
+  transform: scale(1.05);
 }
 
 /* Ambient Background Glows */
 .splash-glow {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
+  filter: blur(85px);
   pointer-events: none;
-  opacity: 0.38;
+  opacity: 0.35;
 }
 
 .glow-saffron {
   top: -60px;
   left: -60px;
-  width: 320px;
-  height: 320px;
+  width: 340px;
+  height: 340px;
   background: #FF9933;
 }
 
 .glow-green {
   bottom: -60px;
   right: -60px;
-  width: 320px;
-  height: 320px;
+  width: 340px;
+  height: 340px;
   background: #138808;
 }
 
-/* Ashoka Chakra Background Watermark */
+/* Background Ashoka Chakra Watermark */
 .splash-chakra-watermark {
   position: absolute;
   top: 50%;
@@ -92,27 +121,64 @@
   to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
+/* Red Fort Historic Silhouette (Bottom Background) */
+.red-fort-silhouette {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Ashoka Emblem Silhouette (Right Side Background) */
+.ashoka-emblem-silhouette {
+  position: absolute;
+  right: 5%;
+  top: 45%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Floating Sparkle Particles */
+.sparkle-particle {
+  position: absolute;
+  font-size: 1.25rem;
+  pointer-events: none;
+  z-index: 2;
+  animation: sparkleFloat 3s ease-in-out infinite alternate;
+}
+.sparkle-particle.p1 { top: 20%; left: 22%; animation-delay: 0s; }
+.sparkle-particle.p2 { top: 25%; right: 24%; animation-delay: 1s; }
+.sparkle-particle.p3 { bottom: 22%; left: 28%; animation-delay: 1.8s; }
+
+@keyframes sparkleFloat {
+  0% { transform: translateY(0) scale(0.9); opacity: 0.6; }
+  100% { transform: translateY(-8px) scale(1.15); opacity: 1; }
+}
+
 /* Main Container Grid */
 .splash-main-container {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   width: 100%;
-  max-width: 860px;
+  max-width: 900px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.75rem;
+  gap: 2rem;
   margin: auto;
 }
 
 /* Indian Flag Vertical Panels (Left & Right) */
 .splash-flag-panel {
-  width: 68px;
-  height: 200px;
-  border-radius: 12px;
+  width: 72px;
+  height: 210px;
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 10px 28px rgba(0,0,0,0.12);
-  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  border: 1.5px solid rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -150,7 +216,7 @@
   justify-content: center;
 }
 
-/* Center Content Box */
+/* Center Content Box (Primary Focus) */
 .splash-content-box {
   flex: 1;
   display: flex;
@@ -169,12 +235,12 @@
 }
 
 .splash-logo-frame {
-  width: 72px;
-  height: 72px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
   overflow: hidden;
   border: 3px solid #EA580C;
-  box-shadow: 0 6px 20px rgba(234, 88, 12, 0.2);
+  box-shadow: 0 6px 22px rgba(234, 88, 12, 0.22);
   margin-bottom: 0.5rem;
 }
 
@@ -185,7 +251,7 @@
 }
 
 .splash-brand-title {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 900;
   color: #431407;
   letter-spacing: 0.1em;
@@ -209,12 +275,12 @@
 }
 
 .splash-flag-icon {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   margin-bottom: 0.2rem;
 }
 
 .splash-hero-headline {
-  font-size: clamp(1.8rem, 5vw, 2.75rem);
+  font-size: clamp(1.85rem, 5vw, 2.85rem);
   font-weight: 900;
   color: #7C2D12;
   margin: 0 0 0.35rem 0;
@@ -234,7 +300,7 @@
 }
 
 .splash-coupon-title {
-  font-size: clamp(1rem, 2.8vw, 1.25rem);
+  font-size: clamp(1rem, 2.8vw, 1.28rem);
   font-weight: 900;
   color: #9A3412;
   margin: 0;
@@ -266,7 +332,7 @@
 }
 
 .splash-urgency-sub {
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 800;
   color: #DC2626;
   letter-spacing: 0.04em;
@@ -274,7 +340,7 @@
 }
 
 .splash-fast-text {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: #475569;
   margin-bottom: 0.85rem;
@@ -285,10 +351,10 @@
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
-  padding: 0.9rem 1.6rem;
+  padding: 0.95rem 1.75rem;
   background: linear-gradient(135deg, #E1306C 0%, #FD1D1D 50%, #F56040 100%);
   color: #FFFFFF;
-  font-size: 0.98rem;
+  font-size: 1.02rem;
   font-weight: 900;
   border: none;
   border-radius: 14px;
@@ -297,7 +363,7 @@
   transition: all 0.22s ease;
   letter-spacing: 0.04em;
   width: 100%;
-  max-width: 380px;
+  max-width: 390px;
   margin-bottom: 0.75rem;
 }
 
@@ -311,14 +377,6 @@
   font-weight: 800;
   color: #475569;
   letter-spacing: 0.04em;
-  margin-bottom: 0.25rem;
-}
-
-.splash-grab-tag {
-  font-size: 0.72rem;
-  font-weight: 900;
-  color: #15803D;
-  letter-spacing: 0.08em;
 }
 
 /* Bottom Festive Greeting */
@@ -337,29 +395,29 @@
 /* Responsive Mobile Layout */
 @media (max-width: 768px) {
   .splash-fullscreen-overlay {
-    padding: 1rem 0.75rem;
+    padding: 1.5rem 0.75rem;
   }
 
   .splash-main-container {
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.25rem;
   }
 
   .splash-flag-panel {
     width: 100%;
-    height: 16px;
+    height: 18px;
     flex-direction: row;
     border-radius: 6px;
     animation: none;
   }
 
   .splash-logo-frame {
-    width: 60px;
-    height: 60px;
+    width: 62px;
+    height: 62px;
   }
 
   .splash-cta-btn {
-    font-size: 0.88rem;
-    padding: 0.8rem 1.1rem;
+    font-size: 0.9rem;
+    padding: 0.85rem 1.2rem;
   }
 }
