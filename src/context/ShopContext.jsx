@@ -212,6 +212,76 @@ export const ShopProvider = ({ children }) => {
     return true;
   };
 
+  const updateUserProfile = async (profileData) => {
+    if (!user?.uid) throw new Error("User not authenticated.");
+
+    const name = (profileData.name || '').trim();
+    const email = (profileData.email || '').trim();
+    const phone = (profileData.phone || '').trim();
+
+    const sanitizedAddress = {
+      ...deliveryAddress,
+      name: name,
+      phone: phone,
+      houseNo: (profileData.houseNo || '').trim(),
+      building: (profileData.houseNo || '').trim(),
+      street: (profileData.street || profileData.address || '').trim(),
+      area: (profileData.street || profileData.address || '').trim(),
+      city: (profileData.city || '').trim(),
+      district: (profileData.city || '').trim(),
+      state: (profileData.state || '').trim(),
+      pincode: (profileData.pincode || '').trim(),
+      updatedAt: new Date().toISOString()
+    };
+
+    // 1. Update Firebase Auth Profile (displayName)
+    try {
+      const { updateProfile } = await import('firebase/auth');
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, {
+          displayName: name
+        });
+      }
+    } catch (e) {
+      console.warn("Auth updateProfile failed:", e);
+    }
+
+    // 2. Persist to Firestore user document (doc(db, "users", user.uid))
+    try {
+      const { doc, setDoc } = await import('firebase/firestore');
+      const userDocData = {
+        uid: user.uid,
+        name: name,
+        displayName: name,
+        email: email,
+        phone: phone,
+        phoneNumber: phone,
+        deliveryAddress: sanitizedAddress,
+        updatedAt: new Date().toISOString()
+      };
+
+      await setDoc(doc(db, "users", user.uid), userDocData, { merge: true });
+    } catch (err) {
+      console.error("Firestore user doc update failed:", err);
+      throw new Error("Failed to save profile changes to database: " + err.message);
+    }
+
+    // 3. Update React State & Local Storage
+    setUser(prev => prev ? {
+      ...prev,
+      displayName: name,
+      email: email,
+      phoneNumber: phone
+    } : prev);
+
+    setDeliveryAddress(sanitizedAddress);
+    try {
+      localStorage.setItem('deliveryAddress', JSON.stringify(sanitizedAddress));
+    } catch(e) {}
+
+    return true;
+  };
+
   // Save to local storage on change
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
@@ -937,6 +1007,7 @@ export const ShopProvider = ({ children }) => {
       deliveryAddress,
       setDeliveryAddress,
       saveDeliveryAddressToDB,
+      updateUserProfile,
       filteredProducts,
       wishlistedProducts: products.filter(p => p.isWishlisted),
       cartWithProducts,

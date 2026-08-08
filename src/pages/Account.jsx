@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Phone, Mail, LogOut, MessageSquare } from 'lucide-react';
+import { Phone, Mail, LogOut, MessageSquare, Edit3, CheckCircle, X } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import './Account.css';
 import Footer from '../components/Footer';
@@ -25,7 +25,7 @@ const InstagramIcon = ({ size = 18, color = '#DB2777' }) => (
 );
 
 const Account = () => {
-  const { user, loading, logout, deliveryAddress, storeSettings } = useContext(ShopContext);
+  const { user, loading, logout, deliveryAddress, storeSettings, updateUserProfile } = useContext(ShopContext);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -34,6 +34,23 @@ const Account = () => {
   const isOrdersView = queryParams.get('tab') === 'orders';
 
   const [avatarError, setAvatarError] = useState(false);
+
+  // Edit Profile Modal States
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState('');
+
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    houseNo: '',
+    street: '',
+    city: '',
+    state: '',
+    pincode: ''
+  });
 
   // Helper to extract clean 10-digit Indian phone number (removes duplicate 91/911 prefixes)
   const getCleanPhoneDigits = (rawPhone) => {
@@ -61,6 +78,102 @@ const Account = () => {
     ? rawInstagram
     : (rawInstagram.startsWith('@') ? rawInstagram : `@${rawInstagram.trim()}`);
 
+  const handleOpenEditModal = () => {
+    setFormError('');
+    setSaveSuccess('');
+    setEditFormData({
+      name: user?.displayName || deliveryAddress?.name || '',
+      email: user?.email || '',
+      phone: user?.phoneNumber || deliveryAddress?.phone || '',
+      houseNo: deliveryAddress?.houseNo || '',
+      street: deliveryAddress?.street || deliveryAddress?.building || '',
+      city: deliveryAddress?.city || deliveryAddress?.district || '',
+      state: deliveryAddress?.state || '',
+      pincode: deliveryAddress?.pincode || ''
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    setFormError('');
+    setSaveSuccess('');
+
+    const name = editFormData.name.trim();
+    const email = editFormData.email.trim();
+    const phone = editFormData.phone.trim();
+    const houseNo = editFormData.houseNo.trim();
+    const street = editFormData.street.trim();
+    const city = editFormData.city.trim();
+    const state = editFormData.state.trim();
+    const pincode = editFormData.pincode.trim();
+
+    if (!name) {
+      setFormError("Full Name is required.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      setFormError("Please enter a valid email address.");
+      return;
+    }
+
+    const phoneDigitsCount = phone.replace(/\D/g, '');
+    if (!phone || phoneDigitsCount.length < 10) {
+      setFormError("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    if (!street && !houseNo) {
+      setFormError("Full Address is required.");
+      return;
+    }
+
+    if (!city) {
+      setFormError("City is required.");
+      return;
+    }
+
+    if (!state) {
+      setFormError("State is required.");
+      return;
+    }
+
+    if (!pincode || !/^\d{6}$/.test(pincode)) {
+      setFormError("Please enter a valid 6-digit Pincode / ZIP Code.");
+      return;
+    }
+
+    setIsSavingProfile(true);
+
+    try {
+      if (updateUserProfile) {
+        await updateUserProfile({
+          name,
+          email,
+          phone,
+          houseNo,
+          street,
+          city,
+          state,
+          pincode
+        });
+      }
+
+      setSaveSuccess("Profile updated successfully.");
+      setTimeout(() => {
+        setIsEditModalOpen(false);
+        setSaveSuccess('');
+      }, 1200);
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      setFormError(err.message || "Failed to update profile. Please try again.");
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
   if (loading) {
     return <div className="account-page animate-fade-in container" style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>;
   }
@@ -80,11 +193,11 @@ const Account = () => {
   const formattedAddress = deliveryAddress
     ? [
         deliveryAddress.houseNo ? `#${deliveryAddress.houseNo}` : '',
-        deliveryAddress.building,
+        deliveryAddress.building && deliveryAddress.building !== deliveryAddress.houseNo ? deliveryAddress.building : '',
         deliveryAddress.street,
-        deliveryAddress.area,
+        deliveryAddress.area && deliveryAddress.area !== deliveryAddress.street ? deliveryAddress.area : '',
         deliveryAddress.landmark ? `(Near ${deliveryAddress.landmark})` : '',
-        deliveryAddress.district,
+        deliveryAddress.city || deliveryAddress.district,
         deliveryAddress.state,
         deliveryAddress.pincode ? `- ${deliveryAddress.pincode}` : ''
       ].filter(Boolean).join(', ')
@@ -94,13 +207,13 @@ const Account = () => {
     <div className="account-page animate-fade-in">
       <div className="container" style={{ paddingBottom: '100px', paddingTop: '1.5rem', maxWidth: '600px', margin: '0 auto' }}>
         
-        {/* VIEW 1: MY ORDERS VIEW (STRICT INDEPENDENCE — ZERO PROFILE INFO, ZERO ADDRESS, ZERO CONTACT INFO, ZERO TOP TABS) */}
+        {/* VIEW 1: MY ORDERS VIEW */}
         {isOrdersView ? (
           <div className="animate-fade-in">
             <CustomerOrdersView user={user} onNavigateToShop={() => navigate('/')} />
           </div>
         ) : (
-          /* VIEW 2: MY PROFILE VIEW (STRICT INDEPENDENCE — ZERO MY ORDERS CARD, ZERO TOP TABS) */
+          /* VIEW 2: MY PROFILE VIEW */
           <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             
             {/* PROFILE CARD */}
@@ -141,11 +254,33 @@ const Account = () => {
                 </div>
               </div>
 
-              {/* MY PROFILE DETAILS */}
+              {/* MY PROFILE DETAILS HEADER WITH EDIT PROFILE BUTTON */}
               <div style={{ width: '100%', backgroundColor: '#F8FAFC', padding: '1.1rem', borderRadius: '12px', border: '1px solid #E2E8F0', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.9rem' }}>
-                <h5 style={{ margin: '0 0 0.25rem 0', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>
-                  MY PROFILE
-                </h5>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                  <h5 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>
+                    MY PROFILE
+                  </h5>
+                  <button 
+                    onClick={handleOpenEditModal}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      backgroundColor: 'var(--primary, #4F46E5)',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '0.35rem 0.75rem',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 6px rgba(79, 70, 229, 0.25)',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <Edit3 size={14} /> Edit Profile
+                  </button>
+                </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid #E2E8F0' }}>
                   <span style={{ color: '#64748B', fontWeight: 600 }}>Name</span>
@@ -237,6 +372,178 @@ const Account = () => {
               </button>
             </div>
 
+          </div>
+        )}
+
+        {/* EDIT PROFILE MODAL OVERLAY */}
+        {isEditModalOpen && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '1rem'
+          }}>
+            <div style={{
+              backgroundColor: '#FFFFFF',
+              borderRadius: '16px',
+              maxWidth: '520px',
+              width: '100%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              padding: '1.5rem',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+              border: '1px solid #E2E8F0'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #E2E8F0', paddingBottom: '0.75rem' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 900, color: '#0F172A' }}>Edit Profile Information</h3>
+                  <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: '#64748B' }}>Update your personal and delivery details</p>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B', padding: '4px', borderRadius: '50%' }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {saveSuccess && (
+                <div style={{ padding: '0.75rem 1rem', backgroundColor: '#F0FDF4', border: '1px solid #DCFCE7', color: '#166534', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <CheckCircle size={18} color="#22C55E" />
+                  {saveSuccess}
+                </div>
+              )}
+
+              {formError && (
+                <div style={{ padding: '0.75rem 1rem', backgroundColor: '#FEF2F2', border: '1px solid #FECACA', color: '#991B1B', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', fontWeight: 600 }}>
+                  ⚠️ {formError}
+                </div>
+              )}
+
+              <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>Full Name *</label>
+                  <input 
+                    type="text" 
+                    value={editFormData.name} 
+                    onChange={e => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Enter full name"
+                    style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem', outline: 'none' }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>Email Address *</label>
+                    <input 
+                      type="email" 
+                      value={editFormData.email} 
+                      onChange={e => setEditFormData(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="name@example.com"
+                      style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem', outline: 'none' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>Mobile Number *</label>
+                    <input 
+                      type="tel" 
+                      value={editFormData.phone} 
+                      onChange={e => setEditFormData(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="10-digit mobile number"
+                      maxLength={10}
+                      style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem', outline: 'none' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>Flat, House No, Building</label>
+                    <input 
+                      type="text" 
+                      value={editFormData.houseNo} 
+                      onChange={e => setEditFormData(prev => ({ ...prev, houseNo: e.target.value }))}
+                      placeholder="e.g. Door No 12"
+                      style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem', outline: 'none' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>Street / Area / Landmark *</label>
+                    <input 
+                      type="text" 
+                      value={editFormData.street} 
+                      onChange={e => setEditFormData(prev => ({ ...prev, street: e.target.value }))}
+                      placeholder="e.g. MG Road, Near Park"
+                      style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem', outline: 'none' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>City *</label>
+                    <input 
+                      type="text" 
+                      value={editFormData.city} 
+                      onChange={e => setEditFormData(prev => ({ ...prev, city: e.target.value }))}
+                      placeholder="City"
+                      style={{ width: '100%', padding: '0.65rem 0.75rem', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.88rem', outline: 'none' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>State *</label>
+                    <input 
+                      type="text" 
+                      value={editFormData.state} 
+                      onChange={e => setEditFormData(prev => ({ ...prev, state: e.target.value }))}
+                      placeholder="State"
+                      style={{ width: '100%', padding: '0.65rem 0.75rem', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.88rem', outline: 'none' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>Pincode *</label>
+                    <input 
+                      type="text" 
+                      value={editFormData.pincode} 
+                      onChange={e => setEditFormData(prev => ({ ...prev, pincode: e.target.value }))}
+                      placeholder="6 digits"
+                      maxLength={6}
+                      style={{ width: '100%', padding: '0.65rem 0.75rem', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.88rem', outline: 'none' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #E2E8F0' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => setIsEditModalOpen(false)}
+                    style={{ padding: '0.65rem 1.25rem', borderRadius: '8px', border: '1px solid #CBD5E1', backgroundColor: '#F8FAFC', color: '#475569', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem' }}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    disabled={isSavingProfile}
+                    style={{ padding: '0.65rem 1.5rem', borderRadius: '8px', border: 'none', backgroundColor: 'var(--primary, #4F46E5)', color: '#FFFFFF', fontWeight: 800, cursor: 'pointer', fontSize: '0.88rem', boxShadow: '0 2px 8px rgba(79, 70, 229, 0.3)' }}
+                  >
+                    {isSavingProfile ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
 
