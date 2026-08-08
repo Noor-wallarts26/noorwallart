@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Package, MapPin, ChevronRight, ChevronDown, Phone, Mail, LogOut, User, Edit3, ShieldCheck } from 'lucide-react';
+import { Package, MapPin, ChevronRight, ChevronDown, Phone, Mail, LogOut, User, Edit3, ShieldCheck, MessageSquare, Instagram } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import MapPicker from '../components/MapPicker';
 import './Account.css';
@@ -12,7 +12,7 @@ import { lookupIndianPincode } from '../utils/pincodeService';
 import CustomerOrdersView from '../components/CustomerOrdersView';
 
 const Account = () => {
-  const { user, loading, logout, deliveryAddress, setDeliveryAddress, saveDeliveryAddressToDB, fetchMyOrders } = useContext(ShopContext);
+  const { user, loading, logout, deliveryAddress, setDeliveryAddress, saveDeliveryAddressToDB, fetchMyOrders, storeSettings } = useContext(ShopContext);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -228,26 +228,26 @@ const Account = () => {
             {/* Expanded Profile Section */}
             {expandedSection === 'profile' && user && (
               <div className="menu-expanded-content" style={{ padding: '1.25rem', backgroundColor: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0', margin: '0 1rem 1rem 1rem' }}>
-                <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>
-                  Account Profile Information
+                <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.88rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>
+                  My Profile
                 </h5>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.9rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid #E2E8F0' }}>
-                    <span style={{ color: '#64748B', fontWeight: 600 }}>Full Name</span>
-                    <strong style={{ color: '#0F172A' }}>{user.displayName || deliveryAddress?.name || 'Not provided'}</strong>
+                    <span style={{ color: '#64748B', fontWeight: 600 }}>Name</span>
+                    <strong style={{ color: '#0F172A' }}>{user.displayName || deliveryAddress?.name || 'Customer'}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid #E2E8F0' }}>
-                    <span style={{ color: '#64748B', fontWeight: 600 }}>Email Address</span>
+                    <span style={{ color: '#64748B', fontWeight: 600 }}>Email</span>
                     <strong style={{ color: '#0F172A' }}>{user.email || 'Not provided'}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid #E2E8F0' }}>
-                    <span style={{ color: '#64748B', fontWeight: 600 }}>Phone Number</span>
+                    <span style={{ color: '#64748B', fontWeight: 600 }}>Mobile Number</span>
                     <strong style={{ color: '#0F172A' }}>{user.phoneNumber || deliveryAddress?.phone || 'Not provided'}</strong>
                   </div>
                   {deliveryAddress && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', paddingTop: '0.2rem' }}>
-                      <span style={{ color: '#64748B', fontWeight: 600 }}>Default Address</span>
+                      <span style={{ color: '#64748B', fontWeight: 600 }}>Address</span>
                       <p style={{ margin: 0, fontSize: '0.84rem', color: '#334155', lineHeight: '1.4' }}>
                         {[deliveryAddress.houseNo, deliveryAddress.building, deliveryAddress.street, deliveryAddress.area, deliveryAddress.district, deliveryAddress.state, deliveryAddress.pincode].filter(Boolean).join(', ')}
                       </p>
@@ -255,21 +255,75 @@ const Account = () => {
                   )}
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>
+                <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid #E2E8F0' }}>
                   <button
                     onClick={() => toggleSection('address')}
                     className="btn-outline"
-                    style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem', fontWeight: 700, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}
+                    style={{ width: '100%', padding: '0.55rem', fontSize: '0.82rem', fontWeight: 700, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}
                   >
                     <Edit3 size={14} /> Edit Address
                   </button>
-                  <button
-                    onClick={() => toggleSection('orders')}
-                    className="btn-primary"
-                    style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem', fontWeight: 700, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}
-                  >
-                    <Package size={14} /> My Orders
-                  </button>
+                </div>
+
+                {/* PROFILE CONTACT OPTIONS SEQUENCE */}
+                <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid #E2E8F0' }}>
+                  <h5 style={{ margin: '0 0 0.85rem 0', fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>
+                    Customer Support & Contact
+                  </h5>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                    {/* Mobile */}
+                    <a 
+                      href={`tel:${storeSettings?.whatsapp || '+918925325330'}`} 
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem', backgroundColor: '#FFFFFF', borderRadius: '10px', border: '1px solid #E2E8F0', textDecoration: 'none', color: '#0F172A' }}
+                    >
+                      <Phone size={18} color="var(--primary, #4F46E5)" />
+                      <div>
+                        <div style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 700 }}>Mobile</div>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 700 }}>{storeSettings?.whatsapp || '+91 89253 25330'}</div>
+                      </div>
+                    </a>
+
+                    {/* WhatsApp */}
+                    <a 
+                      href={`https://wa.me/91${(storeSettings?.whatsapp || '8925325330').replace(/\D/g, '')}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem', backgroundColor: '#F0FDF4', borderRadius: '10px', border: '1px solid #DCFCE7', textDecoration: 'none', color: '#166534' }}
+                    >
+                      <MessageSquare size={18} color="#25D366" />
+                      <div>
+                        <div style={{ fontSize: '0.68rem', color: '#15803D', fontWeight: 700 }}>WhatsApp</div>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 700 }}>Chat Support</div>
+                      </div>
+                    </a>
+
+                    {/* Email */}
+                    <a 
+                      href="mailto:noorkarts.in@gmail.com" 
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem', backgroundColor: '#FFFFFF', borderRadius: '10px', border: '1px solid #E2E8F0', textDecoration: 'none', color: '#0F172A' }}
+                    >
+                      <Mail size={18} color="#2563EB" />
+                      <div>
+                        <div style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 700 }}>Email</div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 700, wordBreak: 'break-all' }}>noorkarts.in@gmail.com</div>
+                      </div>
+                    </a>
+
+                    {/* Instagram */}
+                    <a 
+                      href="https://instagram.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem', backgroundColor: '#FDF2F8', borderRadius: '10px', border: '1px solid #FCE7F3', textDecoration: 'none', color: '#9D174D' }}
+                    >
+                      <Instagram size={18} color="#DB2777" />
+                      <div>
+                        <div style={{ fontSize: '0.68rem', color: '#BE185D', fontWeight: 700 }}>Instagram</div>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 700 }}>@noorkarts</div>
+                      </div>
+                    </a>
+                  </div>
                 </div>
               </div>
             )}

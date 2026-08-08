@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Package, Clock, CheckCircle2, Truck, ShoppingBag, ChevronRight, X, AlertCircle, FileText, MapPin, CreditCard, ChevronDown } from 'lucide-react';
 import { collection, query, where, onSnapshot, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { sanitizeOrder, formatCurrency, formatDate } from '../utils/orderUtils';
+import { ShopContext } from '../context/ShopContext';
 
 const ORDER_STEPS = [
   { key: 'Pending', label: 'Order Placed' },
@@ -46,6 +47,7 @@ const getStatusColor = (statusStr) => {
 };
 
 const CustomerOrdersView = ({ user, onNavigateToShop }) => {
+  const { storeSettings } = useContext(ShopContext);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -241,6 +243,21 @@ const CustomerOrdersView = ({ user, onNavigateToShop }) => {
           </div>
         );
       })}
+
+      {/* CONTACT INFORMATION SECTION AFTER OLDEST ORDER */}
+      <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid #E2E8F0', textAlign: 'center' }}>
+        <h4 style={{ margin: '0 0 0.4rem 0', fontSize: '0.88rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Contact Us
+        </h4>
+        <div style={{ fontSize: '0.84rem', color: '#64748B', display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'center' }}>
+          <div>
+            Mobile: <a href={`tel:${storeSettings?.whatsapp || '+918925325330'}`} style={{ color: 'var(--primary, #4F46E5)', fontWeight: 700, textDecoration: 'none' }}>{storeSettings?.whatsapp || '+91 89253 25330'}</a>
+          </div>
+          <div>
+            Email: <a href="mailto:noorkarts.in@gmail.com" style={{ color: 'var(--primary, #4F46E5)', fontWeight: 700, textDecoration: 'none' }}>noorkarts.in@gmail.com</a>
+          </div>
+        </div>
+      </div>
 
       {/* FULL ORDER DETAILS & STEP-BY-STEP TRACKING TIMELINE MODAL */}
       {selectedOrder && (
