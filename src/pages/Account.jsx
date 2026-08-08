@@ -1,11 +1,11 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Package, MapPin, ChevronRight, ChevronDown, Phone, Mail, LogOut } from 'lucide-react';
+import { Package, MapPin, ChevronRight, ChevronDown, Phone, Mail, LogOut, User, Edit3, ShieldCheck } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import MapPicker from '../components/MapPicker';
 import './Account.css';
 import Footer from '../components/Footer';
 import Login from './Login';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import indiaData from '../utils/indiaStatesDistricts.json';
 
 import { lookupIndianPincode } from '../utils/pincodeService';
@@ -14,11 +14,26 @@ import CustomerOrdersView from '../components/CustomerOrdersView';
 const Account = () => {
   const { user, loading, logout, deliveryAddress, setDeliveryAddress, saveDeliveryAddressToDB, fetchMyOrders } = useContext(ShopContext);
   const navigate = useNavigate();
+  const location = useLocation();
   
-  const [expandedSection, setExpandedSection] = useState(null); // 'orders' | 'address' | null
+  const [expandedSection, setExpandedSection] = useState('orders'); // 'orders' | 'profile' | 'address' | null
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [isPincodeLoading, setIsPincodeLoading] = useState(false);
   const [pincodeError, setPincodeError] = useState('');
+  const [avatarError, setAvatarError] = useState(false);
+
+  // Read tab parameter from URL query string
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    if (tabParam === 'profile') {
+      setExpandedSection('profile');
+    } else if (tabParam === 'address') {
+      setExpandedSection('address');
+    } else if (tabParam === 'orders') {
+      setExpandedSection('orders');
+    }
+  }, [location.search]);
   
   const defaultAddressState = {
     name: '', phone: '', houseNo: '', building: '', street: '', 
@@ -140,16 +155,55 @@ const Account = () => {
           {!user ? (
             <Login embedded={true} />
           ) : (
-            <div className="profile-card card">
-              <div className="profile-header">
-                <img src="/logo.jpg" alt="Noor Wall Arts & Gifts" className="profile-avatar" />
+            <div className="profile-card card" style={{ padding: '1.5rem', borderRadius: '16px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', boxShadow: '0 4px 14px rgba(0,0,0,0.05)' }}>
+              <div className="profile-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '1rem' }}>
+                <div style={{
+                  width: '72px',
+                  height: '72px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--primary, #4F46E5)',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.8rem',
+                  fontWeight: 800,
+                  overflow: 'hidden',
+                  border: '3px solid #E2E8F0',
+                  boxShadow: '0 4px 14px rgba(0, 0, 0, 0.08)',
+                  marginBottom: '0.75rem'
+                }}>
+                  {user.photoURL && !avatarError ? (
+                    <img 
+                      src={user.photoURL} 
+                      alt={user.displayName || 'Profile'} 
+                      onError={() => setAvatarError(true)}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    />
+                  ) : (
+                    <span>{(user.displayName || user.email || 'U').charAt(0).toUpperCase()}</span>
+                  )}
+                </div>
+
                 <div className="profile-info">
-                  <h3 className="brand-title" style={{ fontSize: '1.2rem', marginBottom: '0.2rem' }}>{user.displayName || 'NOOR WALL ARTS & GIFTS'}</h3>
-                  <p className="profile-phone">{user.email || user.phoneNumber}</p>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0F172A', margin: '0 0 0.25rem 0' }}>
+                    {user.displayName || deliveryAddress?.name || 'Valued Customer'}
+                  </h3>
+                  {user.email && (
+                    <p style={{ margin: '0 0 0.2rem 0', fontSize: '0.85rem', color: '#64748B', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
+                      <Mail size={14} /> {user.email}
+                    </p>
+                  )}
+                  {(user.phoneNumber || deliveryAddress?.phone) && (
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748B', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
+                      <Phone size={14} /> {user.phoneNumber || deliveryAddress?.phone}
+                    </p>
+                  )}
                 </div>
               </div>
-              <button onClick={logout} className="btn-outline logout-btn-full">
-                <LogOut size={16} /> Logout
+
+              <button onClick={logout} className="btn-outline logout-btn-full" style={{ borderRadius: '10px', fontSize: '0.88rem', fontWeight: 700 }}>
+                <LogOut size={16} /> Logout Account
               </button>
             </div>
           )}
@@ -157,7 +211,73 @@ const Account = () => {
 
         {/* Menu Cards */}
         <div className="account-menu-card card">
-          {/* My Orders Menu Item */}
+          
+          {/* 1. My Profile Menu Item */}
+          <div className="menu-item-wrapper">
+            <div className="menu-item" onClick={() => toggleSection('profile')}>
+              <div className="menu-icon-bg" style={{ backgroundColor: '#E0E7FF', color: '#4F46E5' }}>
+                <User size={20} />
+              </div>
+              <div className="menu-text">
+                <h4>My Profile</h4>
+                <p>Personal details & account information</p>
+              </div>
+              {expandedSection === 'profile' ? <ChevronDown size={20} color="var(--text-secondary)" /> : <ChevronRight size={20} color="var(--text-secondary)" />}
+            </div>
+
+            {/* Expanded Profile Section */}
+            {expandedSection === 'profile' && user && (
+              <div className="menu-expanded-content" style={{ padding: '1.25rem', backgroundColor: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0', margin: '0 1rem 1rem 1rem' }}>
+                <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>
+                  Account Profile Information
+                </h5>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.9rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid #E2E8F0' }}>
+                    <span style={{ color: '#64748B', fontWeight: 600 }}>Full Name</span>
+                    <strong style={{ color: '#0F172A' }}>{user.displayName || deliveryAddress?.name || 'Not provided'}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid #E2E8F0' }}>
+                    <span style={{ color: '#64748B', fontWeight: 600 }}>Email Address</span>
+                    <strong style={{ color: '#0F172A' }}>{user.email || 'Not provided'}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid #E2E8F0' }}>
+                    <span style={{ color: '#64748B', fontWeight: 600 }}>Phone Number</span>
+                    <strong style={{ color: '#0F172A' }}>{user.phoneNumber || deliveryAddress?.phone || 'Not provided'}</strong>
+                  </div>
+                  {deliveryAddress && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', paddingTop: '0.2rem' }}>
+                      <span style={{ color: '#64748B', fontWeight: 600 }}>Default Address</span>
+                      <p style={{ margin: 0, fontSize: '0.84rem', color: '#334155', lineHeight: '1.4' }}>
+                        {[deliveryAddress.houseNo, deliveryAddress.building, deliveryAddress.street, deliveryAddress.area, deliveryAddress.district, deliveryAddress.state, deliveryAddress.pincode].filter(Boolean).join(', ')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>
+                  <button
+                    onClick={() => toggleSection('address')}
+                    className="btn-outline"
+                    style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem', fontWeight: 700, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}
+                  >
+                    <Edit3 size={14} /> Edit Address
+                  </button>
+                  <button
+                    onClick={() => toggleSection('orders')}
+                    className="btn-primary"
+                    style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem', fontWeight: 700, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}
+                  >
+                    <Package size={14} /> My Orders
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="menu-divider"></div>
+
+          {/* 2. My Orders Menu Item */}
           <div className="menu-item-wrapper">
             <div className="menu-item" onClick={() => toggleSection('orders')}>
               <div className="menu-icon-bg" style={{ backgroundColor: '#F3E8FF', color: '#9333EA' }}>
@@ -165,7 +285,7 @@ const Account = () => {
               </div>
               <div className="menu-text">
                 <h4>My Orders</h4>
-                <p>View order history</p>
+                <p>View order history & track delivery</p>
               </div>
               {expandedSection === 'orders' ? <ChevronDown size={20} color="var(--text-secondary)" /> : <ChevronRight size={20} color="var(--text-secondary)" />}
             </div>

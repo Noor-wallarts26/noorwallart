@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, Heart, ShoppingCart, ReceiptText, Sun, Moon, Phone } from 'lucide-react';
+import { ShoppingBag, Heart, ShoppingCart, Package } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import './Navbar.css';
 
@@ -11,6 +11,8 @@ const Navbar = () => {
 
   // Don't show bottom nav on checkout
   if (currentPath === '/checkout') return null;
+
+  const isMyOrdersActive = currentPath === '/account' && (location.search.includes('tab=orders') || !location.search.includes('tab=profile'));
 
   return (
     <>
@@ -35,13 +37,12 @@ const Navbar = () => {
             <Heart size={24} />
             <span>Favorites</span>
           </Link>
-          <Link to="/account" className={`nav-item ${currentPath === '/account' ? 'active' : ''}`}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            <span>Account</span>
+          <Link to="/account?tab=orders" className={`nav-item ${isMyOrdersActive ? 'active' : ''}`}>
+            <Package size={24} />
+            <span>My Orders</span>
           </Link>
         </div>
       </nav>
-
     </>
   );
 };
