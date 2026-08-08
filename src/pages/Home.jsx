@@ -25,7 +25,7 @@ const IndependenceDayHero = ({ storeSettings }) => {
 
       {/* Ashoka Chakra Background Watermark */}
       <div className="chakra-watermark">
-        <svg viewBox="0 0 100 100" width="280" height="280" opacity="0.04">
+        <svg viewBox="0 0 100 100" width="300" height="300" opacity="0.035">
           <circle cx="50" cy="50" r="45" fill="none" stroke="#000080" strokeWidth="2.5" />
           <circle cx="50" cy="50" r="6" fill="#000080" />
           {[...Array(24)].map((_, i) => (
@@ -42,11 +42,10 @@ const IndependenceDayHero = ({ storeSettings }) => {
         </svg>
       </div>
 
-      {/* Main Container Grid */}
       <div className="independence-container">
         
         {/* Left Indian Flag Decoration */}
-        <div className="flag-decor flag-left" title="Indian National Flag 🇮🇳">
+        <div className="flag-decor flag-left" title="Indian Flag 🇮🇳">
           <div className="flag-stripe saffron"></div>
           <div className="flag-stripe white">
             <div className="flag-chakra-mini">
@@ -59,67 +58,45 @@ const IndependenceDayHero = ({ storeSettings }) => {
           <div className="flag-stripe green"></div>
         </div>
 
-        {/* Center Content */}
+        {/* Center Content Column */}
         <div className="independence-main-content">
           
-          {/* Brand Logo & Title Header */}
-          <div className="hero-brand-badge">
-            <div className="hero-logo-frame">
-              <img 
-                src="/noor_arts_logo.jpg" 
-                onError={(e) => { e.target.src = '/logo.jpg'; }} 
-                alt="NOOR WALLETS Logo" 
-              />
-            </div>
-            <span className="hero-brand-name">NOOR WALLETS</span>
+          {/* NOOR WALLETS Logo & Title */}
+          <div className="hero-logo-wrapper">
+            <img 
+              src="/noor_arts_logo.jpg" 
+              onError={(e) => { e.target.src = '/logo.jpg'; }} 
+              alt="NOOR WALLETS Logo" 
+              className="hero-logo-img"
+            />
+            <span className="hero-brand-title">NOOR WALLETS</span>
           </div>
 
-          {/* Special Offer Headline */}
-          <div className="headline-wrapper">
-            <span className="festive-tag">78th INDEPENDENCE DAY CELEBRATION 🇮🇳</span>
-            <h1 className="hero-title">
-              SPECIAL OFFER FOR INDEPENDENCE DAY 🇮🇳
-            </h1>
-          </div>
+          {/* Main Headline */}
+          <h1 className="hero-main-title">
+            INDEPENDENCE DAY 🇮🇳
+          </h1>
 
-          {/* Main Promotional Copy */}
-          <p className="hero-subtitle">
-            Celebrate Independence with a Special Offer from <strong>NOOR WALLETS</strong>
+          {/* Subtitle */}
+          <p className="hero-sub-title">
+            Special Independence Day Offer
           </p>
 
-          {/* Coupon Announcement Card */}
-          <div className="coupon-announcement-card">
-            <div className="coupon-glow-badge">LIMITED PERIOD EXCLUSIVE OFFER</div>
-            <h2 className="coupon-title">GET YOUR EXCLUSIVE COUPON</h2>
-            <p className="coupon-inst-text">
-              Follow our official Instagram page to unlock &amp; receive your exclusive discount coupon!
-            </p>
-
-            {/* Prominent Clickable CTA Button */}
+          {/* Prominent CTA Button */}
+          <div className="hero-cta-wrapper">
             <button 
               onClick={handleInstagramClick}
-              className="cta-instagram-btn"
+              className="cta-get-code-btn"
             >
               <Instagram size={22} />
-              <span>FOLLOW US &amp; GET YOUR COUPON 🇮🇳</span>
+              <span>GET YOUR CODE FROM INSTAGRAM</span>
             </button>
-          </div>
-
-          {/* Footer Patriotic Messages Inside Banner */}
-          <div className="hero-footer-messages">
-            <p className="thank-you-msg">Thank You for Visiting NOOR WALLETS ❤️</p>
-            <p className="wishing-msg">
-              Wishing You and Your Family a Very Happy Independence Day 🇮🇳
-            </p>
-            <div className="jai-hind-badge">
-              🇮🇳 JAI HIND! 🇮🇳
-            </div>
           </div>
 
         </div>
 
         {/* Right Indian Flag Decoration */}
-        <div className="flag-decor flag-right" title="Indian National Flag 🇮🇳">
+        <div className="flag-decor flag-right" title="Indian Flag 🇮🇳">
           <div className="flag-stripe saffron"></div>
           <div className="flag-stripe white">
             <div className="flag-chakra-mini">
