@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────
-   FULL-SCREEN ANIMATED OPENING SPLASH OVERLAY (REALISTIC & INTERACTIVE)
+   100% VERTICAL / PORTRAIT (9:16) INDEPENDENCE DAY SPLASH SCREEN
 ───────────────────────────────────────────────────────── */
 .splash-fullscreen-overlay {
   position: fixed;
@@ -8,12 +8,12 @@
   width: 100vw;
   height: 100vh;
   z-index: 99999;
-  background: radial-gradient(circle at center, #FFF9F2 0%, #F7EFE5 70%, #EFE5D8 100%);
+  background: linear-gradient(180deg, #FFF9F2 0%, #FFFFFF 50%, #F0FDF4 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  overflow: hidden;
+  padding: 2.2rem 1.2rem;
+  overflow-y: auto;
   opacity: 1;
   transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
@@ -25,12 +25,41 @@
   pointer-events: none;
 }
 
+/* TOP AND BOTTOM TRICOLOR FABRIC DECORATIVE STRIPS */
+.tricolor-fabric-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  display: flex;
+  z-index: 5;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.tricolor-fabric-strip.top-strip {
+  top: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.tricolor-fabric-strip.bottom-strip {
+  bottom: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.strip-stripe {
+  flex: 1;
+  height: 100%;
+}
+.strip-stripe.saffron { background: linear-gradient(90deg, #FF9933 0%, #FF8000 100%); }
+.strip-stripe.white { background: #FFFFFF; }
+.strip-stripe.green { background: linear-gradient(90deg, #138808 0%, #0D6305 100%); }
+
 /* Top Right Skip Button */
 .splash-skip-btn {
   position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
-  z-index: 30;
+  top: 1.35rem;
+  right: 1.35rem;
+  z-index: 10;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -42,45 +71,45 @@
   font-weight: 800;
   color: #7C2D12;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
   transition: all 0.2s ease;
 }
 
 .splash-skip-btn:hover {
   background: #FFFFFF;
   border-color: #EA580C;
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
-/* Ambient Glow Orbs */
+/* Ambient Background Glows */
 .splash-glow {
   position: absolute;
   border-radius: 50%;
-  filter: blur(90px);
+  filter: blur(85px);
   pointer-events: none;
   opacity: 0.35;
 }
 
 .glow-saffron {
-  top: -80px;
-  left: -80px;
-  width: 360px;
-  height: 360px;
+  top: -60px;
+  left: -60px;
+  width: 320px;
+  height: 320px;
   background: #FF9933;
 }
 
 .glow-green {
-  bottom: -80px;
-  right: -80px;
-  width: 360px;
-  height: 360px;
+  bottom: -60px;
+  right: -60px;
+  width: 320px;
+  height: 320px;
   background: #138808;
 }
 
-/* Background Ashoka Chakra Watermark */
+/* Ashoka Chakra Background Watermark */
 .splash-chakra-watermark {
   position: absolute;
-  top: 50%;
+  top: 48%;
   left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -93,207 +122,235 @@
   to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-/* Floating Sparkle Particles */
+/* Red Fort Historic Silhouette (Bottom Edge Background) */
+.red-fort-silhouette {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Sparkle Particles */
 .sparkle-particle {
   position: absolute;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   pointer-events: none;
-  z-index: 4;
+  z-index: 2;
   animation: sparkleFloat 3s ease-in-out infinite alternate;
 }
-.sparkle-particle.p1 { top: 15%; left: 18%; animation-delay: 0s; }
-.sparkle-particle.p2 { top: 22%; right: 18%; animation-delay: 1.2s; }
-.sparkle-particle.p3 { bottom: 18%; left: 22%; animation-delay: 2.1s; }
+.sparkle-particle.p1 { top: 18%; left: 15%; animation-delay: 0s; }
+.sparkle-particle.p2 { bottom: 22%; right: 15%; animation-delay: 1.5s; }
 
 @keyframes sparkleFloat {
   0% { transform: translateY(0) scale(0.9); opacity: 0.6; }
-  100% { transform: translateY(-10px) scale(1.2); opacity: 1; }
+  100% { transform: translateY(-8px) scale(1.15); opacity: 1; }
 }
 
-/* MAIN POSTER CONTAINER */
-.poster-wrapper {
+/* SINGLE-COLUMN VERTICAL PORTRAIT CONTAINER */
+.splash-vertical-container {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   width: 100%;
   max-width: 480px;
-  max-height: 92vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  border-radius: 20px;
+  text-align: center;
+  margin: auto;
+  gap: 1.1rem;
+}
+
+/* BRANDING HEADER */
+.splash-brand-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.splash-logo-frame {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.6);
-  animation: posterEntrance 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  border: 3px solid #EA580C;
+  box-shadow: 0 6px 22px rgba(234, 88, 12, 0.22);
+  margin-bottom: 0.4rem;
 }
 
-@keyframes posterEntrance {
-  0% {
-    opacity: 0;
-    transform: scale(0.92) translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.poster-main-img {
+.splash-logo-frame img {
   width: 100%;
-  height: auto;
-  max-height: 92vh;
-  object-fit: contain;
-  display: block;
-}
-
-/* REALISTIC CINEMATIC SHIMMER LIGHT OVERLAY */
-.poster-shimmer-sweep {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.25) 50%,
-    transparent 100%
-  );
-  transform: skewX(-25deg);
-  pointer-events: none;
-  z-index: 5;
-  animation: posterShimmer 4s ease-in-out infinite;
+  object-fit: cover;
 }
 
-@keyframes posterShimmer {
-  0% { left: -100%; opacity: 0; }
-  30% { opacity: 1; }
-  60% { left: 200%; opacity: 0; }
-  100% { left: 200%; opacity: 0; }
+.splash-brand-title {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #431407;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+  font-family: 'Playfair Display', Georgia, serif;
 }
 
-/* INSIDE ASHOKA CHAKRA WHEEL ANIMATED SPINNING OVERLAY */
-.chakra-center-wheel-overlay {
-  position: absolute;
-  top: 27.5%;
-  left: 49.8%;
-  transform: translate(-50%, -50%);
-  width: 18%;
-  aspect-ratio: 1 / 1;
-  pointer-events: none;
-  z-index: 6;
-  animation: realChakraSpin 20s linear infinite;
+.splash-brand-subtitle {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #C2410C;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 0.15rem;
 }
 
-@keyframes realChakraSpin {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-/* REALISTIC WAVING INDIAN TRICOLOR FLAG OVERLAY */
-.poster-waving-flag-overlay {
-  position: absolute;
-  top: 6.8%;
-  right: 5.5%;
-  width: 13.5%;
-  height: 15%;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+/* CAMPAIGN HEADINGS */
+.splash-campaign-wrapper {
   display: flex;
   flex-direction: column;
-  pointer-events: none;
-  z-index: 7;
-  transform-origin: top left;
-  animation: realFlagWave 2.8s ease-in-out infinite alternate;
+  align-items: center;
 }
 
-@keyframes realFlagWave {
-  0% {
-    transform: rotate(0deg) skewY(0deg) translateY(0);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-  50% {
-    transform: rotate(2deg) skewY(1.5deg) translateY(-3px);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
-  }
-  100% {
-    transform: rotate(-1deg) skewY(-1deg) translateY(-1px);
-    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.18);
-  }
+.splash-flag-badge-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.15rem;
 }
 
-.flag-wave-stripe {
-  flex: 1;
+.splash-hero-headline {
+  font-size: clamp(2rem, 6.5vw, 2.75rem);
+  font-weight: 900;
+  color: #7C2D12;
+  margin: 0 0 0.35rem 0;
+  line-height: 1.12;
+  letter-spacing: 0.02em;
+  font-family: 'Playfair Display', Georgia, serif;
+  text-transform: uppercase;
+}
+
+.splash-offer-badge {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #C2410C;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 0.3rem 0;
+}
+
+.splash-coupon-title {
+  font-size: clamp(1rem, 3.2vw, 1.25rem);
+  font-weight: 900;
+  color: #9A3412;
+  margin: 0;
+}
+
+/* URGENCY CARD & CTA BUTTON */
+.splash-urgency-card {
   width: 100%;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 100%);
+  border: 2px solid #FCD34D;
+  border-radius: 20px;
+  padding: 1.25rem 1rem;
+  box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-}
-.flag-wave-stripe.saffron { background: linear-gradient(90deg, #FF9933 0%, #FF8000 100%); }
-.flag-wave-stripe.white { background: #FFFFFF; position: relative; }
-.flag-wave-stripe.green { background: linear-gradient(90deg, #138808 0%, #0D6305 100%); }
-
-.mini-chakra-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-/* CLICKABLE INTERACTIVE INSTAGRAM BUTTON OVERLAY */
-.poster-cta-overlay-container {
-  position: absolute;
-  bottom: 17.5%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 78%;
-  max-width: 330px;
-  z-index: 10;
+.splash-limited-tag {
+  background-color: #EA580C;
+  color: #FFFFFF;
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 0.2rem 0.75rem;
+  border-radius: 9999px;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.35rem;
 }
 
-.interactive-cta-btn {
+.splash-urgency-sub {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #DC2626;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.2rem;
+}
+
+.splash-fast-text {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 0.95rem;
+}
+
+.splash-cta-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
-  padding: 0.85rem 1.5rem;
+  padding: 1rem 1.75rem;
   background: linear-gradient(135deg, #E1306C 0%, #FD1D1D 50%, #F56040 100%);
   color: #FFFFFF;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 900;
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  border-radius: 9999px;
+  border: none;
+  border-radius: 16px;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(225, 48, 108, 0.5), 0 0 0 4px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 24px rgba(225, 48, 108, 0.38);
   transition: all 0.22s ease;
   letter-spacing: 0.04em;
   width: 100%;
+  margin-bottom: 0.75rem;
 }
 
-.interactive-cta-btn:hover {
-  transform: scale(1.03);
-  box-shadow: 0 12px 30px rgba(225, 48, 108, 0.68), 0 0 0 6px rgba(255, 255, 255, 0.3);
+.splash-cta-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(225, 48, 108, 0.48);
 }
 
-.interactive-cta-btn:active {
-  transform: scale(0.98);
+.splash-inst-text {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #475569;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
-/* Mobile Responsive Adjustments */
+/* BOTTOM FESTIVE GREETING */
+.splash-bottom-greeting {
+  font-size: 0.92rem;
+  font-weight: 900;
+  color: #000080;
+  letter-spacing: 0.06em;
+  padding: 0.4rem 1.3rem;
+  background-color: #FFFFFF;
+  border-radius: 9999px;
+  border: 1.5px solid #000080;
+  box-shadow: 0 2px 8px rgba(0, 0, 128, 0.1);
+  white-space: nowrap;
+}
+
+/* MOBILE SPECIFIC TUNING */
 @media (max-width: 480px) {
-  .poster-wrapper {
-    max-width: 100%;
-    max-height: 95vh;
-    border-radius: 16px;
+  .splash-fullscreen-overlay {
+    padding: 1.75rem 0.85rem;
+  }
+  
+  .splash-logo-frame {
+    width: 64px;
+    height: 64px;
   }
 
-  .poster-cta-overlay-container {
-    bottom: 17.5%;
-    width: 82%;
+  .splash-brand-title {
+    font-size: 1.2rem;
   }
 
-  .interactive-cta-btn {
-    font-size: 0.92rem;
-    padding: 0.78rem 1.1rem;
+  .splash-hero-headline {
+    font-size: 1.95rem;
+  }
+
+  .splash-cta-btn {
+    font-size: 0.95rem;
+    padding: 0.88rem 1.25rem;
   }
 }
