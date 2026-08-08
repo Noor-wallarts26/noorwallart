@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────
-   FULL-SCREEN ANIMATED OPENING SPLASH OVERLAY (POSTER-BASED)
+   FULL-SCREEN ANIMATED OPENING SPLASH OVERLAY (REALISTIC & INTERACTIVE)
 ───────────────────────────────────────────────────────── */
 .splash-fullscreen-overlay {
   position: fixed;
@@ -30,19 +30,19 @@
   position: absolute;
   top: 1.25rem;
   right: 1.25rem;
-  z-index: 20;
+  z-index: 30;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   padding: 0.45rem 0.95rem;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.95);
   border: 1.5px solid #FED7AA;
   border-radius: 9999px;
   font-size: 0.8rem;
   font-weight: 800;
   color: #7C2D12;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
   transition: all 0.2s ease;
 }
 
@@ -98,7 +98,7 @@
   position: absolute;
   font-size: 1.3rem;
   pointer-events: none;
-  z-index: 3;
+  z-index: 4;
   animation: sparkleFloat 3s ease-in-out infinite alternate;
 }
 .sparkle-particle.p1 { top: 15%; left: 18%; animation-delay: 0s; }
@@ -110,7 +110,7 @@
   100% { transform: translateY(-10px) scale(1.2); opacity: 1; }
 }
 
-/* MAIN POSTER CONTAINER WITH CINEMATIC ENTRANCE */
+/* MAIN POSTER CONTAINER */
 .poster-wrapper {
   position: relative;
   z-index: 2;
@@ -146,7 +146,101 @@
   display: block;
 }
 
-/* CLICKABLE INTERACTIVE CTA BUTTON OVERLAY */
+/* REALISTIC CINEMATIC SHIMMER LIGHT OVERLAY */
+.poster-shimmer-sweep {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  transform: skewX(-25deg);
+  pointer-events: none;
+  z-index: 5;
+  animation: posterShimmer 4s ease-in-out infinite;
+}
+
+@keyframes posterShimmer {
+  0% { left: -100%; opacity: 0; }
+  30% { opacity: 1; }
+  60% { left: 200%; opacity: 0; }
+  100% { left: 200%; opacity: 0; }
+}
+
+/* INSIDE ASHOKA CHAKRA WHEEL ANIMATED SPINNING OVERLAY */
+.chakra-center-wheel-overlay {
+  position: absolute;
+  top: 27.5%;
+  left: 49.8%;
+  transform: translate(-50%, -50%);
+  width: 18%;
+  aspect-ratio: 1 / 1;
+  pointer-events: none;
+  z-index: 6;
+  animation: realChakraSpin 20s linear infinite;
+}
+
+@keyframes realChakraSpin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* REALISTIC WAVING INDIAN TRICOLOR FLAG OVERLAY */
+.poster-waving-flag-overlay {
+  position: absolute;
+  top: 6.8%;
+  right: 5.5%;
+  width: 13.5%;
+  height: 15%;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  z-index: 7;
+  transform-origin: top left;
+  animation: realFlagWave 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes realFlagWave {
+  0% {
+    transform: rotate(0deg) skewY(0deg) translateY(0);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  50% {
+    transform: rotate(2deg) skewY(1.5deg) translateY(-3px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+  }
+  100% {
+    transform: rotate(-1deg) skewY(-1deg) translateY(-1px);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.18);
+  }
+}
+
+.flag-wave-stripe {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.flag-wave-stripe.saffron { background: linear-gradient(90deg, #FF9933 0%, #FF8000 100%); }
+.flag-wave-stripe.white { background: #FFFFFF; position: relative; }
+.flag-wave-stripe.green { background: linear-gradient(90deg, #138808 0%, #0D6305 100%); }
+
+.mini-chakra-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* CLICKABLE INTERACTIVE INSTAGRAM BUTTON OVERLAY */
 .poster-cta-overlay-container {
   position: absolute;
   bottom: 17.5%;
@@ -167,7 +261,7 @@
   color: #FFFFFF;
   font-size: 1rem;
   font-weight: 900;
-  border: 2px solid rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.85);
   border-radius: 9999px;
   cursor: pointer;
   box-shadow: 0 8px 24px rgba(225, 48, 108, 0.5), 0 0 0 4px rgba(255, 255, 255, 0.2);
@@ -178,7 +272,7 @@
 
 .interactive-cta-btn:hover {
   transform: scale(1.03);
-  box-shadow: 0 12px 30px rgba(225, 48, 108, 0.65), 0 0 0 6px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 12px 30px rgba(225, 48, 108, 0.68), 0 0 0 6px rgba(255, 255, 255, 0.3);
 }
 
 .interactive-cta-btn:active {
