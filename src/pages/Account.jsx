@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Package, MapPin, ChevronRight, ChevronDown, Phone, Mail, LogOut, User, Edit3, ShieldCheck, MessageSquare, Instagram } from 'lucide-react';
+import { Package, MapPin, ChevronRight, ChevronDown, Phone, Mail, LogOut, User, Edit3, ShieldCheck, MessageSquare } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import MapPicker from '../components/MapPicker';
 import './Account.css';
@@ -10,6 +10,23 @@ import indiaData from '../utils/indiaStatesDistricts.json';
 
 import { lookupIndianPincode } from '../utils/pincodeService';
 import CustomerOrdersView from '../components/CustomerOrdersView';
+
+const InstagramIcon = ({ size = 18, color = '#DB2777' }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke={color} 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+  </svg>
+);
 
 const Account = () => {
   const { user, loading, logout, deliveryAddress, setDeliveryAddress, saveDeliveryAddressToDB, fetchMyOrders, storeSettings } = useContext(ShopContext);
@@ -312,15 +329,15 @@ const Account = () => {
 
                     {/* Instagram */}
                     <a 
-                      href="https://instagram.com" 
+                      href={storeSettings?.instagram ? (storeSettings.instagram.startsWith('http') ? storeSettings.instagram : `https://instagram.com/${storeSettings.instagram.replace('@', '')}`) : 'https://instagram.com'} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem', backgroundColor: '#FDF2F8', borderRadius: '10px', border: '1px solid #FCE7F3', textDecoration: 'none', color: '#9D174D' }}
                     >
-                      <Instagram size={18} color="#DB2777" />
+                      <InstagramIcon size={18} color="#DB2777" />
                       <div>
                         <div style={{ fontSize: '0.68rem', color: '#BE185D', fontWeight: 700 }}>Instagram</div>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 700 }}>@noorkarts</div>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 700 }}>{storeSettings?.instagram || '@noorkarts'}</div>
                       </div>
                     </a>
                   </div>
