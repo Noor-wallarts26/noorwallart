@@ -38,18 +38,21 @@ const Checkout = () => {
     lng: deliveryAddress?.lng || null
   });
 
+  const getMissingFields = () => {
+    const missing = [];
+    if (!formData.name.trim()) missing.push("Full Name");
+    if (!formData.phone.trim() || formData.phone.replace(/\D/g, '').length < 10) missing.push("Mobile Number (10 digits)");
+    if (!formData.pincode.trim() || !/^[1-9][0-9]{5}$/.test(formData.pincode.trim())) missing.push("Pincode (6 digits)");
+    if (!formData.state.trim()) missing.push("State");
+    if (!formData.district.trim()) missing.push("District / City");
+    if (!formData.houseNo.trim()) missing.push("House / Flat / Door No.");
+    if (!formData.street.trim()) missing.push("Street / Road Name");
+    if (!formData.area.trim()) missing.push("Area / Locality");
+    return missing;
+  };
+
   const isFormValid = () => {
-    return (
-      formData.name.trim() !== '' &&
-      formData.phone.trim() !== '' &&
-      formData.houseNo.trim() !== '' &&
-      formData.street.trim() !== '' &&
-      formData.area.trim() !== '' &&
-      formData.district.trim() !== '' &&
-      formData.state.trim() !== '' &&
-      formData.pincode.trim() !== '' &&
-      /^[1-9][0-9]{5}$/.test(formData.pincode.trim())
-    );
+    return getMissingFields().length === 0;
   };
 
   const statesList = React.useMemo(() => {
@@ -152,6 +155,18 @@ const Checkout = () => {
 
   const handleCheckout = async () => {
     setPaymentError(null);
+
+    const missing = getMissingFields();
+    if (missing.length > 0) {
+      const errorMsg = `Please complete all mandatory fields marked with *: ${missing.join(', ')}`;
+      setPaymentError(errorMsg);
+      const formEl = document.querySelector('.checkout-form');
+      if (formEl) {
+        formEl.scrollIntoView({ behavior: 'smooth' });
+      }
+      return;
+    }
+
     setIsProcessing(true);
 
     const isScriptLoaded = await loadRazorpayScript();
@@ -458,17 +473,17 @@ Thank you for shopping with Noor WallArts & Gifts! Please send this message to r
 
           <div className="address-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label>Full Name *</label>
+              <label>Full Name <span style={{ color: '#EF4444' }}>*</span></label>
               <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Enter your full name" required />
             </div>
 
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label>Mobile Number *</label>
+              <label>Mobile Number <span style={{ color: '#EF4444' }}>*</span></label>
               <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="Enter your 10-digit mobile number" maxLength="10" pattern="[0-9]{10}" required />
             </div>
 
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label>Pincode (6-Digit Indian Pincode) *</label>
+              <label>Pincode (6-Digit Indian Pincode) <span style={{ color: '#EF4444' }}>*</span></label>
               <input
                 type="text"
                 name="pincode"
@@ -491,7 +506,7 @@ Thank you for shopping with Noor WallArts & Gifts! Please send this message to r
             </div>
 
             <div className="form-group">
-              <label>State *</label>
+              <label>State <span style={{ color: '#EF4444' }}>*</span></label>
               <select name="state" value={formData.state} onChange={handleStateChange} style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--surface-variant)' }} required>
                 <option value="">Select State</option>
                 {statesList.map(state => (
@@ -501,7 +516,7 @@ Thank you for shopping with Noor WallArts & Gifts! Please send this message to r
             </div>
 
             <div className="form-group">
-              <label>District / City *</label>
+              <label>District / City <span style={{ color: '#EF4444' }}>*</span></label>
               <select name="district" value={formData.district} onChange={handleInputChange} disabled={!formData.state} style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: formData.state ? 'var(--surface-variant)' : 'var(--bg-color)', cursor: formData.state ? 'pointer' : 'not-allowed' }} required>
                 <option value="">Select District</option>
                 {districtsList.map(district => (
@@ -511,7 +526,7 @@ Thank you for shopping with Noor WallArts & Gifts! Please send this message to r
             </div>
             
             <div className="form-group">
-              <label>House / Flat / Door No. *</label>
+              <label>House / Flat / Door No. <span style={{ color: '#EF4444' }}>*</span></label>
               <input type="text" name="houseNo" value={formData.houseNo} onChange={handleInputChange} placeholder="Enter your house number" required />
             </div>
             
@@ -521,12 +536,12 @@ Thank you for shopping with Noor WallArts & Gifts! Please send this message to r
             </div>
 
             <div className="form-group">
-              <label>Street / Road Name *</label>
+              <label>Street / Road Name <span style={{ color: '#EF4444' }}>*</span></label>
               <input type="text" name="street" value={formData.street} onChange={handleInputChange} placeholder="Enter street or road name" required />
             </div>
 
             <div className="form-group">
-              <label>Area / Locality *</label>
+              <label>Area / Locality <span style={{ color: '#EF4444' }}>*</span></label>
               <input type="text" name="area" value={formData.area} onChange={handleInputChange} placeholder="Enter your area or town" required />
             </div>
 

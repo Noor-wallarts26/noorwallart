@@ -125,8 +125,13 @@ const Account = () => {
       return;
     }
 
-    if (!street && !houseNo) {
-      setFormError("Full Address is required.");
+    if (!houseNo) {
+      setFormError("House Number / Flat Number is required.");
+      return;
+    }
+
+    if (!street) {
+      setFormError("Street / Address is required.");
       return;
     }
 
@@ -431,7 +436,9 @@ const Account = () => {
 
               <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>Full Name *</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>
+                    Full Name <span style={{ color: '#EF4444' }}>*</span>
+                  </label>
                   <input 
                     type="text" 
                     value={editFormData.name} 
@@ -443,7 +450,9 @@ const Account = () => {
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>Email Address *</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>
+                      Email Address <span style={{ color: '#EF4444' }}>*</span>
+                    </label>
                     <input 
                       type="email" 
                       value={editFormData.email} 
@@ -454,7 +463,9 @@ const Account = () => {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>Mobile Number *</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>
+                      Mobile Number <span style={{ color: '#EF4444' }}>*</span>
+                    </label>
                     <input 
                       type="tel" 
                       value={editFormData.phone} 
@@ -468,18 +479,22 @@ const Account = () => {
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>Flat, House No, Building</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>
+                      House Number / Flat Number <span style={{ color: '#EF4444' }}>*</span>
+                    </label>
                     <input 
                       type="text" 
                       value={editFormData.houseNo} 
                       onChange={e => setEditFormData(prev => ({ ...prev, houseNo: e.target.value }))}
-                      placeholder="e.g. Door No 12"
+                      placeholder="e.g. Door / Flat No 12"
                       style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem', outline: 'none' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>Street / Area / Landmark *</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>
+                      Street / Address <span style={{ color: '#EF4444' }}>*</span>
+                    </label>
                     <input 
                       type="text" 
                       value={editFormData.street} 
@@ -492,7 +507,9 @@ const Account = () => {
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>City *</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>
+                      City <span style={{ color: '#EF4444' }}>*</span>
+                    </label>
                     <input 
                       type="text" 
                       value={editFormData.city} 
@@ -503,7 +520,9 @@ const Account = () => {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>State *</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>
+                      State <span style={{ color: '#EF4444' }}>*</span>
+                    </label>
                     <input 
                       type="text" 
                       value={editFormData.state} 
@@ -514,7 +533,9 @@ const Account = () => {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>Pincode *</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>
+                      Pincode <span style={{ color: '#EF4444' }}>*</span>
+                    </label>
                     <input 
                       type="text" 
                       value={editFormData.pincode} 
