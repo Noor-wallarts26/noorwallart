@@ -1,40 +1,136 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, X, ShoppingBag, User } from 'lucide-react';
+import { Search, X, ShoppingBag, User, Instagram } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import ProductCard from '../components/ProductCard';
 import HeroSlider from '../components/HeroSlider';
 import './Home.css';
 
-const PromoBanner = ({ storeSettings }) => {
-  const [videoError, setVideoError] = React.useState(false);
+const IndependenceDayHero = ({ storeSettings }) => {
+  const rawInstagram = storeSettings?.instagram || '@noorkarts';
+  const instagramUrl = rawInstagram.startsWith('http')
+    ? rawInstagram
+    : `https://instagram.com/${rawInstagram.replace('@', '').trim()}`;
 
-  React.useEffect(() => {
-    setVideoError(false);
-  }, [storeSettings?.homepageVideoUrl]);
+  const handleInstagramClick = () => {
+    window.open(instagramUrl, '_blank');
+  };
 
   return (
-    <div className="promo-banner">
-      {storeSettings?.homepageVideoUrl && !videoError ? (
-        <video 
-          key={storeSettings.homepageVideoUrl}
-          src={storeSettings.homepageVideoUrl} 
-          autoPlay 
-          loop 
-          muted 
-          playsInline 
-          preload="auto"
-          onError={() => setVideoError(true)}
-          className="promo-img" 
-          style={{ objectFit: 'cover', width: '100%', height: '100%', display: 'block' }}
-        />
-      ) : (
-        <img src={storeSettings?.homepageBannerUrl || "/modern_wall_decor.png"} alt="Premium Wall Decor" className="promo-img" />
-      )}
-      <div className="promo-overlay"></div>
-      <div className="promo-content">
-        <h2 className="brand-title" style={{ color: '#ffffff' }}>NOOR KARTS</h2>
-        <p style={{ color: '#ffffff' }}>PREMIUM QUALITY ARTS & GIFTS</p>
+    <div className="independence-hero-section">
+      {/* Background Patriotic Glows */}
+      <div className="patriotic-glow glow-saffron"></div>
+      <div className="patriotic-glow glow-green"></div>
+
+      {/* Ashoka Chakra Background Watermark */}
+      <div className="chakra-watermark">
+        <svg viewBox="0 0 100 100" width="280" height="280" opacity="0.04">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="#000080" strokeWidth="2.5" />
+          <circle cx="50" cy="50" r="6" fill="#000080" />
+          {[...Array(24)].map((_, i) => (
+            <line 
+              key={i} 
+              x1="50" 
+              y1="50" 
+              x2={50 + 45 * Math.cos((i * 15 * Math.PI) / 180)} 
+              y2={50 + 45 * Math.sin((i * 15 * Math.PI) / 180)} 
+              stroke="#000080" 
+              strokeWidth="1.2" 
+            />
+          ))}
+        </svg>
+      </div>
+
+      {/* Main Container Grid */}
+      <div className="independence-container">
+        
+        {/* Left Indian Flag Decoration */}
+        <div className="flag-decor flag-left" title="Indian National Flag 🇮🇳">
+          <div className="flag-stripe saffron"></div>
+          <div className="flag-stripe white">
+            <div className="flag-chakra-mini">
+              <svg viewBox="0 0 24 24" width="14" height="14">
+                <circle cx="12" cy="12" r="10" fill="none" stroke="#000080" strokeWidth="1" />
+                <circle cx="12" cy="12" r="2" fill="#000080" />
+              </svg>
+            </div>
+          </div>
+          <div className="flag-stripe green"></div>
+        </div>
+
+        {/* Center Content */}
+        <div className="independence-main-content">
+          
+          {/* Brand Logo & Title Header */}
+          <div className="hero-brand-badge">
+            <div className="hero-logo-frame">
+              <img 
+                src="/noor_arts_logo.jpg" 
+                onError={(e) => { e.target.src = '/logo.jpg'; }} 
+                alt="NOOR WALLETS Logo" 
+              />
+            </div>
+            <span className="hero-brand-name">NOOR WALLETS</span>
+          </div>
+
+          {/* Special Offer Headline */}
+          <div className="headline-wrapper">
+            <span className="festive-tag">78th INDEPENDENCE DAY CELEBRATION 🇮🇳</span>
+            <h1 className="hero-title">
+              SPECIAL OFFER FOR INDEPENDENCE DAY 🇮🇳
+            </h1>
+          </div>
+
+          {/* Main Promotional Copy */}
+          <p className="hero-subtitle">
+            Celebrate Independence with a Special Offer from <strong>NOOR WALLETS</strong>
+          </p>
+
+          {/* Coupon Announcement Card */}
+          <div className="coupon-announcement-card">
+            <div className="coupon-glow-badge">LIMITED PERIOD EXCLUSIVE OFFER</div>
+            <h2 className="coupon-title">GET YOUR EXCLUSIVE COUPON</h2>
+            <p className="coupon-inst-text">
+              Follow our official Instagram page to unlock &amp; receive your exclusive discount coupon!
+            </p>
+
+            {/* Prominent Clickable CTA Button */}
+            <button 
+              onClick={handleInstagramClick}
+              className="cta-instagram-btn"
+            >
+              <Instagram size={22} />
+              <span>FOLLOW US &amp; GET YOUR COUPON 🇮🇳</span>
+            </button>
+          </div>
+
+          {/* Footer Patriotic Messages Inside Banner */}
+          <div className="hero-footer-messages">
+            <p className="thank-you-msg">Thank You for Visiting NOOR WALLETS ❤️</p>
+            <p className="wishing-msg">
+              Wishing You and Your Family a Very Happy Independence Day 🇮🇳
+            </p>
+            <div className="jai-hind-badge">
+              🇮🇳 JAI HIND! 🇮🇳
+            </div>
+          </div>
+
+        </div>
+
+        {/* Right Indian Flag Decoration */}
+        <div className="flag-decor flag-right" title="Indian National Flag 🇮🇳">
+          <div className="flag-stripe saffron"></div>
+          <div className="flag-stripe white">
+            <div className="flag-chakra-mini">
+              <svg viewBox="0 0 24 24" width="14" height="14">
+                <circle cx="12" cy="12" r="10" fill="none" stroke="#000080" strokeWidth="1" />
+                <circle cx="12" cy="12" r="2" fill="#000080" />
+              </svg>
+            </div>
+          </div>
+          <div className="flag-stripe green"></div>
+        </div>
+
       </div>
     </div>
   );
@@ -190,7 +286,7 @@ const Home = () => {
       </header>
       <div className="container">
 
-        <PromoBanner storeSettings={storeSettings} />
+        <IndependenceDayHero storeSettings={storeSettings} />
         {sliderProducts.length > 0 && <HeroSlider products={sliderProducts} />}
 
         {isProductsLoading ? (
