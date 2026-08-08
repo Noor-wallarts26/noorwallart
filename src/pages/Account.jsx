@@ -35,6 +35,32 @@ const Account = () => {
 
   const [avatarError, setAvatarError] = useState(false);
 
+  // Helper to extract clean 10-digit Indian phone number (removes duplicate 91/911 prefixes)
+  const getCleanPhoneDigits = (rawPhone) => {
+    if (!rawPhone) return '8925325330';
+    const digits = String(rawPhone).replace(/\D/g, '');
+    if (digits.length >= 10) {
+      return digits.slice(-10);
+    }
+    return digits || '8925325330';
+  };
+
+  const phoneDigits = getCleanPhoneDigits(storeSettings?.whatsapp || '8925325330');
+  const whatsappUrl = `https://wa.me/91${phoneDigits}`;
+  const callUrl = `tel:+91${phoneDigits}`;
+  const callFormattedDisplay = `+91 ${phoneDigits.slice(0, 5)} ${phoneDigits.slice(5)}`;
+
+  const emailAddress = storeSettings?.email || 'noorkarts.in@gmail.com';
+  const emailUrl = `mailto:${emailAddress}`;
+
+  const rawInstagram = storeSettings?.instagram || '@noorkarts';
+  const instagramUrl = rawInstagram.startsWith('http')
+    ? rawInstagram
+    : `https://instagram.com/${rawInstagram.replace('@', '').trim()}`;
+  const instagramDisplay = rawInstagram.startsWith('http')
+    ? rawInstagram
+    : (rawInstagram.startsWith('@') ? rawInstagram : `@${rawInstagram.trim()}`);
+
   if (loading) {
     return <div className="account-page animate-fade-in container" style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>;
   }
@@ -151,21 +177,21 @@ const Account = () => {
                 </h5>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
-                  {/* Mobile */}
+                  {/* Mobile / Call */}
                   <a 
-                    href={`tel:${storeSettings?.whatsapp || '+918925325330'}`} 
+                    href={callUrl} 
                     style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem', backgroundColor: '#FFFFFF', borderRadius: '10px', border: '1px solid #E2E8F0', textDecoration: 'none', color: '#0F172A' }}
                   >
                     <Phone size={18} color="var(--primary, #4F46E5)" />
                     <div>
                       <div style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 700 }}>Mobile / Call</div>
-                      <div style={{ fontSize: '0.78rem', fontWeight: 700 }}>{storeSettings?.whatsapp || '+91 89253 25330'}</div>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 700 }}>{callFormattedDisplay}</div>
                     </div>
                   </a>
 
                   {/* WhatsApp */}
                   <a 
-                    href={`https://wa.me/91${(storeSettings?.whatsapp || '8925325330').replace(/\D/g, '')}`} 
+                    href={whatsappUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem', backgroundColor: '#F0FDF4', borderRadius: '10px', border: '1px solid #DCFCE7', textDecoration: 'none', color: '#166534' }}
@@ -179,19 +205,19 @@ const Account = () => {
 
                   {/* Email */}
                   <a 
-                    href="mailto:noorkarts.in@gmail.com" 
+                    href={emailUrl} 
                     style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem', backgroundColor: '#FFFFFF', borderRadius: '10px', border: '1px solid #E2E8F0', textDecoration: 'none', color: '#0F172A' }}
                   >
                     <Mail size={18} color="#2563EB" />
                     <div>
                       <div style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 700 }}>Email</div>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700, wordBreak: 'break-all' }}>noorkarts.in@gmail.com</div>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 700, wordBreak: 'break-all' }}>{emailAddress}</div>
                     </div>
                   </a>
 
                   {/* Instagram */}
                   <a 
-                    href={storeSettings?.instagram ? (storeSettings.instagram.startsWith('http') ? storeSettings.instagram : `https://instagram.com/${storeSettings.instagram.replace('@', '')}`) : 'https://instagram.com'} 
+                    href={instagramUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem', backgroundColor: '#FDF2F8', borderRadius: '10px', border: '1px solid #FCE7F3', textDecoration: 'none', color: '#9D174D' }}
@@ -199,7 +225,7 @@ const Account = () => {
                     <InstagramIcon size={18} color="#DB2777" />
                     <div>
                       <div style={{ fontSize: '0.68rem', color: '#BE185D', fontWeight: 700 }}>Instagram</div>
-                      <div style={{ fontSize: '0.78rem', fontWeight: 700 }}>{storeSettings?.instagram || '@noorkarts'}</div>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 700 }}>{instagramDisplay}</div>
                     </div>
                   </a>
                 </div>
