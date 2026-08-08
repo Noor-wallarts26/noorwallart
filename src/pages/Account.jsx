@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import indiaData from '../utils/indiaStatesDistricts.json';
 
 import { lookupIndianPincode } from '../utils/pincodeService';
+import CustomerOrdersView from '../components/CustomerOrdersView';
 
 const Account = () => {
   const { user, loading, logout, deliveryAddress, setDeliveryAddress, saveDeliveryAddressToDB, fetchMyOrders } = useContext(ShopContext);
@@ -171,82 +172,8 @@ const Account = () => {
             
             {/* Expanded Orders Section */}
             {expandedSection === 'orders' && (
-              <div className="menu-expanded-content">
-                {isOrdersLoading ? (
-                  <div className="empty-state-mini">
-                    <p>Loading your orders...</p>
-                  </div>
-                ) : myOrders.length === 0 ? (
-                  <div className="empty-state-mini">
-                    <p>No orders found.</p>
-                    <button className="btn-primary mt-2" onClick={() => navigate('/')} style={{ padding: '0.5rem 1rem' }}>Shop Now</button>
-                  </div>
-                ) : (
-                  <div className="orders-list-mini">
-                    {myOrders.map(order => (
-                      <div key={order.id} className="order-item-mini" style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '12px', marginBottom: '1rem' }}>
-                        <div className="order-header-mini" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                          <span className="order-id-mini" style={{ fontWeight: 'bold' }}>#{order.id}</span>
-                          <span className="order-total-mini" style={{ fontWeight: 'bold', color: 'var(--primary)' }}>₹{order.totalPrice.toFixed(2)}</span>
-                        </div>
-                        
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                          <span className="order-status-mini" style={{ 
-                            fontWeight: '600',
-                            color: (order.status || '').toLowerCase() === 'delivered' ? '#16a34a' 
-                                 : (order.status || '').toLowerCase() === 'cancelled' ? '#ef4444' 
-                                 : '#f59e0b' 
-                          }}>
-                            Status: {order.status}
-                          </span>
-                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                            {new Date(order.timestamp).toLocaleDateString()}
-                          </span>
-                        </div>
-
-                        {/* ORDER ITEMS LIST */}
-                        {Array.isArray(order.items) && order.items.length > 0 && (
-                          <div style={{ marginTop: '0.75rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.75rem' }}>
-                            {order.items.map((item, idx) => (
-                              <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.6rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                                  <img src={item.imageUrl || '/logo.jpg'} alt={item.title} style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover' }} />
-                                  <div>
-                                    <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{item.title}</p>
-                                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Qty: {item.quantity} × ₹{item.price}</p>
-                                  </div>
-                                </div>
-
-                                {(order.status || '').toLowerCase() === 'delivered' && (
-                                  <button
-                                    onClick={() => navigate(`/product/${item.productId}`)}
-                                    style={{
-                                      padding: '0.35rem 0.75rem', borderRadius: '6px',
-                                      backgroundColor: 'var(--primary, #4f46e5)', color: '#fff',
-                                      border: 'none', fontSize: '0.75rem', fontWeight: 600,
-                                      cursor: 'pointer', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '0.25rem'
-                                    }}
-                                  >
-                                    ⭐ Write Review
-                                  </button>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        
-                        {order.adminMessage && (
-                          <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: 'var(--surface-variant)', borderRadius: '8px', borderLeft: '3px solid var(--primary)' }}>
-                            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '500' }}>
-                              💬 {order.adminMessage}
-                            </p>
-                          </div>
-                        )}
-
-                      </div>
-                    ))}
-                  </div>
-                )}
+              <div className="menu-expanded-content" style={{ paddingTop: '1rem' }}>
+                <CustomerOrdersView user={user} onNavigateToShop={() => navigate('/')} />
               </div>
             )}
           </div>
