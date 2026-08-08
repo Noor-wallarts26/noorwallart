@@ -57,63 +57,116 @@ const Home = () => {
 
   return (
     <div className="home-page animate-fade-in">
-      <div className="top-brand-header container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 0 0.5rem 0.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-          {/* Customer Profile Avatar Navigation Control */}
-          <div 
-            onClick={() => navigate(user ? '/account?tab=profile' : '/account')}
-            style={{ 
-              cursor: 'pointer', 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              gap: '0.25rem',
-              WebkitTapHighlightColor: 'transparent',
-              paddingLeft: '0.25rem'
-            }}
-            title="My Profile"
-          >
-            <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              backgroundColor: 'var(--primary, #4F46E5)',
-              color: '#FFFFFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: '1rem',
-              overflow: 'hidden',
-              border: '2px solid rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 3px 10px rgba(0, 0, 0, 0.1)'
-            }}>
-              {user && user.photoURL && !avatarError ? (
-                <img 
-                  src={user.photoURL} 
-                  alt="Profile" 
-                  onError={() => setAvatarError(true)}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
-              ) : (
-                <User size={20} color="#FFFFFF" />
-              )}
-            </div>
-            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.3px' }}>
-              Profile
-            </span>
+      {/* PREMIUM TOP BRANDED HEADER BAR */}
+      <div 
+        className="top-brand-header container" 
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          padding: '0.85rem 1.1rem', 
+          marginTop: '0.75rem',
+          marginBottom: '0.85rem',
+          backgroundColor: '#E6CEC5',
+          borderRadius: '18px',
+          border: '1px solid rgba(255, 255, 255, 0.8)',
+          boxShadow: '0 4px 16px rgba(72, 43, 36, 0.08)',
+          transition: 'all 0.3s ease'
+        }}
+      >
+        {/* Left Side: Branded Identity (Logo + Brand Name + Subtitle) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          {/* Noor Arts & Gifts Logo Image */}
+          <div style={{
+            width: '46px',
+            height: '46px',
+            borderRadius: '50%',
+            backgroundColor: '#E6CEC5',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '2px solid #5C3831',
+            boxShadow: '0 2px 8px rgba(92, 56, 49, 0.15)',
+            flexShrink: 0
+          }}>
+            <img 
+              src="/noor_arts_logo.jpg" 
+              alt="Noor Arts & Gifts Logo" 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+            />
           </div>
 
           {/* Brand Heading */}
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <h2 style={{ fontFamily: 'var(--font-heading)', margin: 0, fontSize: '1.35rem', fontWeight: 900, letterSpacing: '0.5px', color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <h1 style={{ 
+              margin: 0, 
+              fontSize: '1.3rem', 
+              fontWeight: 900, 
+              letterSpacing: '0.04em', 
+              color: '#4A2A22',
+              lineHeight: 1.15,
+              fontFamily: "'Playfair Display', Georgia, serif"
+            }}>
               Noor Karts
-            </h2>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.5px' }}>
+            </h1>
+            <span style={{ 
+              fontSize: '0.68rem', 
+              fontWeight: 800, 
+              color: '#6E453B', 
+              letterSpacing: '0.08em', 
+              textTransform: 'uppercase',
+              marginTop: '0.15rem'
+            }}>
               Premium Arts & Gifts
             </span>
           </div>
+        </div>
+
+        {/* Right Side: Customer Profile Avatar Navigation Control */}
+        <div 
+          onClick={() => navigate(user ? '/account?tab=profile' : '/account')}
+          style={{ 
+            cursor: 'pointer', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            gap: '0.2rem',
+            WebkitTapHighlightColor: 'transparent',
+            paddingLeft: '0.5rem'
+          }}
+          title="My Profile"
+        >
+          <div style={{
+            width: '38px',
+            height: '38px',
+            borderRadius: '50%',
+            backgroundColor: '#4A2A22',
+            color: '#FFFFFF',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 800,
+            fontSize: '0.95rem',
+            overflow: 'hidden',
+            border: '2px solid rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 2px 8px rgba(72, 43, 36, 0.15)'
+          }}>
+            {user && user.photoURL && !avatarError ? (
+              <img 
+                src={user.photoURL} 
+                alt="Profile" 
+                onError={() => setAvatarError(true)}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              />
+            ) : (
+              <User size={19} color="#FFFFFF" />
+            )}
+          </div>
+          <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#4A2A22', letterSpacing: '0.3px' }}>
+            Profile
+          </span>
         </div>
       </div>
 
