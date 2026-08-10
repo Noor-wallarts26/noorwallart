@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Star, Zap, ShoppingCart, Share2, Tag, CheckCircle2, X, ShieldCheck, Lock, AlertCircle, Camera } from 'lucide-react';
+import { ArrowLeft, Heart, Star, Zap, ShoppingCart, Share2, Tag, CheckCircle2, X, ShieldCheck, Lock, AlertCircle, Camera, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -31,6 +31,7 @@ const ProductDetail = () => {
   const [previewModalImg, setPreviewModalImg] = useState(null);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [productCoupon, setProductCoupon] = useState(null);
 
   const [couponCodeInput, setCouponCodeInput] = useState('');
@@ -167,6 +168,7 @@ const ProductDetail = () => {
   // Scroll to top and sync existing cart item coupon state on load or when product id changes
   useEffect(() => {
     window.scrollTo(0, 0);
+    setActiveImageIndex(0);
     setReviewForm({ rating: 5, title: '', comment: '' });
 
     if (id && Array.isArray(cartItems)) {
@@ -224,6 +226,12 @@ const ProductDetail = () => {
     .filter(p => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
 
+  const productImages = (Array.isArray(product.images) && product.images.length > 0)
+    ? product.images.filter(img => typeof img === 'string' && img.trim() !== '')
+    : (product.imageUrl ? [product.imageUrl] : []);
+
+  const currentDisplayImage = productImages[activeImageIndex] || product.imageUrl;
+
   return (
     <div key={id} className="product-detail-page animate-fade-in" style={{ position: 'relative' }}>
         <header style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 10 }}>
@@ -232,16 +240,67 @@ const ProductDetail = () => {
           </button>
         </header>
 
-      <div className="detail-image-area" style={{ height: '35vh', minHeight: '300px', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-        {product.imageUrl ? (
-          <img 
-            src={product.imageUrl} 
-            alt={product.title} 
-            style={{ width: '100%', height: '100%', objectFit: 'contain', cursor: 'zoom-in' }} 
-            onClick={() => setIsFullscreen(true)}
-          />
+      <div className="detail-image-area" style={{ position: 'relative', minHeight: '320px', backgroundColor: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '1rem 0' }}>
+        {currentDisplayImage ? (
+          <div style={{ position: 'relative', width: '100%', height: '35vh', minHeight: '280px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img 
+              src={currentDisplayImage} 
+              alt={product.title} 
+              style={{ width: '100%', height: '100%', objectFit: 'contain', cursor: 'zoom-in' }} 
+              onClick={() => setIsFullscreen(true)}
+            />
+            {productImages.length > 1 && (
+              <>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : productImages.length - 1)); }}
+                  style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.85)', border: '1px solid #CBD5E1', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', zIndex: 5 }}
+                  aria-label="Previous Image"
+                >
+                  <ChevronLeft size={20} color="#0F172A" />
+                </button>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setActiveImageIndex((prev) => (prev < productImages.length - 1 ? prev + 1 : 0)); }}
+                  style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.85)', border: '1px solid #CBD5E1', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', zIndex: 5 }}
+                  aria-label="Next Image"
+                >
+                  <ChevronRight size={20} color="#0F172A" />
+                </button>
+              </>
+            )}
+          </div>
         ) : (
           <div className="detail-category-icon" style={{ color, fontSize: '4rem' }}>{icon}</div>
+        )}
+
+        {/* THUMBNAIL SELECTOR STRIP FOR 3 IMAGES */}
+        {productImages.length > 1 && (
+          <div style={{ display: 'flex', gap: '0.6rem', marginTop: '0.75rem', padding: '0 1rem', overflowX: 'auto' }}>
+            {productImages.map((imgUrl, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveImageIndex(idx)}
+                style={{
+                  width: '54px',
+                  height: '54px',
+                  borderRadius: '8px',
+                  border: activeImageIndex === idx ? '2px solid #2563EB' : '1px solid #CBD5E1',
+                  padding: '2px',
+                  backgroundColor: '#F8FAFC',
+                  cursor: 'pointer',
+                  overflow: 'hidden',
+                  outline: 'none',
+                  boxShadow: activeImageIndex === idx ? '0 0 0 2px rgba(37, 99, 235, 0.25)' : 'none',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <img 
+                  src={imgUrl} 
+                  alt={`Thumbnail ${idx + 1}`} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} 
+                />
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
@@ -267,13 +326,12 @@ const ProductDetail = () => {
             }}
             onClick={(e) => { e.stopPropagation(); setIsFullscreen(false); }}
           >
-            &times;
+            <X size={24} />
           </button>
           <img 
-            src={product.imageUrl} 
+            src={currentDisplayImage} 
             alt={product.title} 
-            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-            onClick={(e) => e.stopPropagation()} 
+            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
           />
         </div>,
         document.body
