@@ -338,14 +338,24 @@
     font-size: 0.95rem;
     padding: 0.95rem 1.4rem;
   }
+
+
 }
 
+
+
 .products-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.25rem;
   padding-bottom: 4rem;
   width: 100%;
+}
+
+@media (max-width: 640px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .empty-state {

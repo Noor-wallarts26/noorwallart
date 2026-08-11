@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart, Star, Eye } from 'lucide-react';
+import { Heart, ShoppingCart, Star } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import './ProductCard.css';
 
@@ -21,7 +21,7 @@ const ProductCard = ({ product }) => {
   const { toggleWishlist, addToCart } = useContext(ShopContext);
   const { color, icon } = categoryStyles[product.category] || { color: '#94A3B8', icon: '📦' };
 
-  // Support up to 3 images, falling back to imageUrl
+  // Support multiple images, falling back to imageUrl
   const displayImage = (Array.isArray(product.images) && product.images.length > 0 && product.images[0])
     ? product.images[0]
     : product.imageUrl;
@@ -32,19 +32,19 @@ const ProductCard = ({ product }) => {
   const discountPercent = hasDiscount ? Math.round(((regularPrice - currentPrice) / regularPrice) * 100) : 0;
 
   return (
-    <div className="product-card horizontal-product-card card">
-      {/* LEFT SIDE — Product Image */}
-      <Link to={`/product/${product.id}`} className="product-image-area">
-        {displayImage ? (
-          <img 
-            src={displayImage} 
-            alt={product.title} 
-            className="horizontal-card-img" 
-            loading="lazy"
-          />
-        ) : (
-          <div className="category-icon" style={{ color }}>{icon}</div>
-        )}
+    <div className="product-card card">
+      <Link 
+        to={`/product/${product.id}`} 
+        className="product-image-area" 
+        style={displayImage ? { 
+          backgroundImage: `url(${displayImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        } : { 
+          background: 'var(--surface-variant)'
+        }}
+      >
+        {!displayImage && <div className="category-icon" style={{ color }}>{icon}</div>}
         
         {product.stock === 0 && (
           <div className="out-of-stock-badge">OUT OF STOCK</div>
@@ -54,37 +54,34 @@ const ProductCard = ({ product }) => {
           <div className="discount-badge">{discountPercent}% OFF</div>
         )}
       </Link>
+      
+      <button 
+        className="wishlist-btn"
+        onClick={(e) => {
+          e.preventDefault();
+          toggleWishlist(product.id);
+        }}
+        title={product.isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+      >
+        <Heart 
+          size={20} 
+          fill={product.isWishlisted ? '#EF4444' : 'none'} 
+          color={product.isWishlisted ? '#EF4444' : 'var(--text-secondary)'} 
+        />
+      </button>
 
-      {/* RIGHT SIDE — Product Information */}
       <div className="product-info">
-        <div className="product-header-row">
-          <span className="product-category">{product.category}</span>
-          <button 
-            className="wishlist-btn-inline"
-            onClick={(e) => {
-              e.preventDefault();
-              toggleWishlist(product.id);
-            }}
-            title={product.isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          >
-            <Heart 
-              size={18} 
-              fill={product.isWishlisted ? '#EF4444' : 'none'} 
-              color={product.isWishlisted ? '#EF4444' : 'var(--text-secondary)'} 
-            />
-          </button>
-        </div>
-
         <Link to={`/product/${product.id}`}>
           <h3 className="product-title" title={product.title}>{product.title}</h3>
         </Link>
-
+        <span className="product-category">{product.category}</span>
+        
         <div className="product-rating">
           <div className="stars">
             {[1, 2, 3, 4, 5].map((star) => (
               <Star 
                 key={star} 
-                size={13} 
+                size={12} 
                 fill={star <= Math.round(product.rating || 5) ? '#F59E0B' : 'none'} 
                 color={star <= Math.round(product.rating || 5) ? '#F59E0B' : '#94A3B8'} 
               />
@@ -93,34 +90,22 @@ const ProductCard = ({ product }) => {
           <span className="reviews-count">({product.reviewsCount || 0})</span>
         </div>
 
-        {product.description && (
-          <p className="product-description-snippet">
-            {product.description}
-          </p>
-        )}
-
         <div className="product-bottom">
-          <div className="price-container">
-            <span className="product-price">₹{currentPrice.toFixed(2)}</span>
-            {hasDiscount && (
-              <span className="product-regular-price">₹{regularPrice.toFixed(2)}</span>
-            )}
-          </div>
-
-          <div className="product-action-buttons">
-            <Link to={`/product/${product.id}`} className="view-details-btn" title="View Details">
-              <Eye size={15} />
-              <span>Details</span>
-            </Link>
-            <button 
-              className="add-to-cart-btn-primary"
-              disabled={product.stock === 0}
-              onClick={() => addToCart(product.id)}
-            >
-              <ShoppingCart size={15} />
-              <span>Add to Cart</span>
-            </button>
-          </div>
+          <Link to={`/product/${product.id}`}>
+            <div className="price-container">
+              <span className="product-price">₹{currentPrice.toFixed(2)}</span>
+              {hasDiscount && (
+                <span className="product-regular-price">₹{regularPrice.toFixed(2)}</span>
+              )}
+            </div>
+          </Link>
+          <button 
+            className="add-to-cart-btn"
+            disabled={product.stock === 0}
+            onClick={() => addToCart(product.id)}
+          >
+            <ShoppingCart size={16} />
+          </button>
         </div>
       </div>
     </div>
