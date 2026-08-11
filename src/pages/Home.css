@@ -344,6 +344,60 @@
 
 
 
+/* ─────────────────────────────────────────────────────────
+   PROMO BANNER — Old Top Banner Design
+───────────────────────────────────────────────────────── */
+.promo-banner {
+  position: relative;
+  height: 200px;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.promo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.promo-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+}
+
+.promo-content {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 65%;
+}
+
+.promo-content h2 {
+  font-size: clamp(1.2rem, 5vw, 1.6rem);
+  font-weight: 900;
+  color: white;
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.promo-content p {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+/* ─────────────────────────────────────────────────────────
+   PRODUCT GRID — 2-Column Layout
+───────────────────────────────────────────────────────── */
 .products-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -352,11 +406,9 @@
   width: 100%;
 }
 
-@media (max-width: 640px) {
-  .products-grid {
-    grid-template-columns: 1fr;
-  }
-}
+
+
+
 
 .empty-state {
   display: flex;

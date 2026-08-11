@@ -7,6 +7,31 @@ import HeroSlider from '../components/HeroSlider';
 import SmartSearchBar from '../components/SmartSearchBar';
 import './Home.css';
 
+const PromoBanner = ({ storeSettings }) => {
+  return (
+    <div className="promo-banner">
+      {storeSettings?.homepageVideoUrl ? (
+        <video 
+          src={storeSettings.homepageVideoUrl} 
+          autoPlay 
+          loop 
+          muted 
+          playsInline 
+          className="promo-img" 
+          style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+        />
+      ) : (
+        <img src={storeSettings?.homepageBannerUrl || "/modern_wall_decor.png"} alt="Premium Wall Decor" className="promo-img" />
+      )}
+      <div className="promo-overlay"></div>
+      <div className="promo-content">
+        <h2 style={{ color: '#ffffff' }}>NOORKARTS</h2>
+        <p style={{ color: '#ffffff' }}>Premium Quality Arts &amp; Gifts</p>
+      </div>
+    </div>
+  );
+};
+
 const Home = () => {
   const { 
     searchQuery, setSearchQuery, 
@@ -144,6 +169,7 @@ const Home = () => {
       </header>
       <div className="container">
 
+        <PromoBanner storeSettings={storeSettings} />
         {sliderProducts.length > 0 && <HeroSlider products={sliderProducts} />}
 
         {isProductsLoading ? (
