@@ -106,6 +106,7 @@ export const sanitizeOrder = (order = {}) => {
     const validPrice = isNaN(price) ? 0 : price;
 
     return {
+      productId: validateValue(item.productId, 'N/A'),
       title: validateValue(item.title || item.name || item.product?.title, 'Item'),
       imageUrl: validateValue(item.imageUrl || item.image || item.thumbnail || item.product?.logoUrl, '/logo.jpg'),
       variant: validateValue(item.variant || item.selectedVariant, 'N/A'),
@@ -114,7 +115,13 @@ export const sanitizeOrder = (order = {}) => {
       frameType: validateValue(item.frameType || item.selectedFrame, 'N/A'),
       quantity: validQty,
       price: validPrice,
-      totalPrice: validPrice * validQty
+      totalPrice: validPrice * validQty,
+      appliedCoupon: item.appliedCoupon ? {
+        code: validateValue(item.appliedCoupon.code, 'N/A'),
+        discountType: validateValue(item.appliedCoupon.discountType, 'N/A'),
+        discountValue: validateValue(item.appliedCoupon.discountValue, '0'),
+        discountAmount: isNaN(parseFloat(item.appliedCoupon.discountAmount)) ? 0 : parseFloat(item.appliedCoupon.discountAmount)
+      } : null
     };
   });
 
@@ -131,10 +138,24 @@ export const sanitizeOrder = (order = {}) => {
   const gst = !isNaN(rawGst) ? rawGst : 0;
   const totalPrice = !isNaN(rawTotal) ? rawTotal : Math.max(0, subtotal + deliveryFee + gst - discount);
 
+  const status = validateValue(order.status, 'Ordered');
+  const nowTs = order.timestamp || order.createdAt || Date.now();
+  const defaultHistory = [{
+    status: 'Ordered',
+    timestamp: nowTs,
+    date: formatDate(nowTs),
+    message: 'Order placed successfully.'
+  }];
+  
+  const statusHistory = Array.isArray(order.statusHistory) && order.statusHistory.length > 0
+    ? order.statusHistory
+    : defaultHistory;
+
   return {
     id: validateValue(order.id, 'NWA000000'),
-    timestamp: order.timestamp || order.createdAt || Date.now(),
-    formattedDate: formatDate(order.timestamp || order.createdAt || Date.now()),
+    userId: order.userId || null,
+    timestamp: nowTs,
+    formattedDate: formatDate(nowTs),
     customer: {
       name: validateValue(customer.name, 'Valued Customer'),
       phone: validateValue(customer.phone, 'N/A'),
@@ -149,12 +170,18 @@ export const sanitizeOrder = (order = {}) => {
       state: state || 'N/A',
       pincode: pincode || 'N/A',
       country: country || 'India',
-      fullAddress: fullAddress
+      fullAddress: fullAddress,
+      lat: customer.lat || null,
+      lng: customer.lng || null,
+      addressType: validateValue(customer.addressType, 'Home'),
+      instructions: validateValue(customer.instructions, '')
     },
     items: sanitizedItems,
     paymentMethod: validateValue(order.paymentMethod, 'Razorpay'),
     paymentStatus: validateValue(order.paymentStatus, order.paymentMethod === 'COD' ? 'Pending (COD)' : 'Paid'),
-    status: validateValue(order.status, 'Pending'),
+    status: status,
+    statusHistory: statusHistory,
+    adminMessage: order.adminMessage || '',
     transactionId: validateValue(order.transactionId || order.upiRef || order.paymentId, 'N/A'),
     razorpayOrderId: validateValue(order.razorpayOrderId, 'N/A'),
     razorpaySignature: validateValue(order.razorpaySignature, 'N/A'),

@@ -16,6 +16,8 @@ import Signup from './pages/Signup';
 import Contact from './pages/Contact';
 import StoreInfo from './pages/StoreInfo';
 import Categories from './pages/Categories';
+import Admin from './pages/Admin';
+import OrderDetails from './pages/OrderDetails';
 import SplashScreen from './components/SplashScreen';
 import SwipeNavigator from './components/SwipeNavigator';
 import MaintenanceGuard from './components/MaintenanceGuard';
@@ -40,6 +42,8 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/store-info" element={<StoreInfo />} />
               <Route path="/categories" element={<Categories />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/order/:id" element={<OrderDetails />} />
               <Route path="*" element={<Home />} />
             </Routes>
             <Navbar />

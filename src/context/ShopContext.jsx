@@ -616,7 +616,7 @@ export const ShopProvider = ({ children }) => {
       discount: totDiscount,
       totalPrice: discountedSubtotal + deliveryFee,
       itemsSummary: summary,
-      status: "Pending",
+      status: "Ordered",
       adminMessage: "",
       paymentMethod: paymentMethod,
       transactionId: paymentDetails?.transactionId || "N/A",
@@ -642,6 +642,7 @@ export const ShopProvider = ({ children }) => {
       await setDoc(doc(db, "orders", sanitized.id), sanitized);
     } catch(err) {
       console.error("Error saving order: ", err);
+      throw new Error(`Failed to save order to database: ${err.message}`);
     }
 
     // Auto Expire & Record Redemption for coupons used in order
@@ -763,8 +764,40 @@ export const ShopProvider = ({ children }) => {
   const updateOrderStatus = async (orderId, newStatus, adminMessage) => {
     try {
       const orderRef = doc(db, "orders", orderId.toString());
-      await updateDoc(orderRef, { status: newStatus, adminMessage });
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus, adminMessage } : o));
+      const nowTs = Date.now();
+      
+      // We need to generate the formatted date. Let's dynamically import or format it.
+      // A simple fallback formatter if formatDate is not directly imported
+      const dateStr = new Date(nowTs).toLocaleDateString('en-IN', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: true
+      });
+
+      const newHistoryEvent = {
+        status: newStatus,
+        timestamp: nowTs,
+        date: dateStr,
+        message: adminMessage || ''
+      };
+
+      await updateDoc(orderRef, { 
+        status: newStatus, 
+        adminMessage,
+        statusHistory: arrayUnion(newHistoryEvent)
+      });
+
+      setOrders(prev => prev.map(o => {
+        if (o.id === orderId) {
+          const currentHistory = Array.isArray(o.statusHistory) ? o.statusHistory : [];
+          return { 
+            ...o, 
+            status: newStatus, 
+            adminMessage,
+            statusHistory: [...currentHistory, newHistoryEvent]
+          };
+        }
+        return o;
+      }));
       return true;
     } catch (error) {
       console.error("Error updating order status: ", error);
