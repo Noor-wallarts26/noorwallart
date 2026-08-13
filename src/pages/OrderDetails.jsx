@@ -217,23 +217,6 @@ const OrderDetails = () => {
             <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Order ID</div>
             <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0F172A' }}>{orderNumDisplay}</div>
           </div>
-          
-          {(order.courierPartner || order.trackingInfo) && (
-            <div>
-              <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Delivery / Tracking</div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#334155' }}>
-                {order.courierPartner && <span style={{ marginRight: '0.5rem' }}>{order.courierPartner}</span>}
-                {order.trackingInfo && (
-                  order.trackingInfo.startsWith('http') ? (
-                    <a href={order.trackingInfo} target="_blank" rel="noreferrer" style={{ color: 'var(--primary, #4F46E5)', textDecoration: 'underline' }}>Track</a>
-                  ) : (
-                    <span>({order.trackingInfo})</span>
-                  )
-                )}
-              </div>
-            </div>
-          )}
-
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Order Date</div>
             <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#334155' }}>{orderDate}</div>
@@ -265,10 +248,10 @@ const OrderDetails = () => {
                 
                 // If it's not found in history, but current status index is >= this step, we consider it completed (without exact time if skipped)
                 const currentIndex = getCurrentStepIndex(order.status);
-                const isCompleted = !!event || currentIndex >= idx;
+                const isCompleted = currentIndex >= idx;
                 
-                const dotColor = isCompleted ? '#16A34A' : '#CBD5E1';
-                const textColor = isCompleted ? '#0F172A' : '#94A3B8';
+                const dotColor = isCompleted ? '#16A34A' : '#DC2626';
+                const textColor = isCompleted ? '#0F172A' : '#DC2626';
                 
                 return (
                   <div key={idx} style={{ position: 'relative' }}>
@@ -288,7 +271,7 @@ const OrderDetails = () => {
                           </span>
                         )}
                       </div>
-                      {isCompleted && event?.message && (
+                      {isCompleted && event?.message && !event.message.toLowerCase().includes('order placed successfully') && (
                         <div style={{ marginTop: '0.4rem', fontSize: '0.9rem', color: '#475569', backgroundColor: '#F8FAFC', padding: '0.5rem 0.75rem', borderRadius: '6px', borderLeft: `2px solid #16A34A` }}>
                           {event.message}
                         </div>

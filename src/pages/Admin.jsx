@@ -470,57 +470,9 @@ const Admin = () => {
                       </select>
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Courier Partner</label>
-                      <select
-                        value={orderCouriers[order.id] || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setOrderCouriers(prev => ({...prev, [order.id]: val}));
-                          if (val !== 'Other') setCustomCouriers(prev => ({...prev, [order.id]: ''}));
-                        }}
-                        style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--glass-bg)', color: 'var(--text-primary)' }}
-                      >
-                        <option value="">— Select Courier —</option>
-                        <option value="India Post">India Post</option>
-                        <option value="DTDC">DTDC</option>
-                        <option value="Delhivery">Delhivery</option>
-                        <option value="BlueDart">BlueDart</option>
-                        <option value="Ecom Express">Ecom Express</option>
-                        <option value="Xpressbees">Xpressbees</option>
-                        <option value="Shadowfax">Shadowfax</option>
-                        <option value="Professional Couriers">Professional Couriers</option>
-                        <option value="Trackon">Trackon</option>
-                        <option value="Other">Other (Manual Entry)</option>
-                      </select>
-                    </div>
                   </div>
 
-                  {orderCouriers[order.id] === 'Other' && (
-                    <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                      <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Custom Courier Name</label>
-                      <input
-                        type="text"
-                        value={customCouriers[order.id] || ''}
-                        onChange={(e) => setCustomCouriers(prev => ({...prev, [order.id]: e.target.value}))}
-                        placeholder="Enter courier name"
-                        style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--glass-bg)', color: 'var(--text-primary)' }}
-                      />
-                    </div>
-                  )}
-
-                  <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Tracking Number / Link</label>
-                    <input 
-                      type="text" 
-                      value={orderTrackingInfos[order.id] || ''}
-                      onChange={(e) => setOrderTrackingInfos(prev => ({...prev, [order.id]: e.target.value}))}
-                      placeholder="e.g. AWB123456789 or https://tracking.link"
-                      style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--glass-bg)', color: 'var(--text-primary)' }}
-                    />
-                  </div>
-
-                  <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr auto' }}>
+                  <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr auto', marginTop: '1rem' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Admin Message to Customer</label>
                       <input 
