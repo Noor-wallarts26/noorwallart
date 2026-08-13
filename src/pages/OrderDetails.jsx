@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { ShopContext } from '../context/ShopContext';
-import { ArrowLeft, Package, Truck, Clock, CreditCard, User, MapPin } from 'lucide-react';
+import { ArrowLeft, Package, Truck, Clock, CreditCard, User, MapPin, Download, Star, XCircle, AlertTriangle } from 'lucide-react';
+import { generateAndDownloadInvoice } from '../utils/invoiceGenerator';
 
 const formatStatusText = (statusStr) => {
   const s = (statusStr || 'Pending').toLowerCase();
@@ -45,10 +46,80 @@ const getCurrentStepIndex = (statusStr) => {
 const OrderDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useContext(ShopContext);
+  const { user, loading: authLoading, cancelOrder, addVerifiedReview, checkUserProductReviewEligibility } = useContext(ShopContext);
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState('');
+  const [cancelSuccess, setCancelSuccess] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingProductId, setRatingProductId] = useState(null);
+  const [ratingValue, setRatingValue] = useState(5);
+  const [ratingComment, setRatingComment] = useState('');
+  const [ratingTitle, setRatingTitle] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewMessage, setReviewMessage] = useState('');
+
+  const handleCancelOrder = async () => {
+    if (!cancelOrder) return;
+    const confirmed = window.confirm('Are you sure you want to cancel this order? This action cannot be undone.');
+    if (!confirmed) return;
+    setIsCancelling(true);
+    setCancelError('');
+    try {
+      const result = await cancelOrder(order.id);
+      if (result.success) {
+        setCancelSuccess(true);
+      } else {
+        setCancelError(result.error || 'Failed to cancel order.');
+      }
+    } catch (err) {
+      setCancelError('An unexpected error occurred.');
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  const handleDownloadInvoice = () => {
+    if (order) {
+      generateAndDownloadInvoice(order);
+    }
+  };
+
+  const handleOpenRating = (productId) => {
+    setRatingProductId(productId);
+    setRatingValue(5);
+    setRatingComment('');
+    setRatingTitle('');
+    setReviewMessage('');
+    setShowRatingModal(true);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!ratingProductId || !addVerifiedReview) return;
+    setIsSubmittingReview(true);
+    setReviewMessage('');
+    try {
+      const result = await addVerifiedReview({
+        productId: ratingProductId,
+        orderId: order.id,
+        rating: ratingValue,
+        title: ratingTitle,
+        comment: ratingComment
+      });
+      if (result.success) {
+        setReviewMessage(result.message || 'Review submitted!');
+        setTimeout(() => setShowRatingModal(false), 2000);
+      } else {
+        setReviewMessage(result.error || 'Failed to submit review.');
+      }
+    } catch (err) {
+      setReviewMessage('An unexpected error occurred.');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -330,6 +401,114 @@ const OrderDetails = () => {
           <div style={{ color: '#64748B', fontSize: '0.9rem', fontStyle: 'italic' }}>Shipping details not available.</div>
         )}
       </div>
+
+      {/* Order Actions */}
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
+        <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.1rem', fontWeight: 900, color: '#0F172A' }}>Actions</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          
+          {/* Download Invoice */}
+          <button
+            onClick={handleDownloadInvoice}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.85rem 1.25rem', backgroundColor: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: '10px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 700, color: '#0369A1', transition: 'all 0.2s' }}
+          >
+            <Download size={18} /> Download Invoice / Receipt
+          </button>
+
+          {/* Cancel Order — only for 'Ordered' status */}
+          {order.status?.toLowerCase() === 'ordered' && !cancelSuccess && (
+            <button
+              onClick={handleCancelOrder}
+              disabled={isCancelling}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.85rem 1.25rem', backgroundColor: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '10px', cursor: isCancelling ? 'not-allowed' : 'pointer', fontSize: '0.95rem', fontWeight: 700, color: '#DC2626', opacity: isCancelling ? 0.6 : 1, transition: 'all 0.2s' }}
+            >
+              <XCircle size={18} /> {isCancelling ? 'Cancelling...' : 'Cancel Order'}
+            </button>
+          )}
+          {cancelError && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', backgroundColor: '#FEF2F2', borderRadius: '8px', color: '#DC2626', fontSize: '0.85rem', fontWeight: 600 }}>
+              <AlertTriangle size={16} /> {cancelError}
+            </div>
+          )}
+          {cancelSuccess && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', backgroundColor: '#F0FDF4', borderRadius: '8px', color: '#16A34A', fontSize: '0.85rem', fontWeight: 600 }}>
+              Order cancelled successfully.
+            </div>
+          )}
+
+          {/* Rate Products — only for 'Delivered' orders */}
+          {order.status?.toLowerCase() === 'delivered' && items.map((item, idx) => (
+            <button
+              key={`rate-${idx}`}
+              onClick={() => handleOpenRating(item.productId)}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.85rem 1.25rem', backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '10px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 700, color: '#B45309', transition: 'all 0.2s' }}
+            >
+              <Star size={18} /> Rate: {item.title}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Rating Modal */}
+      {showRatingModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem' }}>
+          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '1.5rem', maxWidth: '400px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: 900, color: '#0F172A' }}>Rate Your Purchase</h3>
+            
+            {/* Star Rating */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', justifyContent: 'center' }}>
+              {[1, 2, 3, 4, 5].map(star => (
+                <button
+                  key={star}
+                  onClick={() => setRatingValue(star)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', fontSize: '2rem', color: star <= ratingValue ? '#F59E0B' : '#CBD5E1', transition: 'color 0.15s' }}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+
+            <input
+              type="text"
+              placeholder="Review title (optional)"
+              value={ratingTitle}
+              onChange={(e) => setRatingTitle(e.target.value)}
+              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #E2E8F0', marginBottom: '0.75rem', fontSize: '0.95rem', boxSizing: 'border-box' }}
+            />
+
+            <textarea
+              placeholder="Write your review... (optional)"
+              value={ratingComment}
+              onChange={(e) => setRatingComment(e.target.value)}
+              rows={3}
+              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #E2E8F0', marginBottom: '1rem', fontSize: '0.95rem', resize: 'vertical', boxSizing: 'border-box' }}
+            />
+
+            {reviewMessage && (
+              <div style={{ padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', fontWeight: 600, backgroundColor: reviewMessage.includes('Thank') || reviewMessage.includes('submitted') ? '#F0FDF4' : '#FEF2F2', color: reviewMessage.includes('Thank') || reviewMessage.includes('submitted') ? '#16A34A' : '#DC2626' }}>
+                {reviewMessage}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button
+                onClick={() => setShowRatingModal(false)}
+                style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC', cursor: 'pointer', fontWeight: 700, color: '#475569', fontSize: '0.95rem' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitReview}
+                disabled={isSubmittingReview}
+                className="btn-primary"
+                style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', fontWeight: 700, fontSize: '0.95rem', opacity: isSubmittingReview ? 0.6 : 1 }}
+              >
+                {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Clock, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { collection, query, where, onSnapshot, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { sanitizeOrder } from '../utils/orderUtils';
 
@@ -27,12 +27,39 @@ const getStatusColor = (statusStr) => {
   return '#B45309';
 };
 
+/**
+ * Helper: checks if a given order belongs to the current user.
+ * Matches by userId (primary), email (secondary), or phone (tertiary).
+ */
+const orderBelongsToUser = (order, user) => {
+  if (!user || !order) return false;
+
+  // 1. Direct userId match (primary — fastest)
+  if (order.userId && order.userId === user.uid) return true;
+
+  // 2. Email match (secondary)
+  if (user.email && order.customer?.email) {
+    if (String(order.customer.email).toLowerCase().trim() === String(user.email).toLowerCase().trim()) {
+      return true;
+    }
+  }
+
+  // 3. Phone match (tertiary)
+  const userPhone = user.phoneNumber ? String(user.phoneNumber).replace(/\D/g, '').slice(-10) : null;
+  if (userPhone && userPhone.length >= 10 && order.customer?.phone) {
+    const orderPhone = String(order.customer.phone).replace(/\D/g, '').slice(-10);
+    if (orderPhone === userPhone) return true;
+  }
+
+  return false;
+};
+
 const CustomerOrdersView = ({ user, onNavigateToShop }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
   const navigate = useNavigate();
 
-  // Real-time listener for Firestore orders belonging to this customer
   useEffect(() => {
     if (!user) {
       setOrders([]);
@@ -41,55 +68,98 @@ const CustomerOrdersView = ({ user, onNavigateToShop }) => {
     }
 
     setLoading(true);
+    setFetchError(null);
 
     const ordersRef = collection(db, "orders");
-    const userPhone = user.phoneNumber ? String(user.phoneNumber).replace(/\D/g, '') : null;
+
+    // Strategy 1: Try real-time listener filtered by userId (works if Firestore rules allow it)
     const q = query(ordersRef, where("userId", "==", user.uid));
 
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      let fetched = snapshot.docs.map(docSnap => ({
-        id: docSnap.id,
-        ...docSnap.data()
-      }));
+    let primarySucceeded = false;
+    let unsubscribe = null;
 
-      const fallbackQueries = [];
-      if (userPhone && userPhone.length >= 10) {
-        const phoneDigits = userPhone.slice(-10);
-        fallbackQueries.push(getDocs(query(ordersRef, where("customer.phone", "==", phoneDigits))));
-      }
-      if (user.email) {
-        fallbackQueries.push(getDocs(query(ordersRef, where("customer.email", "==", user.email))));
-      }
+    try {
+      unsubscribe = onSnapshot(q, async (snapshot) => {
+        primarySucceeded = true;
+        let fetched = snapshot.docs.map(docSnap => ({
+          id: docSnap.id,
+          ...docSnap.data()
+        }));
 
-      if (fallbackQueries.length > 0) {
-        try {
-          const results = await Promise.all(fallbackQueries);
-          results.forEach(snap => {
-            snap.forEach(docSnap => {
-              if (!fetched.some(o => o.id === docSnap.id)) {
-                fetched.push({ id: docSnap.id, ...docSnap.data() });
-              }
-            });
-          });
-        } catch (err) {
-          console.error("Fallback query error:", err);
+        // Also run fallback queries for orders that may not have userId set
+        // but match by email or phone
+        const fallbackQueries = [];
+        if (user.email) {
+          fallbackQueries.push(
+            getDocs(query(ordersRef, where("customer.email", "==", user.email)))
+              .catch(() => null)
+          );
         }
-      }
-      processAndSetOrders(fetched);
-    }, (error) => {
-      console.error("Firestore real-time orders listener error:", error);
+        const userPhone = user.phoneNumber ? String(user.phoneNumber).replace(/\D/g, '') : null;
+        if (userPhone && userPhone.length >= 10) {
+          const phoneDigits = userPhone.slice(-10);
+          fallbackQueries.push(
+            getDocs(query(ordersRef, where("customer.phone", "==", phoneDigits)))
+              .catch(() => null)
+          );
+        }
+
+        if (fallbackQueries.length > 0) {
+          try {
+            const results = await Promise.all(fallbackQueries);
+            results.forEach(snap => {
+              if (!snap) return;
+              snap.forEach(docSnap => {
+                if (!fetched.some(o => o.id === docSnap.id)) {
+                  fetched.push({ id: docSnap.id, ...docSnap.data() });
+                }
+              });
+            });
+          } catch (err) {
+            console.warn("Fallback query error (non-fatal):", err);
+          }
+        }
+
+        processAndSetOrders(fetched);
+      }, async (error) => {
+        // Strategy 2: If the filtered query fails (e.g. Firestore rules block it),
+        // fetch ALL orders and filter client-side — same approach as Admin Panel
+        console.warn("Primary userId query failed, using full-collection fallback:", error.message);
+        try {
+          const allSnapshot = await getDocs(ordersRef);
+          const allOrders = allSnapshot.docs.map(docSnap => ({
+            id: docSnap.id,
+            ...docSnap.data()
+          }));
+          // Filter client-side: only keep orders belonging to this user
+          const myOrders = allOrders.filter(order => orderBelongsToUser(order, user));
+          processAndSetOrders(myOrders);
+        } catch (fallbackError) {
+          console.error("Full fallback also failed:", fallbackError);
+          setFetchError("Unable to load your orders. Please try again later.");
+          setLoading(false);
+        }
+      });
+    } catch (err) {
+      console.error("Failed to set up orders listener:", err);
+      setFetchError("Unable to load your orders. Please try again later.");
       setLoading(false);
-    });
+    }
 
     const processAndSetOrders = (rawList) => {
-      const sanitizedList = rawList.map(o => sanitizeOrder(o));
+      // Double-check ownership client-side for safety
+      const ownedOrders = rawList.filter(order => orderBelongsToUser(order, user));
+      const sanitizedList = ownedOrders.map(o => sanitizeOrder(o));
       // Sort strictly Newest -> Oldest
       sanitizedList.sort((a, b) => (b.timestamp || b.createdAt || 0) - (a.timestamp || a.createdAt || 0));
       setOrders(sanitizedList);
       setLoading(false);
+      setFetchError(null);
     };
 
-    return () => unsubscribe();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [user]);
 
   if (loading) {
@@ -97,6 +167,24 @@ const CustomerOrdersView = ({ user, onNavigateToShop }) => {
       <div style={{ padding: '2rem', textAlign: 'center', color: '#64748B' }}>
         <Clock className="animate-spin" size={28} style={{ margin: '0 auto 0.5rem auto' }} />
         <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>Loading your orders...</p>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div style={{ padding: '2.5rem 1.5rem', textAlign: 'center', backgroundColor: '#FEF2F2', borderRadius: '16px', border: '1px solid #FCA5A5' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0F172A', margin: '0 0 1rem 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          MY ORDERS
+        </h2>
+        <p style={{ color: '#991B1B', fontSize: '0.95rem', fontWeight: 600 }}>{fetchError}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="btn-primary"
+          style={{ padding: '0.65rem 1.5rem', fontSize: '0.9rem', fontWeight: 700, borderRadius: '10px', marginTop: '1rem' }}
+        >
+          Retry
+        </button>
       </div>
     );
   }

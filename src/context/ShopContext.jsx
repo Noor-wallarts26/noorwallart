@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth, db } from '../firebase';
-import { doc, updateDoc, arrayUnion, collection, query, where, getDocs, setDoc, getDoc } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion, collection, query, where, getDocs, setDoc, getDoc, onSnapshot, addDoc, deleteDoc } from 'firebase/firestore';
 import { cleanInput, isRateLimited, isValidCouponCode } from '../utils/security';
 import { generateUniqueOrderId, sanitizeOrder, sendWhatsAppOrderNotification } from '../utils/orderUtils';
 import { sendAdminOrderEmailNotification } from '../utils/emailService';
@@ -609,6 +609,7 @@ export const ShopProvider = ({ children }) => {
     const rawOrderPayload = {
       id: orderId,
       userId: user?.uid || null,
+      userEmail: user?.email || null,
       timestamp: Date.now(),
       originalSubtotal: origSubtotal,
       subtotal: origSubtotal,
@@ -623,8 +624,12 @@ export const ShopProvider = ({ children }) => {
       razorpayOrderId: paymentDetails?.razorpayOrderId || "N/A",
       razorpaySignature: paymentDetails?.razorpaySignature || "N/A",
       paymentStatus: paymentDetails?.paymentStatus || 'Paid',
-      customer: customerDetails,
-      items: cartWithProducts
+      customer: {
+        ...customerDetails,
+        email: customerDetails?.email || user?.email || 'N/A'
+      },
+      items: cartWithProducts,
+      print_status: 'NOT_PRINTED'
     };
 
     const sanitized = sanitizeOrder(rawOrderPayload);
@@ -746,6 +751,18 @@ export const ShopProvider = ({ children }) => {
     }
   };
 
+  const subscribeToAllOrders = (callback) => {
+    const ordersRef = collection(db, 'orders');
+    const unsubscribe = onSnapshot(ordersRef, (snapshot) => {
+      const allOrders = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+      allOrders.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      callback(allOrders);
+    }, (error) => {
+      console.error('Real-time orders listener error:', error);
+    });
+    return unsubscribe;
+  };
+
   const fetchMyOrders = async (userId) => {
     if (!userId) return [];
     try {
@@ -801,6 +818,87 @@ export const ShopProvider = ({ children }) => {
       return true;
     } catch (error) {
       console.error("Error updating order status: ", error);
+      return false;
+    }
+  };
+
+  const cancelOrder = async (orderId) => {
+    if (!user?.uid) return { success: false, error: 'Not authenticated.' };
+    try {
+      const orderRef = doc(db, 'orders', orderId.toString());
+      const orderSnap = await getDoc(orderRef);
+      if (!orderSnap.exists()) return { success: false, error: 'Order not found.' };
+      const orderData = orderSnap.data();
+      // Security: verify ownership
+      if (orderData.userId !== user.uid) return { success: false, error: 'Unauthorized.' };
+      // Only allow cancellation when status is 'Ordered'
+      const currentStatus = (orderData.status || '').toLowerCase();
+      if (currentStatus !== 'ordered') {
+        return { success: false, error: 'This order can no longer be cancelled. Only orders with "Ordered" status can be cancelled.' };
+      }
+      const nowTs = Date.now();
+      const dateStr = new Date(nowTs).toLocaleDateString('en-IN', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: true
+      });
+      const cancelEvent = {
+        status: 'Cancelled',
+        timestamp: nowTs,
+        date: dateStr,
+        message: 'Order cancelled by customer.'
+      };
+      await updateDoc(orderRef, {
+        status: 'Cancelled',
+        adminMessage: 'Customer cancelled this order.',
+        statusHistory: arrayUnion(cancelEvent)
+      });
+      setOrders(prev => prev.map(o => {
+        if (o.id === orderId) {
+          const currentHistory = Array.isArray(o.statusHistory) ? o.statusHistory : [];
+          return { ...o, status: 'Cancelled', adminMessage: 'Customer cancelled this order.', statusHistory: [...currentHistory, cancelEvent] };
+        }
+        return o;
+      }));
+      return { success: true, message: 'Order cancelled successfully.' };
+    } catch (err) {
+      console.error('Error cancelling order:', err);
+      return { success: false, error: 'Failed to cancel order. Please try again.' };
+    }
+  };
+
+  const updateOrderPrintStatus = async (orderId, printStatus) => {
+    try {
+      const orderRef = doc(db, 'orders', orderId.toString());
+      await updateDoc(orderRef, {
+        print_status: printStatus,
+        printed_at: printStatus === 'PRINTED' ? Date.now() : null
+      });
+      return true;
+    } catch (err) {
+      console.error('Error updating print status:', err);
+      return false;
+    }
+  };
+
+  const fetchAllCustomers = async () => {
+    try {
+      const usersRef = collection(db, 'users');
+      const snapshot = await getDocs(usersRef);
+      const customers = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+      return customers;
+    } catch (err) {
+      console.error('Error fetching customers:', err);
+      return [];
+    }
+  };
+
+  const toggleCustomerActive = async (userId, isActive) => {
+    try {
+      const userRef = doc(db, 'users', userId);
+      await updateDoc(userRef, { isActive: isActive, updatedAt: new Date().toISOString() });
+      return true;
+    } catch (err) {
+      console.error('Error toggling customer status:', err);
       return false;
     }
   };
@@ -1064,6 +1162,11 @@ export const ShopProvider = ({ children }) => {
       checkUserProductReviewEligibility,
       updateProductSliderStatus,
       updateProductDeliveryCharge,
+      subscribeToAllOrders,
+      cancelOrder,
+      updateOrderPrintStatus,
+      fetchAllCustomers,
+      toggleCustomerActive,
       user,
       loading,
       isProductsLoading,
