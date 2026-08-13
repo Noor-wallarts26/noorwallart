@@ -261,9 +261,18 @@ const CustomerOrdersView = ({ user, onNavigateToShop }) => {
                   <div style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.2rem' }}>Order ID</div>
                   <div style={{ fontSize: '1rem', fontWeight: 900, color: '#0F172A' }}>{orderNumDisplay}</div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.2rem' }}>Date</div>
+                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>Date</div>
                   <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#334155' }}>{orderDate}</div>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/invoice-preview/${order.id}`);
+                    }}
+                    style={{ background: 'none', border: '1px solid #CBD5E1', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', color: '#0F172A', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.2rem', marginTop: '0.25rem' }}
+                  >
+                    📄 Invoice
+                  </button>
                 </div>
               </div>
 

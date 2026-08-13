@@ -18,6 +18,8 @@ import StoreInfo from './pages/StoreInfo';
 import Categories from './pages/Categories';
 import Admin from './pages/Admin';
 import OrderDetails from './pages/OrderDetails';
+import InvoicePreview from './pages/InvoicePreview';
+import VerifyInvoice from './pages/VerifyInvoice';
 import SplashScreen from './components/SplashScreen';
 import SwipeNavigator from './components/SwipeNavigator';
 import MaintenanceGuard from './components/MaintenanceGuard';
@@ -44,6 +46,8 @@ function App() {
               <Route path="/categories" element={<Categories />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/order/:id" element={<OrderDetails />} />
+              <Route path="/invoice-preview/:id" element={<InvoicePreview />} />
+              <Route path="/verify-order/:token" element={<VerifyInvoice />} />
               <Route path="*" element={<Home />} />
             </Routes>
             <Navbar />

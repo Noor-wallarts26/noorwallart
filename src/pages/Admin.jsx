@@ -1,10 +1,11 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { ShopContext } from '../context/ShopContext';
-import { Search, SlidersHorizontal, AlertCircle, ShoppingBag, CheckCircle, Clock, Truck, LogOut, Settings, Lock, Shield } from 'lucide-react';
+import { Search, SlidersHorizontal, AlertCircle, ShoppingBag, CheckCircle, Clock, Truck, LogOut, Settings, Lock, Shield, FileText } from 'lucide-react';
 import './Admin.css';
+import { downloadCustomerInvoice, downloadDeliveryCopy } from '../utils/pdfGenerator';
 
 const Admin = () => {
-  const { products, updateProductSliderStatus, fetchAllOrders, updateOrderStatus, updateProductDeliveryCharge, paymentSettings } = useContext(ShopContext);
+  const { products, updateProductSliderStatus, fetchAllOrders, updateOrderStatus, updateProductDeliveryCharge, paymentSettings, businessSettings, updateBusinessSettings } = useContext(ShopContext);
   const [searchTerm, setSearchTerm] = useState('');
   const [isUpdating, setIsUpdating] = useState(null); // track which product is updating
   
@@ -32,7 +33,15 @@ const Admin = () => {
   const [isPinLocked, setIsPinLocked] = useState(false);
   const [isPinLoading, setIsPinLoading] = useState(false);
   
-  const [activeTab, setActiveTab] = useState('slider'); // 'slider' | 'orders' | 'settings'
+  const [activeTab, setActiveTab] = useState('slider'); // 'slider' | 'orders' | 'settings' | 'business'
+
+  const [bsForm, setBsForm] = useState(businessSettings || {});
+  const [isSavingBs, setIsSavingBs] = useState(false);
+  const [bsMessage, setBsMessage] = useState('');
+
+  useEffect(() => {
+    if (businessSettings) setBsForm(businessSettings);
+  }, [businessSettings]);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -182,6 +191,20 @@ const Admin = () => {
     p.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleSaveBusinessSettings = async (e) => {
+    e.preventDefault();
+    setIsSavingBs(true);
+    setBsMessage('');
+    const result = await updateBusinessSettings(bsForm);
+    if (result.success) {
+      setBsMessage('Business settings updated successfully!');
+      setTimeout(() => setBsMessage(''), 3000);
+    } else {
+      setBsMessage('Failed to update business settings.');
+    }
+    setIsSavingBs(false);
+  };
+
   const handleToggleSlider = async (productId, currentStatus) => {
     // If trying to add, but we already have 10, prevent it
     if (!currentStatus && sliderCount >= 10) {
@@ -294,6 +317,12 @@ const Admin = () => {
           style={{ background: activeTab === 'settings' ? 'var(--primary)' : 'transparent', color: activeTab === 'settings' ? 'white' : 'var(--text-primary)', border: 'none', padding: '0.5rem 1rem', borderRadius: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}
         >
           <Settings size={18} /> Settings
+        </button>
+        <button 
+          onClick={() => setActiveTab('business')}
+          style={{ background: activeTab === 'business' ? 'var(--primary)' : 'transparent', color: activeTab === 'business' ? 'white' : 'var(--text-primary)', border: 'none', padding: '0.5rem 1rem', borderRadius: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}
+        >
+          <FileText size={18} /> Business Profile
         </button>
       </div>
 
@@ -484,7 +513,23 @@ const Admin = () => {
                       />
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem' }}>
+                      <button 
+                        className="btn-secondary" 
+                        onClick={() => window.open(`#/invoice-preview/${order.id}`, '_blank')}
+                        style={{ padding: '0.6rem 1rem', height: 'max-content', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                        title="View Customer Invoice"
+                      >
+                        <FileText size={16} /> Invoice
+                      </button>
+                      <button 
+                        className="btn-secondary" 
+                        onClick={() => downloadDeliveryCopy(order, businessSettings)}
+                        style={{ padding: '0.6rem 1rem', height: 'max-content', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                        title="Download Delivery/Packing Slip"
+                      >
+                        <Truck size={16} /> Slip
+                      </button>
                       <button 
                         className="btn-primary" 
                         onClick={() => handleUpdateOrder(order.id)}
@@ -572,6 +617,87 @@ const Admin = () => {
               </div>
             )}
           </div>
+        </section>
+      )}
+
+      {activeTab === 'business' && (
+        <section className="admin-section animate-fade-in">
+          <div className="section-header">
+            <div className="section-title">
+              <FileText size={24} color="var(--primary)" />
+              <h2>Business Profile</h2>
+            </div>
+          </div>
+          <p className="section-description">
+            Update your business details below. This information will appear on customer invoices and delivery slips.
+          </p>
+
+          <form onSubmit={handleSaveBusinessSettings} className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '600px' }}>
+            {bsMessage && (
+              <div style={{ padding: '1rem', background: bsMessage.includes('success') ? '#dcfce7' : '#fee2e2', color: bsMessage.includes('success') ? '#166534' : '#991b1b', borderRadius: '8px', fontWeight: 'bold' }}>
+                {bsMessage}
+              </div>
+            )}
+            
+            <div className="form-group">
+              <label style={{ fontWeight: 'bold' }}>Business Name</label>
+              <input 
+                type="text" 
+                value={bsForm.businessName || ''} 
+                onChange={e => setBsForm({...bsForm, businessName: e.target.value})} 
+                placeholder="e.g. Noor Wall Arts" 
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--border-color)', marginTop: '0.5rem' }} 
+              />
+            </div>
+            
+            <div className="form-group">
+              <label style={{ fontWeight: 'bold' }}>GSTIN (Optional)</label>
+              <input 
+                type="text" 
+                value={bsForm.gstin || ''} 
+                onChange={e => setBsForm({...bsForm, gstin: e.target.value})} 
+                placeholder="e.g. 22AAAAA0000A1Z5" 
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--border-color)', marginTop: '0.5rem' }} 
+              />
+            </div>
+            
+            <div className="form-group">
+              <label style={{ fontWeight: 'bold' }}>Business Phone</label>
+              <input 
+                type="text" 
+                value={bsForm.phone || ''} 
+                onChange={e => setBsForm({...bsForm, phone: e.target.value})} 
+                placeholder="e.g. +91 9876543210" 
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--border-color)', marginTop: '0.5rem' }} 
+              />
+            </div>
+            
+            <div className="form-group">
+              <label style={{ fontWeight: 'bold' }}>Business Address</label>
+              <textarea 
+                value={bsForm.address || ''} 
+                onChange={e => setBsForm({...bsForm, address: e.target.value})} 
+                placeholder="Full address of the business..." 
+                rows={3} 
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--border-color)', marginTop: '0.5rem', fontFamily: 'inherit' }} 
+              />
+            </div>
+            
+            <div className="form-group">
+              <label style={{ fontWeight: 'bold' }}>Website/Domain</label>
+              <input 
+                type="text" 
+                value={bsForm.domain || ''} 
+                onChange={e => setBsForm({...bsForm, domain: e.target.value})} 
+                placeholder="e.g. noorwallarts.com" 
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--border-color)', marginTop: '0.5rem' }} 
+              />
+            </div>
+
+            <button type="submit" className="btn-primary" disabled={isSavingBs} style={{ padding: '1rem', fontSize: '1rem', fontWeight: 'bold', borderRadius: '8px' }}>
+              {isSavingBs ? 'Saving...' : 'Save Settings'}
+            </button>
+          </form>
         </section>
       )}
 

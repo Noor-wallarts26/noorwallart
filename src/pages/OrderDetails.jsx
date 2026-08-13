@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { ShopContext } from '../context/ShopContext';
-import { ArrowLeft, Package, Truck, Clock, CreditCard, User, MapPin, Download, Star, XCircle, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Package, Truck, Clock, CreditCard, User, MapPin, Download, Star, XCircle, AlertTriangle, FileText } from 'lucide-react';
 import { generateAndDownloadInvoice } from '../utils/invoiceGenerator';
+import { downloadCustomerInvoice } from '../utils/pdfGenerator';
 
 const formatStatusText = (statusStr) => {
   const s = (statusStr || 'Pending').toLowerCase();
@@ -46,7 +47,7 @@ const getCurrentStepIndex = (statusStr) => {
 const OrderDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, loading: authLoading, cancelOrder, addVerifiedReview, checkUserProductReviewEligibility } = useContext(ShopContext);
+  const { user, loading: authLoading, cancelOrder, addVerifiedReview, checkUserProductReviewEligibility, businessSettings } = useContext(ShopContext);
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -60,6 +61,18 @@ const OrderDetails = () => {
   const [ratingTitle, setRatingTitle] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewMessage, setReviewMessage] = useState('');
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadInvoice = async () => {
+    setIsDownloading(true);
+    try {
+      await downloadCustomerInvoice(order, businessSettings);
+    } catch (err) {
+      alert("Failed to generate invoice. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const handleCancelOrder = async () => {
     if (!cancelOrder) return;
@@ -283,6 +296,24 @@ const OrderDetails = () => {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Invoice Actions */}
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 4px 14px rgba(0,0,0,0.03)', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        <button 
+          onClick={() => navigate(`/invoice-preview/${order.id}`)} 
+          className="btn-primary" 
+          style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+          👁 View Invoice
+        </button>
+        <button 
+          onClick={handleDownloadInvoice} 
+          disabled={isDownloading}
+          className="btn-secondary" 
+          style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', backgroundColor: '#F1F5F9', color: '#0F172A', border: '1px solid #CBD5E1', fontWeight: 700, opacity: isDownloading ? 0.7 : 1, cursor: isDownloading ? 'not-allowed' : 'pointer' }}>
+          {isDownloading ? <Clock className="animate-spin" size={18} /> : <FileText size={18} />}
+          {isDownloading ? 'Generating...' : '📄 Download Invoice / Receipt'}
+        </button>
       </div>
 
       {/* Products List */}
