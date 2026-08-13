@@ -4,12 +4,12 @@ import { sanitizeOrder, formatCurrency, formatDate } from './orderUtils';
  * Company constants for invoices and shipping labels.
  */
 const COMPANY_INFO = {
-  name: 'NoorWallArt',
-  tagline: 'Premium Wall Art & Decor',
-  email: 'support@noorwallart.com',
+  name: 'NOOR KARTS',
+  tagline: 'Premium Arts & Gifts',
+  email: 'noorkarts.in@gmail.com',
   phone: '+91 89253 25330',
-  website: 'www.noorwallart.com',
-  address: 'NoorWallArt Studio, Main Road, Chennai, Tamil Nadu - 600001, India'
+  website: 'www.noorkarts.in',
+  address: 'Noor Karts Studio, Main Road, Chennai, Tamil Nadu - 600001, India'
 };
 
 /**
@@ -321,8 +321,11 @@ export const generateAndDownloadInvoice = (rawOrder) => {
 
       <div class="meta-card">
         <div class="meta-card-title">Payment & Order Details</div>
+        <div class="meta-row"><strong>Invoice No:</strong> INV-${order.id}</div>
         <div class="meta-row"><strong>Order ID:</strong> ${order.id}</div>
         <div class="meta-row"><strong>Order Date:</strong> ${formattedDate}</div>
+        <div class="meta-row"><strong>Order Status:</strong> ${order.status || 'Ordered'}</div>
+        <div class="meta-row"><strong>Courier/Shipping Partner:</strong> ${order.courierPartner || 'Not Assigned'}</div>
         <div class="meta-row"><strong>Payment Method:</strong> ${order.paymentMethod || 'N/A'}</div>
         <div class="meta-row"><strong>Payment Status:</strong> ${order.paymentStatus || 'N/A'}</div>
         <div class="meta-row"><strong>Transaction ID:</strong> ${order.transactionId || 'N/A'}</div>

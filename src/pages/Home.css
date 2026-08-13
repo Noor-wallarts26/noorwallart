@@ -399,8 +399,8 @@
    PRODUCT GRID — 2-Column Layout
 ───────────────────────────────────────────────────────── */
 .products-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
   gap: 1.25rem;
   padding-bottom: 4rem;
   width: 100%;

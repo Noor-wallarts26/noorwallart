@@ -217,6 +217,23 @@ const OrderDetails = () => {
             <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Order ID</div>
             <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0F172A' }}>{orderNumDisplay}</div>
           </div>
+          
+          {(order.courierPartner || order.trackingInfo) && (
+            <div>
+              <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Delivery / Tracking</div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#334155' }}>
+                {order.courierPartner && <span style={{ marginRight: '0.5rem' }}>{order.courierPartner}</span>}
+                {order.trackingInfo && (
+                  order.trackingInfo.startsWith('http') ? (
+                    <a href={order.trackingInfo} target="_blank" rel="noreferrer" style={{ color: 'var(--primary, #4F46E5)', textDecoration: 'underline' }}>Track</a>
+                  ) : (
+                    <span>({order.trackingInfo})</span>
+                  )
+                )}
+              </div>
+            </div>
+          )}
+
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Order Date</div>
             <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#334155' }}>{orderDate}</div>
@@ -235,37 +252,50 @@ const OrderDetails = () => {
               <p style={{ margin: '0.5rem 0 0 0', color: '#991B1B', fontSize: '0.9rem' }}>This order has been cancelled.</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingLeft: '8px', borderLeft: '2px solid #E2E8F0', marginLeft: '8px' }}>
-              {(Array.isArray(order.statusHistory) && order.statusHistory.length > 0 
-                  ? order.statusHistory 
-                  : [{ status: order.status || 'Ordered', timestamp: order.timestamp, date: order.formattedDate, message: order.adminMessage || 'Status updated.' }]
-                ).map((historyEvent, idx, arr) => {
-                  const isLast = idx === arr.length - 1;
-                  const dotColor = isLast ? '#16A34A' : '#94A3B8';
-                  return (
-                    <div key={idx} style={{ position: 'relative' }}>
-                      <div style={{ 
-                        position: 'absolute', left: '-22px', top: '4px', width: '14px', height: '14px', 
-                        borderRadius: '50%', backgroundColor: '#FFFFFF', border: `3px solid ${dotColor}`,
-                        boxShadow: isLast ? `0 0 0 3px rgba(22, 163, 74, 0.2)` : 'none'
-                      }}></div>
-                      <div style={{ marginLeft: '0.75rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
-                          <span style={{ fontSize: '1.05rem', fontWeight: 800, color: isLast ? '#0F172A' : '#475569' }}>
-                            {historyEvent.status}
-                          </span>
+            <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '8px', borderLeft: '2px solid #E2E8F0', marginLeft: '8px' }}>
+              {STATUS_FLOW.map((stepStatus, idx) => {
+                let event = Array.isArray(order.statusHistory) 
+                  ? order.statusHistory.find(h => h.status?.toLowerCase() === stepStatus.toLowerCase())
+                  : null;
+                
+                // Fallback for 'Ordered' if history is missing but we have an order
+                if (!event && stepStatus === 'Ordered') {
+                  event = { status: 'Ordered', timestamp: order.timestamp, date: order.formattedDate || (order.timestamp ? new Date(order.timestamp).toLocaleString('en-IN') : '') };
+                }
+                
+                // If it's not found in history, but current status index is >= this step, we consider it completed (without exact time if skipped)
+                const currentIndex = getCurrentStepIndex(order.status);
+                const isCompleted = !!event || currentIndex >= idx;
+                
+                const dotColor = isCompleted ? '#16A34A' : '#CBD5E1';
+                const textColor = isCompleted ? '#0F172A' : '#94A3B8';
+                
+                return (
+                  <div key={idx} style={{ position: 'relative' }}>
+                    <div style={{ 
+                      position: 'absolute', left: '-22px', top: '4px', width: '14px', height: '14px', 
+                      borderRadius: '50%', backgroundColor: isCompleted ? '#16A34A' : '#FFFFFF', border: `2px solid ${dotColor}`,
+                      boxShadow: isCompleted ? `0 0 0 3px rgba(22, 163, 74, 0.2)` : 'none'
+                    }}></div>
+                    <div style={{ marginLeft: '0.75rem', paddingBottom: idx === STATUS_FLOW.length - 1 ? 0 : '2rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '1.05rem', fontWeight: 800, color: textColor }}>
+                          {stepStatus}
+                        </span>
+                        {isCompleted && event && (
                           <span style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 600 }}>
-                            {historyEvent.date || (historyEvent.timestamp ? new Date(historyEvent.timestamp).toLocaleString('en-IN') : 'N/A')}
+                            {event.date || (event.timestamp ? new Date(event.timestamp).toLocaleString('en-IN') : 'N/A')}
                           </span>
-                        </div>
-                        {historyEvent.message && (
-                          <div style={{ marginTop: '0.4rem', fontSize: '0.9rem', color: '#475569', backgroundColor: '#F8FAFC', padding: '0.5rem 0.75rem', borderRadius: '6px', borderLeft: `2px solid ${isLast ? '#16A34A' : '#CBD5E1'}` }}>
-                            {historyEvent.message}
-                          </div>
                         )}
                       </div>
+                      {isCompleted && event?.message && (
+                        <div style={{ marginTop: '0.4rem', fontSize: '0.9rem', color: '#475569', backgroundColor: '#F8FAFC', padding: '0.5rem 0.75rem', borderRadius: '6px', borderLeft: `2px solid #16A34A` }}>
+                          {event.message}
+                        </div>
+                      )}
                     </div>
-                  );
+                  </div>
+                );
               })}
             </div>
           )}

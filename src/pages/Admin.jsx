@@ -14,6 +14,7 @@ const Admin = () => {
   const [orderStatuses, setOrderStatuses] = useState({});
   const [orderCouriers, setOrderCouriers] = useState({});
   const [customCouriers, setCustomCouriers] = useState({});
+  const [orderTrackingInfos, setOrderTrackingInfos] = useState({});
 
   // --- NEW AUTH STATE ---
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
@@ -62,6 +63,7 @@ const Admin = () => {
         const initialSts = {};
         const initialCouriers = {};
         const initialCustomCouriers = {};
+        const initialTracking = {};
         const knownCouriers = ['', 'India Post', 'DTDC', 'Delhivery', 'BlueDart', 'Ecom Express', 'Xpressbees', 'Shadowfax', 'Professional Couriers', 'Trackon', 'Other'];
         fetched.forEach(o => {
           initialMsgs[o.id] = o.adminMessage || '';
@@ -74,11 +76,13 @@ const Admin = () => {
             initialCouriers[o.id] = saved;
             initialCustomCouriers[o.id] = '';
           }
+          initialTracking[o.id] = o.trackingInfo || '';
         });
         setOrderMessages(initialMsgs);
         setOrderStatuses(initialSts);
         setOrderCouriers(initialCouriers);
         setCustomCouriers(initialCustomCouriers);
+        setOrderTrackingInfos(initialTracking);
         
         setIsOrdersLoading(false);
       };
@@ -163,7 +167,8 @@ const Admin = () => {
     const msg = orderMessages[orderId];
     const courierSelection = orderCouriers[orderId] || '';
     const courier = courierSelection === 'Other' ? (customCouriers[orderId] || '').trim() : courierSelection;
-    const success = await updateOrderStatus(orderId, status, msg, courier);
+    const trackingInfo = (orderTrackingInfos[orderId] || '').trim();
+    const success = await updateOrderStatus(orderId, status, msg, courier, trackingInfo);
     if (success) {
       alert("Order updated successfully!");
     } else {
@@ -498,11 +503,22 @@ const Admin = () => {
                         type="text"
                         value={customCouriers[order.id] || ''}
                         onChange={(e) => setCustomCouriers(prev => ({...prev, [order.id]: e.target.value}))}
-                        placeholder="Enter courier partner name"
+                        placeholder="Enter courier name"
                         style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--glass-bg)', color: 'var(--text-primary)' }}
                       />
                     </div>
                   )}
+
+                  <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Tracking Number / Link</label>
+                    <input 
+                      type="text" 
+                      value={orderTrackingInfos[order.id] || ''}
+                      onChange={(e) => setOrderTrackingInfos(prev => ({...prev, [order.id]: e.target.value}))}
+                      placeholder="e.g. AWB123456789 or https://tracking.link"
+                      style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--glass-bg)', color: 'var(--text-primary)' }}
+                    />
+                  </div>
 
                   <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr auto' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>

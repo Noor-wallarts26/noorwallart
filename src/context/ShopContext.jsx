@@ -778,7 +778,7 @@ export const ShopProvider = ({ children }) => {
     }
   };
 
-  const updateOrderStatus = async (orderId, newStatus, adminMessage, courierPartner) => {
+  const updateOrderStatus = async (orderId, newStatus, adminMessage, courierPartner, trackingInfo) => {
     try {
       const orderRef = doc(db, "orders", orderId.toString());
       const nowTs = Date.now();
@@ -805,6 +805,10 @@ export const ShopProvider = ({ children }) => {
       if (courierPartner !== undefined) {
         updatePayload.courierPartner = courierPartner || '';
       }
+      
+      if (trackingInfo !== undefined) {
+        updatePayload.trackingInfo = trackingInfo || '';
+      }
 
       await updateDoc(orderRef, updatePayload);
 
@@ -816,6 +820,7 @@ export const ShopProvider = ({ children }) => {
             status: newStatus, 
             adminMessage,
             courierPartner: courierPartner !== undefined ? (courierPartner || '') : o.courierPartner,
+            trackingInfo: trackingInfo !== undefined ? (trackingInfo || '') : o.trackingInfo,
             statusHistory: [...currentHistory, newHistoryEvent]
           };
         }
