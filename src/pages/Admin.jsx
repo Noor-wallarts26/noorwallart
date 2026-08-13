@@ -12,6 +12,8 @@ const Admin = () => {
   const [isOrdersLoading, setIsOrdersLoading] = useState(true);
   const [orderMessages, setOrderMessages] = useState({});
   const [orderStatuses, setOrderStatuses] = useState({});
+  const [orderCouriers, setOrderCouriers] = useState({});
+  const [customCouriers, setCustomCouriers] = useState({});
 
   // --- NEW AUTH STATE ---
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
@@ -58,12 +60,25 @@ const Admin = () => {
         
         const initialMsgs = {};
         const initialSts = {};
+        const initialCouriers = {};
+        const initialCustomCouriers = {};
+        const knownCouriers = ['', 'India Post', 'DTDC', 'Delhivery', 'BlueDart', 'Ecom Express', 'Xpressbees', 'Shadowfax', 'Professional Couriers', 'Trackon', 'Other'];
         fetched.forEach(o => {
           initialMsgs[o.id] = o.adminMessage || '';
           initialSts[o.id] = o.status || 'Ordered';
+          const saved = o.courierPartner || '';
+          if (saved && !knownCouriers.includes(saved)) {
+            initialCouriers[o.id] = 'Other';
+            initialCustomCouriers[o.id] = saved;
+          } else {
+            initialCouriers[o.id] = saved;
+            initialCustomCouriers[o.id] = '';
+          }
         });
         setOrderMessages(initialMsgs);
         setOrderStatuses(initialSts);
+        setOrderCouriers(initialCouriers);
+        setCustomCouriers(initialCustomCouriers);
         
         setIsOrdersLoading(false);
       };
@@ -146,7 +161,9 @@ const Admin = () => {
   const handleUpdateOrder = async (orderId) => {
     const status = orderStatuses[orderId];
     const msg = orderMessages[orderId];
-    const success = await updateOrderStatus(orderId, status, msg);
+    const courierSelection = orderCouriers[orderId] || '';
+    const courier = courierSelection === 'Other' ? (customCouriers[orderId] || '').trim() : courierSelection;
+    const success = await updateOrderStatus(orderId, status, msg, courier);
     if (success) {
       alert("Order updated successfully!");
     } else {
@@ -430,7 +447,7 @@ const Admin = () => {
                     </div>
                   </div>
 
-                  <div className="order-action-controls" style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr 2fr auto' }}>
+                  <div className="order-action-controls" style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr 1fr', marginBottom: '0.5rem' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Status</label>
                       <select 
@@ -447,7 +464,47 @@ const Admin = () => {
                         <option value="Cancelled">Cancelled</option>
                       </select>
                     </div>
-                    
+
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Courier Partner</label>
+                      <select
+                        value={orderCouriers[order.id] || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setOrderCouriers(prev => ({...prev, [order.id]: val}));
+                          if (val !== 'Other') setCustomCouriers(prev => ({...prev, [order.id]: ''}));
+                        }}
+                        style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--glass-bg)', color: 'var(--text-primary)' }}
+                      >
+                        <option value="">— Select Courier —</option>
+                        <option value="India Post">India Post</option>
+                        <option value="DTDC">DTDC</option>
+                        <option value="Delhivery">Delhivery</option>
+                        <option value="BlueDart">BlueDart</option>
+                        <option value="Ecom Express">Ecom Express</option>
+                        <option value="Xpressbees">Xpressbees</option>
+                        <option value="Shadowfax">Shadowfax</option>
+                        <option value="Professional Couriers">Professional Couriers</option>
+                        <option value="Trackon">Trackon</option>
+                        <option value="Other">Other (Manual Entry)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {orderCouriers[order.id] === 'Other' && (
+                    <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Custom Courier Name</label>
+                      <input
+                        type="text"
+                        value={customCouriers[order.id] || ''}
+                        onChange={(e) => setCustomCouriers(prev => ({...prev, [order.id]: e.target.value}))}
+                        placeholder="Enter courier partner name"
+                        style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--glass-bg)', color: 'var(--text-primary)' }}
+                      />
+                    </div>
+                  )}
+
+                  <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr auto' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Admin Message to Customer</label>
                       <input 

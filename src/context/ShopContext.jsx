@@ -778,13 +778,11 @@ export const ShopProvider = ({ children }) => {
     }
   };
 
-  const updateOrderStatus = async (orderId, newStatus, adminMessage) => {
+  const updateOrderStatus = async (orderId, newStatus, adminMessage, courierPartner) => {
     try {
       const orderRef = doc(db, "orders", orderId.toString());
       const nowTs = Date.now();
       
-      // We need to generate the formatted date. Let's dynamically import or format it.
-      // A simple fallback formatter if formatDate is not directly imported
       const dateStr = new Date(nowTs).toLocaleDateString('en-IN', {
         day: '2-digit', month: 'short', year: 'numeric',
         hour: '2-digit', minute: '2-digit', hour12: true
@@ -797,11 +795,18 @@ export const ShopProvider = ({ children }) => {
         message: adminMessage || ''
       };
 
-      await updateDoc(orderRef, { 
+      const updatePayload = { 
         status: newStatus, 
         adminMessage,
         statusHistory: arrayUnion(newHistoryEvent)
-      });
+      };
+
+      // Only write courierPartner if provided (not undefined)
+      if (courierPartner !== undefined) {
+        updatePayload.courierPartner = courierPartner || '';
+      }
+
+      await updateDoc(orderRef, updatePayload);
 
       setOrders(prev => prev.map(o => {
         if (o.id === orderId) {
@@ -810,6 +815,7 @@ export const ShopProvider = ({ children }) => {
             ...o, 
             status: newStatus, 
             adminMessage,
+            courierPartner: courierPartner !== undefined ? (courierPartner || '') : o.courierPartner,
             statusHistory: [...currentHistory, newHistoryEvent]
           };
         }
