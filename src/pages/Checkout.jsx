@@ -175,33 +175,63 @@ const Checkout = () => {
       setIsProcessing(false);
       return;
     }
-    
     try {
-      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || paymentSettings?.razorpayKeyId || storeSettings?.razorpayKeyId || 'rzp_live_default';
+      // 1. Create a Pending Order in Firestore
+      const pendingOrder = await placeOrder(formData, 'Razorpay');
+      if (!pendingOrder || !pendingOrder.id) {
+        throw new Error("Failed to create pending order. Please try again.");
+      }
 
+      // 2. Request backend to create Razorpay Order securely
+      const response = await fetch('/api/payment/create-razorpay-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: pendingOrder.id })
+      });
+      
+      const rpData = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(rpData.error || "Failed to initialize secure payment.");
+      }
+
+      // 3. Open Razorpay using backend-generated order ID
       const options = {
-        key: razorpayKey,
-        amount: Math.round(finalTotal * 100),
-        currency: 'INR',
+        key: rpData.key_id,
+        amount: rpData.amount, // backend verified amount
+        currency: "INR",
         name: "NOOR WALLARTS & GIFTS",
-        description: `Order Payment (${totalItemsInCart} items)`,
+        description: `Order Payment (#${pendingOrder.id})`,
         image: storeSettings?.logoUrl || '/logo.jpg',
-        handler: async function (response) {
+        order_id: rpData.id, // THE SERVER GENERATED ORDER ID
+        handler: async function (paymentResponse) {
           try {
             setIsProcessing(true);
-            const paymentDetails = {
-              transactionId: response.razorpay_payment_id || `PAY_${Date.now()}`,
-              razorpayOrderId: response.razorpay_order_id || 'N/A',
-              razorpaySignature: response.razorpay_signature || 'N/A',
-              paymentStatus: 'Paid'
-            };
-            const finalOrder = await placeOrder(formData, 'Razorpay', paymentDetails);
-            if (finalOrder) {
-              setOrderPlaced(finalOrder);
+            
+            // 4. Verify Payment securely on the backend
+            const verifyRes = await fetch('/api/payment/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                orderId: pendingOrder.id,
+                razorpay_order_id: paymentResponse.razorpay_order_id,
+                razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                razorpay_signature: paymentResponse.razorpay_signature
+              })
+            });
+            
+            const verifyData = await verifyRes.json();
+            
+            if (!verifyRes.ok) {
+                throw new Error(verifyData.message || "Payment verification failed.");
             }
+            
+            // Success! The backend updated Firestore, we just show the success screen
+            setOrderPlaced({ ...pendingOrder, paymentStatus: 'Paid ✅' });
+            
           } catch (err) {
-            console.error("Order creation error:", err);
-            setPaymentError("Payment succeeded but order creation failed. Please contact customer support.");
+            console.error("Order verification error:", err);
+            setPaymentError(err.message || "Payment succeeded but verification failed. Please contact customer support.");
           } finally {
             setIsProcessing(false);
           }
@@ -217,17 +247,17 @@ const Checkout = () => {
         modal: {
           ondismiss: function() {
             setIsProcessing(false);
-            setPaymentError("Payment window was closed before completion. You can retry payment below.");
+            setPaymentError("Payment window was closed before completion. You can retry payment later.");
           }
         }
       };
 
       const rzp = new window.Razorpay(options);
       
-      rzp.on('payment.failed', function (response) {
-        console.error("Razorpay Payment Failed:", response.error);
+      rzp.on('payment.failed', function (paymentResponse) {
+        console.error("Razorpay Payment Failed:", paymentResponse.error);
         setIsProcessing(false);
-        const errorMsg = response.error?.description || "Payment failed or was declined. Please try again.";
+        const errorMsg = paymentResponse.error?.description || "Payment failed or was declined. Please try again.";
         setPaymentError(errorMsg);
       });
 

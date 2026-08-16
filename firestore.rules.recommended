@@ -23,9 +23,10 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Orders: Users can create and read their own orders, admin can read/write all
+    // Orders: Users can read their own orders, admin can read/write all
     match /orders/{orderId} {
-      allow create: if isAuthenticated();
+      // Creation is blocked for frontend clients (handled securely via backend APIs)
+      allow create: if false; 
       allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
       allow update: if isAdmin();
       allow delete: if false;

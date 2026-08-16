@@ -644,10 +644,10 @@ export const ShopProvider = ({ children }) => {
       status: "Ordered",
       adminMessage: "",
       paymentMethod: paymentMethod,
-      transactionId: paymentDetails?.transactionId || "N/A",
-      razorpayOrderId: paymentDetails?.razorpayOrderId || "N/A",
-      razorpaySignature: paymentDetails?.razorpaySignature || "N/A",
-      paymentStatus: paymentDetails?.paymentStatus || 'Paid',
+      transactionId: paymentMethod === 'Razorpay' ? "Pending" : (paymentDetails?.transactionId || "N/A"),
+      razorpayOrderId: "Pending",
+      razorpaySignature: "Pending",
+      paymentStatus: paymentMethod === 'Razorpay' ? 'Pending' : (paymentDetails?.paymentStatus || 'Pending'),
       customer: {
         ...customerDetails,
         email: customerDetails?.email || user?.email || 'N/A'
@@ -763,11 +763,11 @@ export const ShopProvider = ({ children }) => {
 
   const fetchAllOrders = async () => {
     try {
-      const q = query(collection(db, "orders"));
-      const querySnapshot = await getDocs(q);
-      const fetchedOrders = [];
-      querySnapshot.forEach((doc) => { fetchedOrders.push(doc.data()); });
-      fetchedOrders.sort((a, b) => b.timestamp - a.timestamp);
+      const response = await fetch('/api/admin-ops/orders', {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) throw new Error('Failed to fetch orders from backend');
+      const fetchedOrders = await response.json();
       return fetchedOrders;
     } catch (error) {
       console.error("Error fetching all orders: ", error);
@@ -776,15 +776,10 @@ export const ShopProvider = ({ children }) => {
   };
 
   const subscribeToAllOrders = (callback) => {
-    const ordersRef = collection(db, 'orders');
-    const unsubscribe = onSnapshot(ordersRef, (snapshot) => {
-      const allOrders = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
-      allOrders.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-      callback(allOrders);
-    }, (error) => {
-      console.error('Real-time orders listener error:', error);
-    });
-    return unsubscribe;
+    // Realtime listeners are disabled for backend admin panel
+    // We just fetch once for compatibility.
+    fetchAllOrders().then(callback);
+    return () => {}; // dummy unsubscribe
   };
 
   const fetchMyOrders = async (userId) => {
@@ -804,9 +799,18 @@ export const ShopProvider = ({ children }) => {
 
   const updateOrderStatus = async (orderId, newStatus, adminMessage, courierPartner, trackingInfo) => {
     try {
-      const orderRef = doc(db, "orders", orderId.toString());
+      const response = await fetch('/api/admin-ops/update-order-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, newStatus, adminMessage, courierPartner, trackingInfo })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update order');
+      }
+
       const nowTs = Date.now();
-      
       const dateStr = new Date(nowTs).toLocaleDateString('en-IN', {
         day: '2-digit', month: 'short', year: 'numeric',
         hour: '2-digit', minute: '2-digit', hour12: true
@@ -818,23 +822,6 @@ export const ShopProvider = ({ children }) => {
         date: dateStr,
         message: adminMessage || ''
       };
-
-      const updatePayload = { 
-        status: newStatus, 
-        adminMessage,
-        statusHistory: arrayUnion(newHistoryEvent)
-      };
-
-      // Only write courierPartner if provided (not undefined)
-      if (courierPartner !== undefined) {
-        updatePayload.courierPartner = courierPartner || '';
-      }
-      
-      if (trackingInfo !== undefined) {
-        updatePayload.trackingInfo = trackingInfo || '';
-      }
-
-      await updateDoc(orderRef, updatePayload);
 
       setOrders(prev => prev.map(o => {
         if (o.id === orderId) {
@@ -903,11 +890,12 @@ export const ShopProvider = ({ children }) => {
 
   const updateOrderPrintStatus = async (orderId, printStatus) => {
     try {
-      const orderRef = doc(db, 'orders', orderId.toString());
-      await updateDoc(orderRef, {
-        print_status: printStatus,
-        printed_at: printStatus === 'PRINTED' ? Date.now() : null
+      const response = await fetch('/api/admin-ops/update-print-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, printStatus })
       });
+      if (!response.ok) throw new Error('Failed to update print status');
       return true;
     } catch (err) {
       console.error('Error updating print status:', err);

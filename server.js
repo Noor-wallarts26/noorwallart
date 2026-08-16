@@ -9,6 +9,9 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
+import paymentRoutes from './routes/paymentRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+
 import { 
   logSecurityEvent, 
   LOGIN_SUCCESS, 
@@ -93,6 +96,8 @@ const authLimiter = rateLimit({
 });
 
 app.use('/api/', globalLimiter);
+app.use('/api/payment', paymentRoutes);
+app.use('/api/admin-ops', adminRoutes);
 
 const loginAttempts = new Map();
 const pinAttempts = new Map();

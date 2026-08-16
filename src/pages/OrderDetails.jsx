@@ -94,11 +94,6 @@ const OrderDetails = () => {
     }
   };
 
-  const handleDownloadInvoice = () => {
-    if (order) {
-      generateAndDownloadInvoice(order);
-    }
-  };
 
   const handleOpenRating = (productId) => {
     setRatingProductId(productId);
@@ -259,12 +254,24 @@ const OrderDetails = () => {
                   event = { status: 'Ordered', timestamp: order.timestamp, date: order.formattedDate || (order.timestamp ? new Date(order.timestamp).toLocaleString('en-IN') : '') };
                 }
                 
-                // If it's not found in history, but current status index is >= this step, we consider it completed (without exact time if skipped)
+                // If it's not found in history, but current status index is >= this step, we consider it completed
                 const currentIndex = getCurrentStepIndex(order.status);
                 const isCompleted = currentIndex >= idx;
                 
                 const dotColor = isCompleted ? '#16A34A' : '#DC2626';
                 const textColor = isCompleted ? '#0F172A' : '#DC2626';
+                
+                const statusKey = `${stepStatus.toLowerCase()}At`;
+                const backendTimestamp = order[statusKey];
+                
+                let displayDate = null;
+                if (backendTimestamp) {
+                  displayDate = new Date(backendTimestamp).toLocaleString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+                } else if (event) {
+                  displayDate = event.date || (event.timestamp ? new Date(event.timestamp).toLocaleString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : null);
+                } else if (stepStatus === 'Ordered' && order.timestamp) {
+                  displayDate = new Date(order.timestamp).toLocaleString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+                }
                 
                 return (
                   <div key={idx} style={{ position: 'relative' }}>
@@ -278,9 +285,9 @@ const OrderDetails = () => {
                         <span style={{ fontSize: '1.05rem', fontWeight: 800, color: textColor }}>
                           {stepStatus}
                         </span>
-                        {isCompleted && event && (
+                        {isCompleted && displayDate && (
                           <span style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 600 }}>
-                            {event.date || (event.timestamp ? new Date(event.timestamp).toLocaleString('en-IN') : 'N/A')}
+                            {displayDate}
                           </span>
                         )}
                       </div>
