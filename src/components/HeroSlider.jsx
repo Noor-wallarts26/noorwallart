@@ -132,11 +132,12 @@ const HeroSlider = ({ products }) => {
               </div>
               
               <div className="hero-slide-image-wrapper">
-                <div 
-                  className="hero-slide-image"
-                  style={{ backgroundImage: `url(${product.imageUrl})` }}
-                >
-                  {!product.imageUrl && <div className="placeholder-slide">{product.title}</div>}
+                <div className="hero-slide-image">
+                  {product.imageUrl ? (
+                    <img src={product.imageUrl} alt={product.title} className="slider-product-img" loading="lazy" />
+                  ) : (
+                    <div className="placeholder-slide">{product.title}</div>
+                  )}
                 </div>
               </div>
             </Link>
