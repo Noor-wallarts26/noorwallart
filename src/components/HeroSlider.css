@@ -1,6 +1,6 @@
 .hero-slider-container {
   position: relative;
-  width: 80%;
+  width: 100%;
   margin: 0 auto 2rem auto;
   aspect-ratio: auto; /* Remove fixed ratio for mobile to allow content to fit */
   min-height: 250px;
@@ -38,14 +38,14 @@
 
 .hero-slide-content {
   flex: 1.2;
-  padding: 1.25rem 0.75rem 2.5rem 1.25rem; 
+  padding: 2.25rem 0.75rem 2.5rem 1.25rem; 
   display: flex;
   flex-direction: column;
   justify-content: center; 
 }
 
 .hero-slide-category {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -172,14 +172,14 @@
 
 @media (min-width: 768px) {
   .hero-slider-container {
-    aspect-ratio: 16.8 / 9;
+    aspect-ratio: 21 / 9;
     max-height: 400px;
   }
   .hero-slide-content {
-    padding: 3rem;
+    padding: 4.5rem 3rem 3rem 3rem;
   }
   .hero-slide-category {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     margin-bottom: 0.75rem;
   }
   .hero-slide-content h3 {
